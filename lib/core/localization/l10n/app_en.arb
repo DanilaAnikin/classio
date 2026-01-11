@@ -1,0 +1,741 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-01-07",
+  "appName": "Classio",
+  "@appName": {
+    "description": "The name of the application"
+  },
+  "welcomeMessage": "Welcome to Classio",
+  "@welcomeMessage": {
+    "description": "Welcome message displayed on the home screen"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings menu item"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language selection label"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme selection label"
+  },
+  "cleanTheme": "Clean",
+  "@cleanTheme": {
+    "description": "Clean theme option"
+  },
+  "playfulTheme": "Playful",
+  "@playfulTheme": {
+    "description": "Playful theme option"
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Home navigation item"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard navigation item"
+  },
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Language selection dialog title"
+  },
+  "selectTheme": "Select Theme",
+  "@selectTheme": {
+    "description": "Theme selection dialog title"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "logout": "Logout",
+  "@logout": {
+    "description": "Logout button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "welcomeBack": "Welcome Back",
+  "@welcomeBack": {
+    "description": "Welcome back message on login screen"
+  },
+  "signInToContinue": "Sign in to continue",
+  "@signInToContinue": {
+    "description": "Sign in prompt message"
+  },
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": {
+    "description": "Forgot password link text"
+  },
+  "loginError": "Login failed. Please check your credentials.",
+  "@loginError": {
+    "description": "Login error message"
+  },
+  "emailRequired": "Email is required",
+  "@emailRequired": {
+    "description": "Email validation error message"
+  },
+  "emailInvalid": "Please enter a valid email",
+  "@emailInvalid": {
+    "description": "Email format validation error message"
+  },
+  "passwordRequired": "Password is required",
+  "@passwordRequired": {
+    "description": "Password validation error message"
+  },
+  "passwordTooShort": "Password must be at least 6 characters",
+  "@passwordTooShort": {
+    "description": "Password length validation error message"
+  },
+  "loggingIn": "Logging in...",
+  "@loggingIn": {
+    "description": "Login progress message"
+  },
+
+  "dashboardGreetingMorning": "Good Morning",
+  "@dashboardGreetingMorning": {
+    "description": "Morning greeting on dashboard"
+  },
+  "dashboardGreetingAfternoon": "Good Afternoon",
+  "@dashboardGreetingAfternoon": {
+    "description": "Afternoon greeting on dashboard"
+  },
+  "dashboardGreetingEvening": "Good Evening",
+  "@dashboardGreetingEvening": {
+    "description": "Evening greeting on dashboard"
+  },
+
+  "dashboardUpNext": "Up Next",
+  "@dashboardUpNext": {
+    "description": "Section header for upcoming item"
+  },
+  "dashboardTodaySchedule": "Today's Schedule",
+  "@dashboardTodaySchedule": {
+    "description": "Section header for today's schedule"
+  },
+  "dashboardDueSoon": "Due Soon",
+  "@dashboardDueSoon": {
+    "description": "Section header for items due soon"
+  },
+
+  "lessonCancelled": "Cancelled",
+  "@lessonCancelled": {
+    "description": "Status for cancelled lesson"
+  },
+  "lessonSubstitution": "Substitution",
+  "@lessonSubstitution": {
+    "description": "Status for substitution lesson"
+  },
+  "lessonInProgress": "In Progress",
+  "@lessonInProgress": {
+    "description": "Status for lesson currently in progress"
+  },
+  "lessonUpcoming": "Starting in {minutes} min",
+  "@lessonUpcoming": {
+    "description": "Status for upcoming lesson with time",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "15"
+      }
+    }
+  },
+  "lessonRoom": "Room {room}",
+  "@lessonRoom": {
+    "description": "Room number display",
+    "placeholders": {
+      "room": {
+        "type": "String",
+        "example": "101"
+      }
+    }
+  },
+
+  "assignmentDueToday": "Due Today",
+  "@assignmentDueToday": {
+    "description": "Assignment due today status"
+  },
+  "assignmentDueTomorrow": "Due Tomorrow",
+  "@assignmentDueTomorrow": {
+    "description": "Assignment due tomorrow status"
+  },
+  "assignmentDueIn": "Due in {days} days",
+  "@assignmentDueIn": {
+    "description": "Assignment due in specified days",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "assignmentCompleted": "Completed",
+  "@assignmentCompleted": {
+    "description": "Assignment completed status"
+  },
+  "assignmentOverdue": "Overdue",
+  "@assignmentOverdue": {
+    "description": "Assignment overdue status"
+  },
+
+  "noLessonsToday": "No lessons today",
+  "@noLessonsToday": {
+    "description": "Empty state for no lessons"
+  },
+  "noUpcomingAssignments": "No upcoming assignments",
+  "@noUpcomingAssignments": {
+    "description": "Empty state for no assignments"
+  },
+  "allDoneForToday": "All done for today!",
+  "@allDoneForToday": {
+    "description": "Empty state when all tasks are complete"
+  },
+  "freeTime": "Free Time",
+  "@freeTime": {
+    "description": "Indicates free time period"
+  },
+
+  "dashboardLoading": "Loading your dashboard...",
+  "@dashboardLoading": {
+    "description": "Loading state message for dashboard"
+  },
+  "dashboardError": "Something went wrong",
+  "@dashboardError": {
+    "description": "Error state message for dashboard"
+  },
+  "dashboardRetry": "Retry",
+  "@dashboardRetry": {
+    "description": "Retry button text"
+  },
+
+  "navHome": "Home",
+  "@navHome": {
+    "description": "Navigation tab for home"
+  },
+  "navSchedule": "Schedule",
+  "@navSchedule": {
+    "description": "Navigation tab for schedule"
+  },
+  "navGrades": "Grades",
+  "@navGrades": {
+    "description": "Navigation tab for grades"
+  },
+  "navProfile": "Profile",
+  "@navProfile": {
+    "description": "Navigation tab for profile"
+  },
+
+  "scheduleTitle": "Weekly Schedule",
+  "@scheduleTitle": {
+    "description": "Title for the schedule screen"
+  },
+  "scheduleMonday": "Mon",
+  "@scheduleMonday": {
+    "description": "Short form of Monday"
+  },
+  "scheduleTuesday": "Tue",
+  "@scheduleTuesday": {
+    "description": "Short form of Tuesday"
+  },
+  "scheduleWednesday": "Wed",
+  "@scheduleWednesday": {
+    "description": "Short form of Wednesday"
+  },
+  "scheduleThursday": "Thu",
+  "@scheduleThursday": {
+    "description": "Short form of Thursday"
+  },
+  "scheduleFriday": "Fri",
+  "@scheduleFriday": {
+    "description": "Short form of Friday"
+  },
+  "scheduleSaturday": "Sat",
+  "@scheduleSaturday": {
+    "description": "Short form of Saturday"
+  },
+  "scheduleSunday": "Sun",
+  "@scheduleSunday": {
+    "description": "Short form of Sunday"
+  },
+  "scheduleMondayFull": "Monday",
+  "@scheduleMondayFull": {
+    "description": "Full name of Monday"
+  },
+  "scheduleTuesdayFull": "Tuesday",
+  "@scheduleTuesdayFull": {
+    "description": "Full name of Tuesday"
+  },
+  "scheduleWednesdayFull": "Wednesday",
+  "@scheduleWednesdayFull": {
+    "description": "Full name of Wednesday"
+  },
+  "scheduleThursdayFull": "Thursday",
+  "@scheduleThursdayFull": {
+    "description": "Full name of Thursday"
+  },
+  "scheduleFridayFull": "Friday",
+  "@scheduleFridayFull": {
+    "description": "Full name of Friday"
+  },
+  "scheduleNoLessons": "No lessons scheduled",
+  "@scheduleNoLessons": {
+    "description": "Empty state for no lessons in schedule"
+  },
+  "scheduleBreak": "Break",
+  "@scheduleBreak": {
+    "description": "Break time between lessons"
+  },
+
+  "gradesTitle": "Grades",
+  "@gradesTitle": {
+    "description": "Title for the grades screen"
+  },
+  "gradesComingSoon": "Grades coming soon",
+  "@gradesComingSoon": {
+    "description": "Placeholder message for grades feature"
+  },
+
+  "profileTitle": "Profile",
+  "@profileTitle": {
+    "description": "Title for the profile screen"
+  },
+  "profileThemeSection": "Appearance",
+  "@profileThemeSection": {
+    "description": "Section header for theme settings in profile"
+  },
+  "profileLanguageSection": "Language",
+  "@profileLanguageSection": {
+    "description": "Section header for language settings in profile"
+  },
+  "profileLogout": "Log out",
+  "@profileLogout": {
+    "description": "Logout button in profile"
+  },
+  "profileLogoutConfirm": "Are you sure you want to log out?",
+  "@profileLogoutConfirm": {
+    "description": "Logout confirmation message"
+  },
+
+  "gradesAverage": "Average",
+  "@gradesAverage": {
+    "description": "Label for average grade"
+  },
+  "gradesWeight": "Weight",
+  "@gradesWeight": {
+    "description": "Label for grade weight"
+  },
+  "gradesDate": "Date",
+  "@gradesDate": {
+    "description": "Label for grade date"
+  },
+  "gradesOverallAverage": "Overall Average",
+  "@gradesOverallAverage": {
+    "description": "Label for overall average across all subjects"
+  },
+  "gradesNoGrades": "No grades yet",
+  "@gradesNoGrades": {
+    "description": "Message when there are no grades"
+  },
+  "gradesWeightFormat": "Weight {weight}",
+  "@gradesWeightFormat": {
+    "description": "Format for displaying weight",
+    "placeholders": {
+      "weight": {
+        "type": "String"
+      }
+    }
+  },
+
+  "subjectDetailStream": "Stream",
+  "@subjectDetailStream": {
+    "description": "Subject detail stream tab label"
+  },
+  "subjectDetailStreamDescription": "Class announcements and updates",
+  "@subjectDetailStreamDescription": {
+    "description": "Subject detail stream tab description"
+  },
+  "subjectDetailAssignments": "Assignments",
+  "@subjectDetailAssignments": {
+    "description": "Subject detail assignments tab label"
+  },
+  "subjectDetailAssignmentsDescription": "Your tasks and homework",
+  "@subjectDetailAssignmentsDescription": {
+    "description": "Subject detail assignments tab description"
+  },
+  "subjectDetailMaterials": "Materials",
+  "@subjectDetailMaterials": {
+    "description": "Subject detail materials tab label"
+  },
+  "subjectDetailMaterialsDescription": "Course resources and files",
+  "@subjectDetailMaterialsDescription": {
+    "description": "Subject detail materials tab description"
+  },
+  "subjectDetailAnnouncement": "Announcement",
+  "@subjectDetailAnnouncement": {
+    "description": "Subject detail announcement label"
+  },
+  "subjectDetailAssignment": "Assignment",
+  "@subjectDetailAssignment": {
+    "description": "Subject detail assignment label"
+  },
+  "subjectDetailSubmit": "Submit",
+  "@subjectDetailSubmit": {
+    "description": "Subject detail submit button text"
+  },
+  "subjectDetailSubmitted": "Assignment Submitted!",
+  "@subjectDetailSubmitted": {
+    "description": "Subject detail assignment submitted confirmation message"
+  },
+  "subjectDetailNoStream": "No announcements yet",
+  "@subjectDetailNoStream": {
+    "description": "Subject detail empty state for no announcements"
+  },
+  "subjectDetailNoAssignments": "No assignments yet",
+  "@subjectDetailNoAssignments": {
+    "description": "Subject detail empty state for no assignments"
+  },
+  "subjectDetailNoMaterials": "No materials yet",
+  "@subjectDetailNoMaterials": {
+    "description": "Subject detail empty state for no materials"
+  },
+  "subjectDetailDueDate": "Due {date}",
+  "@subjectDetailDueDate": {
+    "description": "Subject detail due date format",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Jan 15"
+      }
+    }
+  },
+  "subjectDetailPostedBy": "Posted by {author}",
+  "@subjectDetailPostedBy": {
+    "description": "Subject detail posted by author format",
+    "placeholders": {
+      "author": {
+        "type": "String",
+        "example": "Mr. Smith"
+      }
+    }
+  },
+  "subjectDetailViewMaterial": "View Material",
+  "@subjectDetailViewMaterial": {
+    "description": "Subject detail view material button text"
+  },
+
+  "dashboardInProgress": "In Progress",
+  "@dashboardInProgress": {
+    "description": "Status for lesson currently in progress on dashboard"
+  },
+  "dashboardUpNextLabel": "Up Next",
+  "@dashboardUpNextLabel": {
+    "description": "Label for the next upcoming item"
+  },
+  "dashboardStarted": "Started",
+  "@dashboardStarted": {
+    "description": "Status when lesson has already started"
+  },
+  "dashboardStartingNow": "Starting now",
+  "@dashboardStartingNow": {
+    "description": "Status when lesson is starting now"
+  },
+  "dashboardInHoursMinutes": "in {hours}h {minutes}m",
+  "@dashboardInHoursMinutes": {
+    "description": "Time until lesson in hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "1"
+      },
+      "minutes": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "dashboardInMinutes": "in {minutes}m",
+  "@dashboardInMinutes": {
+    "description": "Time until lesson in minutes",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "15"
+      }
+    }
+  },
+  "dashboardCancelled": "Cancelled",
+  "@dashboardCancelled": {
+    "description": "Status for cancelled lesson on dashboard"
+  },
+  "dashboardSubstitution": "Substitution: {teacher}",
+  "@dashboardSubstitution": {
+    "description": "Substitution status with teacher name",
+    "placeholders": {
+      "teacher": {
+        "type": "String",
+        "example": "Mr. Smith"
+      }
+    }
+  },
+  "dashboardAllDone": "All done for today!",
+  "@dashboardAllDone": {
+    "description": "Message when all lessons are complete"
+  },
+  "dashboardNoMoreLessons": "No more lessons scheduled",
+  "@dashboardNoMoreLessons": {
+    "description": "Message when there are no more lessons"
+  },
+  "dashboardNoClassesToday": "No classes today",
+  "@dashboardNoClassesToday": {
+    "description": "Message when there are no classes today"
+  },
+  "dashboardEnjoyFreeDay": "Enjoy your free day!",
+  "@dashboardEnjoyFreeDay": {
+    "description": "Message encouraging user to enjoy free day"
+  },
+  "dashboardSub": "SUB",
+  "@dashboardSub": {
+    "description": "Short label for substitution"
+  },
+  "dashboardToday": "Today",
+  "@dashboardToday": {
+    "description": "Today label for assignments"
+  },
+  "dashboardTomorrow": "Tomorrow",
+  "@dashboardTomorrow": {
+    "description": "Tomorrow label for assignments"
+  },
+  "dashboardLater": "Later",
+  "@dashboardLater": {
+    "description": "Later label for assignments"
+  },
+  "dashboardAllCaughtUp": "All caught up!",
+  "@dashboardAllCaughtUp": {
+    "description": "Message when all assignments are complete"
+  },
+  "dashboardNoAssignmentsDue": "No assignments due soon",
+  "@dashboardNoAssignmentsDue": {
+    "description": "Message when no assignments are due soon"
+  },
+  "dashboardSomethingWrong": "Something went wrong",
+  "@dashboardSomethingWrong": {
+    "description": "Generic error message"
+  },
+  "dashboardStudent": "Student",
+  "@dashboardStudent": {
+    "description": "Default student label"
+  },
+  "dashboardAnError": "An error occurred",
+  "@dashboardAnError": {
+    "description": "Error message"
+  },
+  "dashboardNoData": "No data available",
+  "@dashboardNoData": {
+    "description": "Message when no data is available"
+  },
+
+  "scheduleLessonCount": "{count} lesson",
+  "@scheduleLessonCount": {
+    "description": "Singular lesson count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "scheduleLessonsCount": "{count} lessons",
+  "@scheduleLessonsCount": {
+    "description": "Plural lessons count",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "scheduleWeekend": "Weekend!",
+  "@scheduleWeekend": {
+    "description": "Weekend message"
+  },
+  "scheduleEnjoyTimeOff": "Enjoy your time off!",
+  "@scheduleEnjoyTimeOff": {
+    "description": "Message to enjoy time off"
+  },
+  "scheduleFreeDay": "You have a free day. Time to relax!",
+  "@scheduleFreeDay": {
+    "description": "Free day message"
+  },
+  "scheduleUnknown": "Unknown",
+  "@scheduleUnknown": {
+    "description": "Unknown value placeholder"
+  },
+
+  "gradesNoGradesYet": "No grades yet",
+  "@gradesNoGradesYet": {
+    "description": "Message when there are no grades yet"
+  },
+  "gradesWillAppear": "Your grades will appear here once they are available.",
+  "@gradesWillAppear": {
+    "description": "Message explaining grades will appear when available"
+  },
+  "gradesFailedToLoad": "Failed to load grades",
+  "@gradesFailedToLoad": {
+    "description": "Error message when grades fail to load"
+  },
+  "gradesRetry": "Retry",
+  "@gradesRetry": {
+    "description": "Retry button text for grades"
+  },
+  "gradesExcellent": "Excellent",
+  "@gradesExcellent": {
+    "description": "Excellent grade label"
+  },
+  "gradesGood": "Good",
+  "@gradesGood": {
+    "description": "Good grade label"
+  },
+  "gradesFair": "Fair",
+  "@gradesFair": {
+    "description": "Fair grade label"
+  },
+  "gradesNeedsWork": "Needs Work",
+  "@gradesNeedsWork": {
+    "description": "Needs work grade label"
+  },
+  "gradesWeightLabel": "Weight {weight}",
+  "@gradesWeightLabel": {
+    "description": "Weight label with value",
+    "placeholders": {
+      "weight": {
+        "type": "String",
+        "example": "2"
+      }
+    }
+  },
+
+  "subjectStream": "Stream",
+  "@subjectStream": {
+    "description": "Stream tab label"
+  },
+  "subjectAssignments": "Assignments",
+  "@subjectAssignments": {
+    "description": "Assignments tab label"
+  },
+  "subjectMaterials": "Materials",
+  "@subjectMaterials": {
+    "description": "Materials tab label"
+  },
+  "subjectNoPostsYet": "No posts yet",
+  "@subjectNoPostsYet": {
+    "description": "Empty state for no posts"
+  },
+  "subjectPostsWillAppear": "Posts will appear here when your teacher shares updates",
+  "@subjectPostsWillAppear": {
+    "description": "Explanation for empty posts state"
+  },
+  "subjectTodayAt": "Today at {time}",
+  "@subjectTodayAt": {
+    "description": "Today at specific time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "10:30"
+      }
+    }
+  },
+  "subjectYesterdayAt": "Yesterday at {time}",
+  "@subjectYesterdayAt": {
+    "description": "Yesterday at specific time",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "10:30"
+      }
+    }
+  },
+  "subjectDayAt": "{day} at {time}",
+  "@subjectDayAt": {
+    "description": "Day at specific time",
+    "placeholders": {
+      "day": {
+        "type": "String",
+        "example": "Monday"
+      },
+      "time": {
+        "type": "String",
+        "example": "10:30"
+      }
+    }
+  },
+  "subjectNoAssignments": "No assignments",
+  "@subjectNoAssignments": {
+    "description": "Empty state for no assignments"
+  },
+  "subjectAssignmentsWillAppear": "Assignments will appear here when your teacher posts them",
+  "@subjectAssignmentsWillAppear": {
+    "description": "Explanation for empty assignments state"
+  },
+  "subjectDueToday": "Due today",
+  "@subjectDueToday": {
+    "description": "Due today status"
+  },
+  "subjectDueTomorrow": "Due tomorrow",
+  "@subjectDueTomorrow": {
+    "description": "Due tomorrow status"
+  },
+  "subjectDueDate": "Due {date}",
+  "@subjectDueDate": {
+    "description": "Due date with date value",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Jan 15"
+      }
+    }
+  },
+  "subjectSubmitted": "Assignment Submitted!",
+  "@subjectSubmitted": {
+    "description": "Assignment submitted confirmation"
+  },
+  "subjectSubmit": "Submit",
+  "@subjectSubmit": {
+    "description": "Submit button text"
+  },
+  "subjectNoMaterials": "No materials",
+  "@subjectNoMaterials": {
+    "description": "Empty state for no materials"
+  },
+  "subjectMaterialsWillAppear": "Course materials will appear here when your teacher shares them",
+  "@subjectMaterialsWillAppear": {
+    "description": "Explanation for empty materials state"
+  },
+  "subjectOpening": "Opening: {url}",
+  "@subjectOpening": {
+    "description": "Opening URL message",
+    "placeholders": {
+      "url": {
+        "type": "String",
+        "example": "https://example.com"
+      }
+    }
+  },
+  "subjectFailedToLoad": "Failed to load subject",
+  "@subjectFailedToLoad": {
+    "description": "Error message when subject fails to load"
+  }
+}
