@@ -29,7 +29,33 @@ flutter run
 2. Clone the repository
 3. Run `flutter pub get` to install dependencies
 4. Run `flutter gen-l10n` to generate localization files
-5. Run `flutter run` to start the application
+5. Create a `.env` file in the root directory with your Supabase credentials:
+   ```
+   SUPABASE_URL=your_supabase_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+6. Run `flutter run` to start the application
+
+## Building for Production
+
+For production builds, use `--dart-define` to pass environment variables securely without bundling the .env file:
+
+### Android
+```bash
+flutter build apk --dart-define=SUPABASE_URL=your_url --dart-define=SUPABASE_ANON_KEY=your_key
+```
+
+### iOS
+```bash
+flutter build ios --dart-define=SUPABASE_URL=your_url --dart-define=SUPABASE_ANON_KEY=your_key
+```
+
+### Web
+```bash
+flutter build web --dart-define=SUPABASE_URL=your_url --dart-define=SUPABASE_ANON_KEY=your_key
+```
+
+**IMPORTANT**: Never commit the `.env` file to version control. It's already in `.gitignore`.
 
 ## Project Structure
 

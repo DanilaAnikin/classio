@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// Represents a subject taught by a teacher in the admin panel.
 ///
 /// Contains information about the subject including:
@@ -24,8 +22,9 @@ class TeacherSubject {
   /// Optional description of the subject.
   final String? description;
 
-  /// Theme color for the subject for visual identification.
-  final Color color;
+  /// Theme color for the subject for visual identification (ARGB int value).
+  /// Convert to Flutter Color in UI layer using: Color(color)
+  final int color;
 
   /// Number of classes this subject is taught to.
   final int classCount;
@@ -36,7 +35,7 @@ class TeacherSubject {
     String? id,
     String? name,
     String? description,
-    Color? color,
+    int? color,
     int? classCount,
   }) {
     return TeacherSubject(

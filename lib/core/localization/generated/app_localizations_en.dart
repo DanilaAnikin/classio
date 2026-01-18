@@ -505,4 +505,237 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subjectFailedToLoad => 'Failed to load subject';
+
+  @override
+  String get accessDenied => 'Access Denied';
+
+  @override
+  String get noSchoolAssigned => 'No School Assigned';
+
+  @override
+  String get schoolAdmin => 'School Admin';
+
+  @override
+  String get users => 'Users';
+
+  @override
+  String get classes => 'Classes';
+
+  @override
+  String get subjects => 'Subjects';
+
+  @override
+  String get inviteCodes => 'Invite Codes';
+
+  @override
+  String get schoolDetails => 'School Details';
+
+  @override
+  String get principalDashboard => 'Principal Dashboard';
+
+  @override
+  String get deputyDashboard => 'Deputy Dashboard';
+
+  @override
+  String get deputyPanel => 'Deputy Panel';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get inviteCodeLabel => 'Invite Code';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get signUp => 'Sign Up';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get registerWithInviteCode => 'Register with Invite Code';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account?';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account?';
+
+  @override
+  String get iDontHaveAccount => 'I don\'t have an account';
+
+  @override
+  String get inviteCodeRequiredError => 'Please enter your invite code';
+
+  @override
+  String get inviteCodeTooShort => 'Invite code must be at least 6 characters';
+
+  @override
+  String get firstNameLabel => 'First Name';
+
+  @override
+  String get lastNameLabel => 'Last Name';
+
+  @override
+  String get confirmPasswordLabel => 'Confirm Password';
+
+  @override
+  String get pleaseConfirmPassword => 'Please confirm your password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get firstNameRequired => 'Please enter your first name';
+
+  @override
+  String get firstNameTooShort => 'First name must be at least 2 characters';
+
+  @override
+  String get lastNameRequired => 'Please enter your last name';
+
+  @override
+  String get lastNameTooShort => 'Last name must be at least 2 characters';
+
+  @override
+  String get enterYourEmail => 'Enter your email address';
+
+  @override
+  String get enterYourPassword => 'Enter your password';
+
+  @override
+  String get enterYourInviteCode => 'Enter your invite code';
+
+  @override
+  String get enterYourFirstName => 'Enter your first name';
+
+  @override
+  String get enterYourLastName => 'Enter your last name';
+
+  @override
+  String get reEnterPassword => 'Re-enter your password';
+
+  @override
+  String get welcomeToClassio => 'Welcome to Classio';
+
+  @override
+  String get joinClassio => 'Join Classio';
+
+  @override
+  String get createAccountToGetStarted => 'Create your account to get started';
+
+  @override
+  String get dismiss => 'Dismiss';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get resetPasswordInstructions =>
+      'Enter your email address and we\'ll send you a link to reset your password.';
+
+  @override
+  String get sendResetLink => 'Send Reset Link';
+
+  @override
+  String get passwordResetLinkSent =>
+      'Password reset link sent! Check your email inbox.';
+
+  @override
+  String get failedToSendResetLink =>
+      'Failed to send reset link. Please try again.';
+
+  @override
+  String get noPermissionToAccessPage =>
+      'You do not have permission to access this page.';
+
+  @override
+  String get notAssignedToSchool => 'You are not assigned to any school.';
+
+  @override
+  String get generateInvite => 'Generate Invite';
+
+  @override
+  String get createClass => 'Create Class';
+
+  @override
+  String get overview => 'Overview';
+
+  @override
+  String get schedule => 'Schedule';
+
+  @override
+  String get parents => 'Parents';
+
+  @override
+  String get staff => 'Staff';
+
+  @override
+  String get invites => 'Invites';
+
+  @override
+  String get scheduleWeekPrevious => 'Previous Week';
+
+  @override
+  String get scheduleWeekCurrent => 'This Week';
+
+  @override
+  String get scheduleWeekNext => 'Next Week';
+
+  @override
+  String get scheduleWeekAfterNext => 'Week After';
+
+  @override
+  String get scheduleWeekStable => 'Stable';
+
+  @override
+  String get scheduleLessonModified => 'Modified';
+
+  @override
+  String get scheduleLessonTime => 'Time';
+
+  @override
+  String get scheduleLessonRoom => 'Room';
+
+  @override
+  String get scheduleLessonDate => 'Date';
+
+  @override
+  String get scheduleLessonSubstitute => 'Substitute Teacher';
+
+  @override
+  String get scheduleLessonNote => 'Note';
+
+  @override
+  String get scheduleLessonChangesFromStable => 'Changes from Stable Timetable';
+
+  @override
+  String get scheduleLessonStableDescription =>
+      'This is a stable lesson that repeats every week';
+
+  @override
+  String get scheduleLessonSubject => 'Subject';
+
+  @override
+  String get scheduleLessonStartTime => 'Start Time';
+
+  @override
+  String get scheduleLessonEndTime => 'End Time';
+
+  @override
+  String get scheduleLessonTeacher => 'Teacher';
+
+  @override
+  String get scheduleLessonCancelled => 'Cancelled';
+
+  @override
+  String get scheduleLessonSubstitution => 'Substitution';
+
+  @override
+  String get close => 'Close';
 }

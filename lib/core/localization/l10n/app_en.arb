@@ -737,5 +737,311 @@
   "subjectFailedToLoad": "Failed to load subject",
   "@subjectFailedToLoad": {
     "description": "Error message when subject fails to load"
+  },
+
+  "accessDenied": "Access Denied",
+  "@accessDenied": {
+    "description": "Access denied message"
+  },
+  "noSchoolAssigned": "No School Assigned",
+  "@noSchoolAssigned": {
+    "description": "Message when user has no school assigned"
+  },
+  "schoolAdmin": "School Admin",
+  "@schoolAdmin": {
+    "description": "School admin page title"
+  },
+  "users": "Users",
+  "@users": {
+    "description": "Users tab label"
+  },
+  "classes": "Classes",
+  "@classes": {
+    "description": "Classes tab label"
+  },
+  "subjects": "Subjects",
+  "@subjects": {
+    "description": "Subjects label"
+  },
+  "inviteCodes": "Invite Codes",
+  "@inviteCodes": {
+    "description": "Invite codes section label"
+  },
+  "schoolDetails": "School Details",
+  "@schoolDetails": {
+    "description": "School details page title"
+  },
+  "principalDashboard": "Principal Dashboard",
+  "@principalDashboard": {
+    "description": "Principal dashboard page title"
+  },
+  "deputyDashboard": "Deputy Dashboard",
+  "@deputyDashboard": {
+    "description": "Deputy dashboard page title"
+  },
+  "deputyPanel": "Deputy Panel",
+  "@deputyPanel": {
+    "description": "Deputy panel page title"
+  },
+  "emailLabel": "Email",
+  "@emailLabel": {
+    "description": "Email field label"
+  },
+  "passwordLabel": "Password",
+  "@passwordLabel": {
+    "description": "Password field label"
+  },
+  "inviteCodeLabel": "Invite Code",
+  "@inviteCodeLabel": {
+    "description": "Invite code field label"
+  },
+  "signIn": "Sign In",
+  "@signIn": {
+    "description": "Sign in button text"
+  },
+  "signUp": "Sign Up",
+  "@signUp": {
+    "description": "Sign up button text"
+  },
+  "register": "Register",
+  "@register": {
+    "description": "Register button text"
+  },
+  "registerWithInviteCode": "Register with Invite Code",
+  "@registerWithInviteCode": {
+    "description": "Registration with invite code heading"
+  },
+  "dontHaveAccount": "Don't have an account?",
+  "@dontHaveAccount": {
+    "description": "Prompt for users without account"
+  },
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {
+    "description": "Prompt for users with account"
+  },
+  "iDontHaveAccount": "I don't have an account",
+  "@iDontHaveAccount": {
+    "description": "Link text for users without account"
+  },
+  "inviteCodeRequiredError": "Please enter your invite code",
+  "@inviteCodeRequiredError": {
+    "description": "Validation error when invite code is empty"
+  },
+  "inviteCodeTooShort": "Invite code must be at least 6 characters",
+  "@inviteCodeTooShort": {
+    "description": "Validation error when invite code is too short"
+  },
+  "firstNameLabel": "First Name",
+  "@firstNameLabel": {
+    "description": "First name field label"
+  },
+  "lastNameLabel": "Last Name",
+  "@lastNameLabel": {
+    "description": "Last name field label"
+  },
+  "confirmPasswordLabel": "Confirm Password",
+  "@confirmPasswordLabel": {
+    "description": "Confirm password field label"
+  },
+  "pleaseConfirmPassword": "Please confirm your password",
+  "@pleaseConfirmPassword": {
+    "description": "Validation error when confirm password is empty"
+  },
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {
+    "description": "Validation error when passwords do not match"
+  },
+  "firstNameRequired": "Please enter your first name",
+  "@firstNameRequired": {
+    "description": "Validation error when first name is empty"
+  },
+  "firstNameTooShort": "First name must be at least 2 characters",
+  "@firstNameTooShort": {
+    "description": "Validation error when first name is too short"
+  },
+  "lastNameRequired": "Please enter your last name",
+  "@lastNameRequired": {
+    "description": "Validation error when last name is empty"
+  },
+  "lastNameTooShort": "Last name must be at least 2 characters",
+  "@lastNameTooShort": {
+    "description": "Validation error when last name is too short"
+  },
+  "enterYourEmail": "Enter your email address",
+  "@enterYourEmail": {
+    "description": "Email hint text"
+  },
+  "enterYourPassword": "Enter your password",
+  "@enterYourPassword": {
+    "description": "Password hint text"
+  },
+  "enterYourInviteCode": "Enter your invite code",
+  "@enterYourInviteCode": {
+    "description": "Invite code hint text"
+  },
+  "enterYourFirstName": "Enter your first name",
+  "@enterYourFirstName": {
+    "description": "First name hint text"
+  },
+  "enterYourLastName": "Enter your last name",
+  "@enterYourLastName": {
+    "description": "Last name hint text"
+  },
+  "reEnterPassword": "Re-enter your password",
+  "@reEnterPassword": {
+    "description": "Confirm password hint text"
+  },
+  "welcomeToClassio": "Welcome to Classio",
+  "@welcomeToClassio": {
+    "description": "Welcome message on login page"
+  },
+  "joinClassio": "Join Classio",
+  "@joinClassio": {
+    "description": "Join message on registration page"
+  },
+  "createAccountToGetStarted": "Create your account to get started",
+  "@createAccountToGetStarted": {
+    "description": "Subtitle on registration page"
+  },
+  "dismiss": "Dismiss",
+  "@dismiss": {
+    "description": "Dismiss button text"
+  },
+  "resetPassword": "Reset Password",
+  "@resetPassword": {
+    "description": "Reset password dialog title"
+  },
+  "resetPasswordInstructions": "Enter your email address and we'll send you a link to reset your password.",
+  "@resetPasswordInstructions": {
+    "description": "Reset password instructions"
+  },
+  "sendResetLink": "Send Reset Link",
+  "@sendResetLink": {
+    "description": "Send reset link button text"
+  },
+  "passwordResetLinkSent": "Password reset link sent! Check your email inbox.",
+  "@passwordResetLinkSent": {
+    "description": "Success message after sending reset link"
+  },
+  "failedToSendResetLink": "Failed to send reset link. Please try again.",
+  "@failedToSendResetLink": {
+    "description": "Error message when reset link fails to send"
+  },
+  "noPermissionToAccessPage": "You do not have permission to access this page.",
+  "@noPermissionToAccessPage": {
+    "description": "Message when user lacks permission"
+  },
+  "notAssignedToSchool": "You are not assigned to any school.",
+  "@notAssignedToSchool": {
+    "description": "Message when user is not assigned to a school"
+  },
+  "generateInvite": "Generate Invite",
+  "@generateInvite": {
+    "description": "Generate invite button label"
+  },
+  "createClass": "Create Class",
+  "@createClass": {
+    "description": "Create class button label"
+  },
+  "overview": "Overview",
+  "@overview": {
+    "description": "Overview tab label"
+  },
+  "schedule": "Schedule",
+  "@schedule": {
+    "description": "Schedule tab label"
+  },
+  "parents": "Parents",
+  "@parents": {
+    "description": "Parents tab label"
+  },
+  "staff": "Staff",
+  "@staff": {
+    "description": "Staff tab label"
+  },
+  "invites": "Invites",
+  "@invites": {
+    "description": "Invites tab label"
+  },
+
+  "scheduleWeekPrevious": "Previous Week",
+  "@scheduleWeekPrevious": {
+    "description": "Previous week label for week selector"
+  },
+  "scheduleWeekCurrent": "This Week",
+  "@scheduleWeekCurrent": {
+    "description": "Current week label for week selector"
+  },
+  "scheduleWeekNext": "Next Week",
+  "@scheduleWeekNext": {
+    "description": "Next week label for week selector"
+  },
+  "scheduleWeekAfterNext": "Week After",
+  "@scheduleWeekAfterNext": {
+    "description": "Week after next label for week selector"
+  },
+  "scheduleWeekStable": "Stable",
+  "@scheduleWeekStable": {
+    "description": "Stable timetable label for week selector"
+  },
+  "scheduleLessonModified": "Modified",
+  "@scheduleLessonModified": {
+    "description": "Label indicating a lesson was modified from stable"
+  },
+  "scheduleLessonTime": "Time",
+  "@scheduleLessonTime": {
+    "description": "Time label for lesson detail"
+  },
+  "scheduleLessonRoom": "Room",
+  "@scheduleLessonRoom": {
+    "description": "Room label for lesson detail"
+  },
+  "scheduleLessonDate": "Date",
+  "@scheduleLessonDate": {
+    "description": "Date label for lesson detail"
+  },
+  "scheduleLessonSubstitute": "Substitute Teacher",
+  "@scheduleLessonSubstitute": {
+    "description": "Substitute teacher label for lesson detail"
+  },
+  "scheduleLessonNote": "Note",
+  "@scheduleLessonNote": {
+    "description": "Note label for lesson detail"
+  },
+  "scheduleLessonChangesFromStable": "Changes from Stable Timetable",
+  "@scheduleLessonChangesFromStable": {
+    "description": "Section header for changes from stable"
+  },
+  "scheduleLessonStableDescription": "This is a stable lesson that repeats every week",
+  "@scheduleLessonStableDescription": {
+    "description": "Description for stable lesson indicator"
+  },
+  "scheduleLessonSubject": "Subject",
+  "@scheduleLessonSubject": {
+    "description": "Subject label for changes"
+  },
+  "scheduleLessonStartTime": "Start Time",
+  "@scheduleLessonStartTime": {
+    "description": "Start time label for changes"
+  },
+  "scheduleLessonEndTime": "End Time",
+  "@scheduleLessonEndTime": {
+    "description": "End time label for changes"
+  },
+  "scheduleLessonTeacher": "Teacher",
+  "@scheduleLessonTeacher": {
+    "description": "Teacher label for changes"
+  },
+  "scheduleLessonCancelled": "Cancelled",
+  "@scheduleLessonCancelled": {
+    "description": "Cancelled status for lesson"
+  },
+  "scheduleLessonSubstitution": "Substitution",
+  "@scheduleLessonSubstitution": {
+    "description": "Substitution status for lesson"
+  },
+  "close": "Close",
+  "@close": {
+    "description": "Close button text"
   }
 }

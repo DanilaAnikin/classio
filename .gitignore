@@ -1,5 +1,6 @@
 # Environment variables (secrets)
 .env
+assets/.env
 
 # Miscellaneous
 *.class
@@ -46,3 +47,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Generated Dart files
+*.g.dart
+*.freezed.dart
+*.gr.dart
+
+# Generated localization
+lib/core/localization/generated/

@@ -13,6 +13,18 @@ class Grade {
     required this.date,
   });
 
+  /// Creates a [Grade] instance from a JSON map.
+  factory Grade.fromJson(Map<String, dynamic> json) {
+    return Grade(
+      id: json['id'] as String,
+      subjectId: json['subject_id'] as String,
+      score: (json['score'] as num).toDouble(),
+      weight: (json['weight'] as num).toDouble(),
+      description: json['description'] as String,
+      date: DateTime.parse(json['date'] as String),
+    );
+  }
+
   /// Unique identifier for the grade.
   final String id;
 
@@ -59,6 +71,18 @@ class Grade {
       description: description ?? this.description,
       date: date ?? this.date,
     );
+  }
+
+  /// Converts this [Grade] to a JSON map.
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'subject_id': subjectId,
+      'score': score,
+      'weight': weight,
+      'description': description,
+      'date': date.toIso8601String(),
+    };
   }
 
   @override

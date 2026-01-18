@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:classio/core/localization/app_localizations.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../data/repositories/supabase_auth_repository.dart';
 import '../providers/auth_provider.dart';
 
 /// Login page that adapts to Clean or Playful theme modes.
@@ -25,6 +27,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _inviteCodeController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _isRegistrationMode = false;
@@ -35,6 +39,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     _inviteCodeController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -58,16 +64,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
+    // Get the ScaffoldMessenger before building the SnackBar
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    scaffoldMessenger.clearSnackBars(); // Clear any existing snackbars first
+
+    scaffoldMessenger.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 6),
         action: SnackBarAction(
           label: 'Dismiss',
           textColor: Colors.white,
           onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            scaffoldMessenger.hideCurrentSnackBar();
           },
         ),
       ),
@@ -81,6 +93,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _formKey.currentState?.reset();
       _confirmPasswordController.clear();
       _inviteCodeController.clear();
+      _firstNameController.clear();
+      _lastNameController.clear();
     });
   }
 
@@ -99,6 +113,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             email: _emailController.text.trim(),
             password: _passwordController.text,
             inviteCode: _inviteCodeController.text.trim(),
+            firstName: _firstNameController.text.trim(),
+            lastName: _lastNameController.text.trim(),
           );
     }
   }
@@ -113,7 +129,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your email';
+      return context.l10n.emailRequired;
     }
 
     final emailRegex = RegExp(
@@ -121,7 +137,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
 
     if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email address';
+      return context.l10n.emailInvalid;
     }
 
     return null;
@@ -129,11 +145,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your password';
+      return context.l10n.passwordRequired;
     }
 
     if (value.length < 6) {
-      return 'Password must be at least 6 characters';
+      return context.l10n.passwordTooShort;
     }
 
     return null;
@@ -141,11 +157,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please confirm your password';
+      return context.l10n.pleaseConfirmPassword;
     }
 
     if (value != _passwordController.text) {
-      return 'Passwords do not match';
+      return context.l10n.passwordsDoNotMatch;
     }
 
     return null;
@@ -153,11 +169,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _validateInviteCode(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your invite code';
+      return context.l10n.inviteCodeRequiredError;
     }
 
     if (value.length < 6) {
-      return 'Invite code must be at least 6 characters';
+      return context.l10n.inviteCodeTooShort;
+    }
+
+    return null;
+  }
+
+  String? _validateFirstName(String? value) {
+    if (value == null || value.isEmpty) {
+      return context.l10n.firstNameRequired;
+    }
+
+    if (value.trim().length < 2) {
+      return context.l10n.firstNameTooShort;
+    }
+
+    return null;
+  }
+
+  String? _validateLastName(String? value) {
+    if (value == null || value.isEmpty) {
+      return context.l10n.lastNameRequired;
+    }
+
+    if (value.trim().length < 2) {
+      return context.l10n.lastNameTooShort;
     }
 
     return null;
@@ -220,6 +260,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                     // Registration-only fields
                     if (_isRegistrationMode) ...[
+                      const SizedBox(height: 16),
+
+                      // First Name Field
+                      _buildFirstNameField(isLoading, isPlayful, theme),
+
+                      const SizedBox(height: 16),
+
+                      // Last Name Field
+                      _buildLastNameField(isLoading, isPlayful, theme),
+
                       const SizedBox(height: 16),
 
                       // Confirm Password Field
@@ -296,7 +346,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildWelcomeText(bool isPlayful, ThemeData theme) {
     return Text(
-      _isRegistrationMode ? 'Join Classio' : 'Welcome to Classio',
+      _isRegistrationMode ? context.l10n.joinClassio : context.l10n.welcomeToClassio,
       style: theme.textTheme.headlineMedium?.copyWith(
         fontWeight: isPlayful ? FontWeight.w800 : FontWeight.w600,
         color: theme.colorScheme.onSurface,
@@ -309,8 +359,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget _buildSubtitle(bool isPlayful, ThemeData theme) {
     return Text(
       _isRegistrationMode
-          ? 'Create your account to get started'
-          : 'Sign in to continue',
+          ? context.l10n.createAccountToGetStarted
+          : context.l10n.signInToContinue,
       style: theme.textTheme.bodyLarge?.copyWith(
         color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
         fontWeight: isPlayful ? FontWeight.w600 : FontWeight.w400,
@@ -338,8 +388,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         keyboardType: TextInputType.emailAddress,
         textInputAction: TextInputAction.next,
         decoration: InputDecoration(
-          labelText: 'Email',
-          hintText: 'Enter your email address',
+          labelText: context.l10n.emailLabel,
+          hintText: context.l10n.enterYourEmail,
           prefixIcon: Icon(
             Icons.email_outlined,
             color: theme.colorScheme.primary,
@@ -376,8 +426,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           }
         },
         decoration: InputDecoration(
-          labelText: 'Password',
-          hintText: 'Enter your password',
+          labelText: context.l10n.passwordLabel,
+          hintText: context.l10n.enterYourPassword,
           prefixIcon: Icon(
             Icons.lock_outline_rounded,
             color: theme.colorScheme.primary,
@@ -422,8 +472,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         obscureText: _obscureConfirmPassword,
         textInputAction: TextInputAction.next,
         decoration: InputDecoration(
-          labelText: 'Confirm Password',
-          hintText: 'Re-enter your password',
+          labelText: context.l10n.confirmPasswordLabel,
+          hintText: context.l10n.reEnterPassword,
           prefixIcon: Icon(
             Icons.lock_outline_rounded,
             color: theme.colorScheme.primary,
@@ -472,14 +522,80 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           }
         },
         decoration: InputDecoration(
-          labelText: 'Invite Code',
-          hintText: 'Enter your invite code',
+          labelText: context.l10n.inviteCodeLabel,
+          hintText: context.l10n.enterYourInviteCode,
           prefixIcon: Icon(
             Icons.vpn_key_outlined,
             color: theme.colorScheme.primary,
           ),
         ),
         validator: _validateInviteCode,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+      ),
+    );
+  }
+
+  Widget _buildFirstNameField(
+      bool isLoading, bool isPlayful, ThemeData theme) {
+    return Container(
+      decoration: isPlayful
+          ? BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            )
+          : null,
+      child: TextFormField(
+        controller: _firstNameController,
+        enabled: !isLoading,
+        textInputAction: TextInputAction.next,
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(
+          labelText: context.l10n.firstNameLabel,
+          hintText: context.l10n.enterYourFirstName,
+          prefixIcon: Icon(
+            Icons.person_outline,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        validator: _validateFirstName,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+      ),
+    );
+  }
+
+  Widget _buildLastNameField(
+      bool isLoading, bool isPlayful, ThemeData theme) {
+    return Container(
+      decoration: isPlayful
+          ? BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            )
+          : null,
+      child: TextFormField(
+        controller: _lastNameController,
+        enabled: !isLoading,
+        textInputAction: TextInputAction.next,
+        textCapitalization: TextCapitalization.words,
+        decoration: InputDecoration(
+          labelText: context.l10n.lastNameLabel,
+          hintText: context.l10n.enterYourLastName,
+          prefixIcon: Icon(
+            Icons.person_outline,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        validator: _validateLastName,
         autovalidateMode: AutovalidateMode.onUserInteraction,
       ),
     );
@@ -531,7 +647,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ),
               )
             : Text(
-                _isRegistrationMode ? 'Register' : 'Sign In',
+                _isRegistrationMode ? context.l10n.register : context.l10n.signIn,
                 style: TextStyle(
                   fontSize: isPlayful ? 18 : 16,
                   fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
@@ -548,8 +664,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       onPressed: isLoading ? null : _toggleMode,
       child: Text(
         _isRegistrationMode
-            ? 'Already have an account?'
-            : "I don't have an account",
+            ? context.l10n.alreadyHaveAccount
+            : context.l10n.iDontHaveAccount,
         style: TextStyle(
           fontWeight: isPlayful ? FontWeight.w600 : FontWeight.w500,
           fontSize: isPlayful ? 15 : 14,
@@ -563,22 +679,203 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildForgotPasswordButton(bool isPlayful, ThemeData theme) {
     return TextButton(
-      onPressed: () {
-        // TODO: Implement forgot password functionality
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Forgot password feature coming soon!'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
+      onPressed: () => _showForgotPasswordDialog(isPlayful, theme),
       child: Text(
-        'Forgot Password?',
+        context.l10n.forgotPassword,
         style: TextStyle(
           fontWeight: isPlayful ? FontWeight.w600 : FontWeight.w500,
           fontSize: isPlayful ? 15 : 14,
         ),
       ),
     );
+  }
+
+  void _showForgotPasswordDialog(bool isPlayful, ThemeData theme) {
+    final forgotPasswordEmailController = TextEditingController();
+    final forgotPasswordFormKey = GlobalKey<FormState>();
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(isPlayful ? 24 : 12),
+              ),
+              title: Text(
+                context.l10n.resetPassword,
+                style: TextStyle(
+                  fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
+                ),
+              ),
+              content: Form(
+                key: forgotPasswordFormKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.resetPasswordInstructions,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: forgotPasswordEmailController,
+                      enabled: !isSubmitting,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) {
+                        if (!isSubmitting) {
+                          _submitForgotPassword(
+                            dialogContext,
+                            forgotPasswordFormKey,
+                            forgotPasswordEmailController,
+                            isPlayful,
+                            theme,
+                            setDialogState,
+                            () => isSubmitting,
+                            (value) {
+                              isSubmitting = value;
+                            },
+                          );
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: context.l10n.emailLabel,
+                        hintText: context.l10n.enterYourEmail,
+                        prefixIcon: Icon(
+                          Icons.email_outlined,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      validator: _validateEmail,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    context.l10n.cancel,
+                    style: TextStyle(
+                      color: isSubmitting
+                          ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
+                          : null,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () => _submitForgotPassword(
+                            dialogContext,
+                            forgotPasswordFormKey,
+                            forgotPasswordEmailController,
+                            isPlayful,
+                            theme,
+                            setDialogState,
+                            () => isSubmitting,
+                            (value) {
+                              isSubmitting = value;
+                            },
+                          ),
+                  child: isSubmitting
+                      ? SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        )
+                      : Text(context.l10n.sendResetLink),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _submitForgotPassword(
+    BuildContext dialogContext,
+    GlobalKey<FormState> formKey,
+    TextEditingController emailController,
+    bool isPlayful,
+    ThemeData theme,
+    void Function(void Function()) setDialogState,
+    bool Function() getIsSubmitting,
+    void Function(bool) setIsSubmitting,
+  ) async {
+    if (getIsSubmitting()) return;
+
+    if (formKey.currentState?.validate() ?? false) {
+      setDialogState(() {
+        setIsSubmitting(true);
+      });
+
+      try {
+        final authRepository =
+            ref.read(authRepositoryProvider) as SupabaseAuthRepository;
+        final success = await authRepository.resetPassword(
+          email: emailController.text.trim(),
+        );
+
+        if (!dialogContext.mounted) return;
+
+        Navigator.of(dialogContext).pop();
+
+        if (!mounted) return;
+
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                context.l10n.passwordResetLinkSent,
+              ),
+              backgroundColor: theme.colorScheme.primary,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                context.l10n.failedToSendResetLink,
+              ),
+              backgroundColor: theme.colorScheme.error,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (e) {
+        if (!dialogContext.mounted) return;
+
+        setDialogState(() {
+          setIsSubmitting(false);
+        });
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: theme.colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 }

@@ -35,9 +35,10 @@ class ClassInfo {
   ///
   /// Throws an [ArgumentError] if the JSON is invalid or missing required fields.
   factory ClassInfo.fromJson(Map<String, dynamic> json) {
-    final id = json['id'] as String?;
-    final schoolId = json['school_id'] as String?;
-    final name = json['name'] as String?;
+    // Safely convert to String using toString() to handle any type
+    final id = json['id']?.toString();
+    final schoolId = json['school_id']?.toString();
+    final name = json['name']?.toString();
 
     if (id == null || schoolId == null || name == null) {
       throw ArgumentError(
@@ -46,21 +47,38 @@ class ClassInfo {
 
     // Parse createdAt from string if present
     DateTime? createdAt;
-    final createdAtStr = json['created_at'] as String?;
-    if (createdAtStr != null) {
+    final createdAtValue = json['created_at'];
+    if (createdAtValue != null) {
       try {
-        createdAt = DateTime.parse(createdAtStr);
+        createdAt = DateTime.parse(createdAtValue.toString());
       } catch (_) {
         createdAt = null;
       }
     }
 
+    // Parse gradeLevel from either int, num, or String
+    int? gradeLevel;
+    final gradeLevelValue = json['grade_level'];
+    if (gradeLevelValue != null) {
+      if (gradeLevelValue is int) {
+        gradeLevel = gradeLevelValue;
+      } else if (gradeLevelValue is num) {
+        gradeLevel = gradeLevelValue.toInt();
+      } else if (gradeLevelValue is String) {
+        gradeLevel = int.tryParse(gradeLevelValue);
+      }
+    }
+
+    // Safely handle academicYear which can be null or any type
+    final academicYearValue = json['academic_year'];
+    final academicYear = academicYearValue?.toString();
+
     return ClassInfo(
       id: id,
       schoolId: schoolId,
       name: name,
-      gradeLevel: json['grade_level'] as int?,
-      academicYear: json['academic_year'] as String?,
+      gradeLevel: gradeLevel,
+      academicYear: academicYear,
       createdAt: createdAt,
     );
   }

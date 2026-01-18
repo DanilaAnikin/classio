@@ -578,8 +578,8 @@ class _AssignmentCard extends ConsumerWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [
-                  assignment.subject.color.withValues(alpha: 0.1),
-                  assignment.subject.color.withValues(alpha: 0.02),
+                  Color(assignment.subject.color).withValues(alpha: 0.1),
+                  Color(assignment.subject.color).withValues(alpha: 0.02),
                 ],
               )
             : null,
@@ -599,7 +599,7 @@ class _AssignmentCard extends ConsumerWidget {
         boxShadow: [
           BoxShadow(
             color: isPlayful
-                ? assignment.subject.color.withValues(alpha: isCompleted ? 0.03 : 0.1)
+                ? Color(assignment.subject.color).withValues(alpha: isCompleted ? 0.03 : 0.1)
                 : Colors.black.withValues(alpha: 0.02),
             blurRadius: isPlayful ? 10 : 4,
             offset: Offset(0, isPlayful ? 3 : 2),

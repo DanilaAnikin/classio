@@ -101,6 +101,15 @@ class SchedulePage extends ConsumerWidget {
                 ),
               ),
 
+              // Week Selector
+              SliverToBoxAdapter(
+                child: ResponsiveCenter(
+                  maxWidth: 1200,
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: const WeekSelector(),
+                ),
+              ),
+
               // Day Selector
               SliverToBoxAdapter(
                 child: ResponsiveCenter(
@@ -186,6 +195,12 @@ class SchedulePage extends ConsumerWidget {
                             lesson: lesson,
                             isFirst: index == 0,
                             isLast: index == lessons.length - 1,
+                            onTap: () {
+                              showLessonDetailDialog(
+                                context: context,
+                                lesson: lesson,
+                              );
+                            },
                           );
                         },
                       ),

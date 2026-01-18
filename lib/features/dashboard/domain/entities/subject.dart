@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 /// Represents a subject/course in the school.
 ///
 /// Contains information about the subject such as its name and theme color.
@@ -18,8 +16,9 @@ class Subject {
   /// Name of the subject (e.g., "Mathematics", "Physics").
   final String name;
 
-  /// Theme color for the subject for visual identification.
-  final Color color;
+  /// Theme color for the subject for visual identification (ARGB int value).
+  /// Convert to Flutter Color in UI layer using: Color(color)
+  final int color;
 
   /// Name of the teacher teaching this subject.
   final String? teacherName;
@@ -29,7 +28,7 @@ class Subject {
   Subject copyWith({
     String? id,
     String? name,
-    Color? color,
+    int? color,
     String? teacherName,
   }) {
     return Subject(

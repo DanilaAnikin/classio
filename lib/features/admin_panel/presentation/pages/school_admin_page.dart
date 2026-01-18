@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:classio/core/localization/app_localizations.dart';
 import 'package:classio/core/providers/theme_provider.dart';
 import 'package:classio/features/auth/presentation/providers/auth_provider.dart';
 import 'package:classio/features/auth/domain/entities/app_user.dart';
@@ -55,7 +56,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
     if (!authState.hasAdminPrivileges) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('School Admin'),
+          title: Text(context.l10n.schoolAdmin),
           centerTitle: true,
         ),
         body: Center(
@@ -69,7 +70,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
               ),
               const SizedBox(height: 16),
               Text(
-                'Access Denied',
+                context.l10n.accessDenied,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurface,
@@ -77,7 +78,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
               ),
               const SizedBox(height: 8),
               Text(
-                'You do not have permission to access this page.',
+                context.l10n.noPermissionToAccessPage,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -93,7 +94,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
     if (schoolId == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('School Admin'),
+          title: Text(context.l10n.schoolAdmin),
           centerTitle: true,
         ),
         body: Center(
@@ -107,7 +108,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
               ),
               const SizedBox(height: 16),
               Text(
-                'No School Assigned',
+                context.l10n.noSchoolAssigned,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurface,
@@ -115,7 +116,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
               ),
               const SizedBox(height: 8),
               Text(
-                'You are not assigned to any school.',
+                context.l10n.notAssignedToSchool,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -129,18 +130,18 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('School Admin'),
+        title: Text(context.l10n.schoolAdmin),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
+          tabs: [
             Tab(
-              icon: Icon(Icons.people_outline_rounded),
-              text: 'Users',
+              icon: const Icon(Icons.people_outline_rounded),
+              text: context.l10n.users,
             ),
             Tab(
-              icon: Icon(Icons.class_outlined),
-              text: 'Classes',
+              icon: const Icon(Icons.class_outlined),
+              text: context.l10n.classes,
             ),
           ],
           labelColor: theme.colorScheme.primary,
@@ -183,7 +184,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
       return FloatingActionButton.extended(
         onPressed: () => _showGenerateInviteCodeDialog(context, schoolId),
         icon: const Icon(Icons.person_add_alt_1_rounded),
-        label: const Text('Generate Invite'),
+        label: Text(context.l10n.generateInvite),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
       );
@@ -192,7 +193,7 @@ class _SchoolAdminPageState extends ConsumerState<SchoolAdminPage>
       return FloatingActionButton.extended(
         onPressed: () => _showCreateClassDialog(context, schoolId),
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Create Class'),
+        label: Text(context.l10n.createClass),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
       );
@@ -989,7 +990,7 @@ class _UserCard extends StatelessWidget {
     } else if (user.firstName != null) {
       return user.firstName![0].toUpperCase();
     }
-    return user.email[0].toUpperCase();
+    return (user.email ?? 'U')[0].toUpperCase();
   }
 
   @override
@@ -1054,7 +1055,7 @@ class _UserCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  user.email,
+                  user.email ?? '',
                   style: TextStyle(
                     fontSize: isPlayful ? 13 : 12,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -1226,17 +1227,49 @@ class _GenerateInviteCodeDialogState
       _isGenerating = true;
     });
 
-    // TODO: Implement actual code generation via provider/repository
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final usageLimit = int.tryParse(_usageLimitController.text) ?? 1;
 
-    // Generate a placeholder code
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toRadixString(36);
-    final rolePrefix = _selectedRole.name.substring(0, 3).toUpperCase();
+      final inviteCode = await ref.read(adminNotifierProvider.notifier).generateInviteCode(
+        schoolId: widget.schoolId,
+        role: _selectedRole,
+        usageLimit: usageLimit,
+        expiresAt: DateTime.now().add(const Duration(days: 7)),
+      );
 
-    setState(() {
-      _generatedCode = '$rolePrefix-${timestamp.toUpperCase()}';
-      _isGenerating = false;
-    });
+      if (mounted) {
+        if (inviteCode != null) {
+          setState(() {
+            _generatedCode = inviteCode.code;
+            _isGenerating = false;
+          });
+        } else {
+          // Check for error in admin state
+          final adminState = ref.read(adminNotifierProvider);
+          setState(() {
+            _isGenerating = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(adminState.errorMessage ?? 'Failed to generate invite code'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isGenerating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   void _copyToClipboard() {
@@ -1265,7 +1298,12 @@ class _GenerateInviteCodeDialogState
             size: 24,
           ),
           const SizedBox(width: 12),
-          const Text('Generate Invite Code'),
+          const Expanded(
+            child: Text(
+              'Generate Invite Code',
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
       content: SizedBox(
@@ -1294,6 +1332,7 @@ class _GenerateInviteCodeDialogState
                   vertical: 12,
                 ),
               ),
+              isExpanded: true,
               items: [UserRole.teacher, UserRole.student, UserRole.parent]
                   .map((role) => DropdownMenuItem(
                         value: role,
@@ -1440,19 +1479,51 @@ class _CreateClassDialogState extends ConsumerState<_CreateClassDialog> {
       _isCreating = true;
     });
 
-    // TODO: Implement actual class creation via provider/repository
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      final gradeLevel = int.tryParse(_gradeLevelController.text) ?? 1;
 
-    if (mounted) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Class "${_classNameController.text}" created'),
-          duration: const Duration(seconds: 2),
-        ),
+      final classInfo = await ref.read(adminNotifierProvider.notifier).createClass(
+        schoolId: widget.schoolId,
+        name: _classNameController.text.trim(),
+        gradeLevel: gradeLevel,
+        academicYear: _academicYearController.text.trim(),
       );
-      // Refresh classes list
-      ref.invalidate(schoolClassesProvider(widget.schoolId));
+
+      if (mounted) {
+        if (classInfo != null) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Class "${_classNameController.text}" created'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          // Check for error in admin state
+          final adminState = ref.read(adminNotifierProvider);
+          setState(() {
+            _isCreating = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(adminState.errorMessage ?? 'Failed to create class'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isCreating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
     }
   }
 

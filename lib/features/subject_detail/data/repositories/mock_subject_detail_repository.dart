@@ -35,14 +35,14 @@ class MockSubjectDetailRepository implements SubjectDetailRepository {
     final subject = Subject(
       id: subjectId,
       name: subjectData['name'] as String,
-      color: subjectData['color'] as Color,
+      color: (subjectData['color'] as Color).toARGB32(),
       teacherName: subjectData['teacherName'] as String,
     );
 
     return SubjectDetail(
       subjectId: subjectId,
       subjectName: subject.name,
-      subjectColor: subject.color,
+      subjectColor: Color(subject.color),
       teacherName: subject.teacherName!,
       posts: _getPostsForSubject(subjectId, now),
       materials: _getMaterialsForSubject(subjectId, now),

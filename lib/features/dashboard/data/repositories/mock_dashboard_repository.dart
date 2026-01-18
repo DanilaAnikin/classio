@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../../domain/domain.dart';
 
 /// Mock implementation of [DashboardRepository] for testing and development.
@@ -39,49 +37,49 @@ class MockDashboardRepository implements DashboardRepository {
     mathematics = const Subject(
       id: 'math-1',
       name: 'Mathematics',
-      color: Colors.blue,
+      color: 0xFF2196F3, // Blue
       teacherName: 'Dr. Johnson',
     );
 
     physics = const Subject(
       id: 'phys-1',
       name: 'Physics',
-      color: Colors.orange,
+      color: 0xFFFF9800, // Orange
       teacherName: 'Prof. Anderson',
     );
 
     czechLanguage = const Subject(
       id: 'czech-1',
       name: 'Czech Language',
-      color: Colors.red,
+      color: 0xFFF44336, // Red
       teacherName: 'Ms. Nováková',
     );
 
     english = const Subject(
       id: 'eng-1',
       name: 'English',
-      color: Colors.purple,
+      color: 0xFF9C27B0, // Purple
       teacherName: 'Mr. Smith',
     );
 
     history = const Subject(
       id: 'hist-1',
       name: 'History',
-      color: Colors.brown,
+      color: 0xFF795548, // Brown
       teacherName: 'Dr. Williams',
     );
 
     chemistry = const Subject(
       id: 'chem-1',
       name: 'Chemistry',
-      color: Colors.green,
+      color: 0xFF4CAF50, // Green
       teacherName: 'Dr. Martinez',
     );
 
     physicalEducation = const Subject(
       id: 'pe-1',
       name: 'Physical Education',
-      color: Colors.teal,
+      color: 0xFF009688, // Teal
       teacherName: 'Coach Davis',
     );
   }

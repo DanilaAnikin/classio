@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import 'grade.dart';
 
 /// Represents grade statistics for a specific subject.
@@ -22,8 +20,9 @@ class SubjectGradeStats {
   /// Name of the subject (e.g., "Mathematics", "Physics").
   final String subjectName;
 
-  /// Theme color for the subject for visual identification.
-  final Color subjectColor;
+  /// Theme color for the subject for visual identification (ARGB int value).
+  /// Convert to Flutter Color in UI layer using: Color(subjectColor)
+  final int subjectColor;
 
   /// Weighted average of all grades for this subject.
   ///
@@ -50,7 +49,7 @@ class SubjectGradeStats {
   SubjectGradeStats copyWith({
     String? subjectId,
     String? subjectName,
-    Color? subjectColor,
+    int? subjectColor,
     double? average,
     List<Grade>? grades,
   }) {

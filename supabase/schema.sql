@@ -66,9 +66,10 @@ CREATE TABLE classes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   school_id UUID NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  grade_level INT,
+  head_teacher_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  grade_level TEXT,
   academic_year TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- -----------------------------------------------------

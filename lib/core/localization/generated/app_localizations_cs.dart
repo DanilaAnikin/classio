@@ -260,68 +260,68 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get subjectDetailStream => 'Příspěvky';
+  String get subjectDetailStream => 'Prispevky';
 
   @override
-  String get subjectDetailStreamDescription => 'Oznámení a aktuality z hodiny';
+  String get subjectDetailStreamDescription => 'Oznameni a aktuality z hodiny';
 
   @override
-  String get subjectDetailAssignments => 'Úkoly';
+  String get subjectDetailAssignments => 'Ukoly';
 
   @override
-  String get subjectDetailAssignmentsDescription => 'Vaše úkoly a domácí práce';
+  String get subjectDetailAssignmentsDescription => 'Vase ukoly a domaci prace';
 
   @override
-  String get subjectDetailMaterials => 'Materiály';
+  String get subjectDetailMaterials => 'Materialy';
 
   @override
-  String get subjectDetailMaterialsDescription => 'Materiály a soubory kurzu';
+  String get subjectDetailMaterialsDescription => 'Materialy a soubory kurzu';
 
   @override
-  String get subjectDetailAnnouncement => 'Oznámení';
+  String get subjectDetailAnnouncement => 'Oznameni';
 
   @override
-  String get subjectDetailAssignment => 'Úkol';
+  String get subjectDetailAssignment => 'Ukol';
 
   @override
   String get subjectDetailSubmit => 'Odevzdat';
 
   @override
-  String get subjectDetailSubmitted => 'Úkol odevzdán!';
+  String get subjectDetailSubmitted => 'Ukol odevzdan!';
 
   @override
-  String get subjectDetailNoStream => 'Zatím žádná oznámení';
+  String get subjectDetailNoStream => 'Zatim zadna oznameni';
 
   @override
-  String get subjectDetailNoAssignments => 'Zatím žádné úkoly';
+  String get subjectDetailNoAssignments => 'Zatim zadne ukoly';
 
   @override
-  String get subjectDetailNoMaterials => 'Zatím žádné materiály';
+  String get subjectDetailNoMaterials => 'Zatim zadne materialy';
 
   @override
   String subjectDetailDueDate(String date) {
-    return 'Termín $date';
+    return 'Termin $date';
   }
 
   @override
   String subjectDetailPostedBy(String author) {
-    return 'Přidal/a $author';
+    return 'Pridal/a $author';
   }
 
   @override
-  String get subjectDetailViewMaterial => 'Zobrazit materiál';
+  String get subjectDetailViewMaterial => 'Zobrazit material';
 
   @override
-  String get dashboardInProgress => 'Probíhá';
+  String get dashboardInProgress => 'Probiha';
 
   @override
-  String get dashboardUpNextLabel => 'Další';
+  String get dashboardUpNextLabel => 'Dalsi';
 
   @override
-  String get dashboardStarted => 'Začalo';
+  String get dashboardStarted => 'Zacalo';
 
   @override
-  String get dashboardStartingNow => 'Začíná nyní';
+  String get dashboardStartingNow => 'Zacina nyni';
 
   @override
   String dashboardInHoursMinutes(int hours, int minutes) {
@@ -334,24 +334,24 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get dashboardCancelled => 'Zrušeno';
+  String get dashboardCancelled => 'Zruseno';
 
   @override
   String dashboardSubstitution(String teacher) {
-    return 'Suplování: $teacher';
+    return 'Suplovani: $teacher';
   }
 
   @override
-  String get dashboardAllDone => 'Vše hotovo na dnešek!';
+  String get dashboardAllDone => 'Vse hotovo na dnesek!';
 
   @override
-  String get dashboardNoMoreLessons => 'Žádné další hodiny naplánovány';
+  String get dashboardNoMoreLessons => 'Zadne dalsi hodiny naplanovany';
 
   @override
-  String get dashboardNoClassesToday => 'Dnes žádné hodiny';
+  String get dashboardNoClassesToday => 'Dnes zadne hodiny';
 
   @override
-  String get dashboardEnjoyFreeDay => 'Užijte si volný den!';
+  String get dashboardEnjoyFreeDay => 'Uzijte si volny den!';
 
   @override
   String get dashboardSub => 'SUP';
@@ -360,28 +360,28 @@ class AppLocalizationsCs extends AppLocalizations {
   String get dashboardToday => 'Dnes';
 
   @override
-  String get dashboardTomorrow => 'Zítra';
+  String get dashboardTomorrow => 'Zitra';
 
   @override
-  String get dashboardLater => 'Později';
+  String get dashboardLater => 'Pozdeji';
 
   @override
-  String get dashboardAllCaughtUp => 'Vše zvládnuto!';
+  String get dashboardAllCaughtUp => 'Vse zvladnuto!';
 
   @override
-  String get dashboardNoAssignmentsDue => 'Žádné úkoly brzy nesplatné';
+  String get dashboardNoAssignmentsDue => 'Zadne ukoly brzy nesplatne';
 
   @override
-  String get dashboardSomethingWrong => 'Něco se pokazilo';
+  String get dashboardSomethingWrong => 'Neco se pokazilo';
 
   @override
   String get dashboardStudent => 'Student';
 
   @override
-  String get dashboardAnError => 'Došlo k chybě';
+  String get dashboardAnError => 'Doslo k chybe';
 
   @override
-  String get dashboardNoData => 'Žádná data k dispozici';
+  String get dashboardNoData => 'Zadna data k dispozici';
 
   @override
   String scheduleLessonCount(int count) {
@@ -394,62 +394,62 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get scheduleWeekend => 'Víkend!';
+  String get scheduleWeekend => 'Vikend!';
 
   @override
-  String get scheduleEnjoyTimeOff => 'Užijte si volno!';
+  String get scheduleEnjoyTimeOff => 'Uzijte si volno!';
 
   @override
-  String get scheduleFreeDay => 'Máte volný den. Čas odpočívat!';
+  String get scheduleFreeDay => 'Mate volny den. Cas odpocivat!';
 
   @override
-  String get scheduleUnknown => 'Neznámý';
+  String get scheduleUnknown => 'Neznamy';
 
   @override
-  String get gradesNoGradesYet => 'Zatím žádné známky';
+  String get gradesNoGradesYet => 'Zatim zadne znamky';
 
   @override
   String get gradesWillAppear =>
-      'Vaše známky se zde zobrazí, jakmile budou k dispozici.';
+      'Vase znamky se zde zobrazi, jakmile budou k dispozici.';
 
   @override
-  String get gradesFailedToLoad => 'Nepodařilo se načíst známky';
+  String get gradesFailedToLoad => 'Nepodarilo se nacist znamky';
 
   @override
   String get gradesRetry => 'Opakovat';
 
   @override
-  String get gradesExcellent => 'Výborně';
+  String get gradesExcellent => 'Vyborne';
 
   @override
-  String get gradesGood => 'Dobře';
+  String get gradesGood => 'Dobre';
 
   @override
-  String get gradesFair => 'Dostatečně';
+  String get gradesFair => 'Dostatecne';
 
   @override
-  String get gradesNeedsWork => 'Potřebuje zlepšit';
+  String get gradesNeedsWork => 'Potrebuje zlepsit';
 
   @override
   String gradesWeightLabel(String weight) {
-    return 'Váha $weight';
+    return 'Vaha $weight';
   }
 
   @override
   String get subjectStream => 'Aktuality';
 
   @override
-  String get subjectAssignments => 'Úkoly';
+  String get subjectAssignments => 'Ukoly';
 
   @override
-  String get subjectMaterials => 'Materiály';
+  String get subjectMaterials => 'Materialy';
 
   @override
-  String get subjectNoPostsYet => 'Zatím žádné příspěvky';
+  String get subjectNoPostsYet => 'Zatim zadne prispevky';
 
   @override
   String get subjectPostsWillAppear =>
-      'Příspěvky se zde zobrazí, když učitel sdílí aktualizace';
+      'Prispevky se zde zobrazi, kdyz ucitel sdili aktualizace';
 
   @override
   String subjectTodayAt(String time) {
@@ -458,7 +458,7 @@ class AppLocalizationsCs extends AppLocalizations {
 
   @override
   String subjectYesterdayAt(String time) {
-    return 'Včera v $time';
+    return 'Vcera v $time';
   }
 
   @override
@@ -467,41 +467,274 @@ class AppLocalizationsCs extends AppLocalizations {
   }
 
   @override
-  String get subjectNoAssignments => 'Žádné úkoly';
+  String get subjectNoAssignments => 'Zadne ukoly';
 
   @override
   String get subjectAssignmentsWillAppear =>
-      'Úkoly se zde zobrazí, když je učitel zadá';
+      'Ukoly se zde zobrazi, kdyz je ucitel zada';
 
   @override
-  String get subjectDueToday => 'Splatné dnes';
+  String get subjectDueToday => 'Splatne dnes';
 
   @override
-  String get subjectDueTomorrow => 'Splatné zítra';
+  String get subjectDueTomorrow => 'Splatne zitra';
 
   @override
   String subjectDueDate(String date) {
-    return 'Splatné $date';
+    return 'Splatne $date';
   }
 
   @override
-  String get subjectSubmitted => 'Úkol odevzdán!';
+  String get subjectSubmitted => 'Ukol odevzdan!';
 
   @override
   String get subjectSubmit => 'Odevzdat';
 
   @override
-  String get subjectNoMaterials => 'Žádné materiály';
+  String get subjectNoMaterials => 'Zadne materialy';
 
   @override
   String get subjectMaterialsWillAppear =>
-      'Materiály kurzu se zde zobrazí, když je učitel sdílí';
+      'Materialy kurzu se zde zobrazi, kdyz je ucitel sdili';
 
   @override
   String subjectOpening(String url) {
-    return 'Otevírám: $url';
+    return 'Oteviram: $url';
   }
 
   @override
-  String get subjectFailedToLoad => 'Nepodařilo se načíst předmět';
+  String get subjectFailedToLoad => 'Nepodarilo se nacist predmet';
+
+  @override
+  String get accessDenied => 'Pristup odepren';
+
+  @override
+  String get noSchoolAssigned => 'Neni prirazena zadna skola';
+
+  @override
+  String get schoolAdmin => 'Spravce skoly';
+
+  @override
+  String get users => 'Uzivatele';
+
+  @override
+  String get classes => 'Tridy';
+
+  @override
+  String get subjects => 'Predmety';
+
+  @override
+  String get inviteCodes => 'Pozvanky';
+
+  @override
+  String get schoolDetails => 'Udaje o skole';
+
+  @override
+  String get principalDashboard => 'Panel reditele';
+
+  @override
+  String get deputyDashboard => 'Panel zastupce';
+
+  @override
+  String get deputyPanel => 'Panel zastupce';
+
+  @override
+  String get emailLabel => 'E-mail';
+
+  @override
+  String get passwordLabel => 'Heslo';
+
+  @override
+  String get inviteCodeLabel => 'Kod pozvanky';
+
+  @override
+  String get signIn => 'Prihlasit se';
+
+  @override
+  String get signUp => 'Registrovat se';
+
+  @override
+  String get register => 'Registrovat';
+
+  @override
+  String get registerWithInviteCode => 'Registrace s kodem pozvanky';
+
+  @override
+  String get dontHaveAccount => 'Nemate ucet?';
+
+  @override
+  String get alreadyHaveAccount => 'Uz mate ucet?';
+
+  @override
+  String get iDontHaveAccount => 'Nemam ucet';
+
+  @override
+  String get inviteCodeRequiredError => 'Prosim zadejte kod pozvanky';
+
+  @override
+  String get inviteCodeTooShort => 'Kod pozvanky musi mit alespon 6 znaku';
+
+  @override
+  String get firstNameLabel => 'Jmeno';
+
+  @override
+  String get lastNameLabel => 'Prijmeni';
+
+  @override
+  String get confirmPasswordLabel => 'Potvrdit heslo';
+
+  @override
+  String get pleaseConfirmPassword => 'Prosim potvrdte heslo';
+
+  @override
+  String get passwordsDoNotMatch => 'Hesla se neshoduji';
+
+  @override
+  String get firstNameRequired => 'Prosim zadejte sve jmeno';
+
+  @override
+  String get firstNameTooShort => 'Jmeno musi mit alespon 2 znaky';
+
+  @override
+  String get lastNameRequired => 'Prosim zadejte sve prijmeni';
+
+  @override
+  String get lastNameTooShort => 'Prijmeni musi mit alespon 2 znaky';
+
+  @override
+  String get enterYourEmail => 'Zadejte svuj e-mail';
+
+  @override
+  String get enterYourPassword => 'Zadejte sve heslo';
+
+  @override
+  String get enterYourInviteCode => 'Zadejte kod pozvanky';
+
+  @override
+  String get enterYourFirstName => 'Zadejte sve jmeno';
+
+  @override
+  String get enterYourLastName => 'Zadejte sve prijmeni';
+
+  @override
+  String get reEnterPassword => 'Znovu zadejte heslo';
+
+  @override
+  String get welcomeToClassio => 'Vitejte v Classio';
+
+  @override
+  String get joinClassio => 'Pripojte se ke Classio';
+
+  @override
+  String get createAccountToGetStarted => 'Vytvorte si ucet a zacnete';
+
+  @override
+  String get dismiss => 'Zavrrit';
+
+  @override
+  String get resetPassword => 'Obnovit heslo';
+
+  @override
+  String get resetPasswordInstructions =>
+      'Zadejte svou e-mailovou adresu a posleme vam odkaz pro obnoveni hesla.';
+
+  @override
+  String get sendResetLink => 'Odeslat odkaz pro obnoveni';
+
+  @override
+  String get passwordResetLinkSent =>
+      'Odkaz pro obnoveni hesla odeslan! Zkontrolujte svou e-mailovou schranku.';
+
+  @override
+  String get failedToSendResetLink =>
+      'Nepodarilo se odeslat odkaz. Zkuste to prosim znovu.';
+
+  @override
+  String get noPermissionToAccessPage =>
+      'Nemate opravneni pristupovat k teto strance.';
+
+  @override
+  String get notAssignedToSchool => 'Nejste prirazeni k zadne skole.';
+
+  @override
+  String get generateInvite => 'Vygenerovat pozvanku';
+
+  @override
+  String get createClass => 'Vytvorit tridu';
+
+  @override
+  String get overview => 'Prehled';
+
+  @override
+  String get schedule => 'Rozvrh';
+
+  @override
+  String get parents => 'Rodice';
+
+  @override
+  String get staff => 'Zamestnanci';
+
+  @override
+  String get invites => 'Pozvanky';
+
+  @override
+  String get scheduleWeekPrevious => 'Previous Week';
+
+  @override
+  String get scheduleWeekCurrent => 'This Week';
+
+  @override
+  String get scheduleWeekNext => 'Next Week';
+
+  @override
+  String get scheduleWeekAfterNext => 'Week After';
+
+  @override
+  String get scheduleWeekStable => 'Stable';
+
+  @override
+  String get scheduleLessonModified => 'Modified';
+
+  @override
+  String get scheduleLessonTime => 'Time';
+
+  @override
+  String get scheduleLessonRoom => 'Room';
+
+  @override
+  String get scheduleLessonDate => 'Date';
+
+  @override
+  String get scheduleLessonSubstitute => 'Substitute Teacher';
+
+  @override
+  String get scheduleLessonNote => 'Note';
+
+  @override
+  String get scheduleLessonChangesFromStable => 'Changes from Stable Timetable';
+
+  @override
+  String get scheduleLessonStableDescription =>
+      'This is a stable lesson that repeats every week';
+
+  @override
+  String get scheduleLessonSubject => 'Subject';
+
+  @override
+  String get scheduleLessonStartTime => 'Start Time';
+
+  @override
+  String get scheduleLessonEndTime => 'End Time';
+
+  @override
+  String get scheduleLessonTeacher => 'Teacher';
+
+  @override
+  String get scheduleLessonCancelled => 'Cancelled';
+
+  @override
+  String get scheduleLessonSubstitution => 'Substitution';
+
+  @override
+  String get close => 'Close';
 }

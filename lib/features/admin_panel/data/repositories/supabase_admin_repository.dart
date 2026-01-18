@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/utils/subject_colors.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../dashboard/domain/entities/subject.dart';
 import '../../domain/entities/entities.dart';
@@ -32,22 +32,6 @@ class SupabaseAdminRepository implements AdminRepository {
       : _supabase = supabaseClient ?? Supabase.instance.client;
 
   final SupabaseClient _supabase;
-
-  /// Default colors for subjects that don't have a specified color.
-  static const List<Color> _subjectColors = [
-    Colors.blue,
-    Colors.orange,
-    Colors.green,
-    Colors.purple,
-    Colors.teal,
-    Colors.red,
-    Colors.indigo,
-    Colors.amber,
-    Colors.cyan,
-    Colors.pink,
-    Colors.lime,
-    Colors.brown,
-  ];
 
   @override
   Future<List<School>> getSchools() async {
@@ -103,12 +87,10 @@ class SupabaseAdminRepository implements AdminRepository {
           .eq('school_id', schoolId)
           .order('last_name', ascending: true);
 
-      // Note: profiles table doesn't have email, we need to join or get it separately
-      // For now, we'll use empty string for email and it should be populated from auth
+      // Note: profiles table doesn't have email directly accessible
+      // Email will be null if not available - UI should handle this gracefully
       return (response as List).map((json) {
         final data = json as Map<String, dynamic>;
-        // Add a placeholder email since profiles table might not have it directly
-        data['email'] = data['email'] ?? '${data['id']}@placeholder.com';
         return AppUser.fromJson(data);
       }).toList();
     } on PostgrestException catch (e) {
@@ -177,36 +159,56 @@ class SupabaseAdminRepository implements AdminRepository {
     DateTime? expiresAt,
   }) async {
     try {
-      // Generate a random 8-character alphanumeric code
-      final code = _generateRandomCode(8);
+      // Generate a random 16-character alphanumeric code (cryptographically secure)
+      final token = _generateRandomCode(16);
+
+      // Get current user ID for created_by_user_id
+      final currentUserId = _supabase.auth.currentUser?.id;
 
       final response = await _supabase
-          .from('invite_codes')
+          .from('invite_tokens')
           .insert({
-            'code': code,
+            'token': token,
             'role': role.toJson(),
             'school_id': schoolId,
-            'class_id': classId,
-            'usage_limit': usageLimit,
+            'specific_class_id': classId,
+            'created_by_user_id': currentUserId,
             'times_used': 0,
-            'is_active': true,
-            'expires_at': expiresAt?.toIso8601String(),
+            'usage_limit': usageLimit,
+            'expires_at': expiresAt?.toIso8601String() ??
+                DateTime.now().add(const Duration(days: 7)).toIso8601String(),
           })
           .select('''
-            id,
-            code,
+            token,
             role,
             school_id,
-            class_id,
-            usage_limit,
+            specific_class_id,
             times_used,
-            is_active,
+            usage_limit,
             expires_at,
             created_at
           ''')
           .single();
 
-      return InviteCode.fromJson(response);
+      // Map invite_tokens schema to InviteCode entity
+      final timesUsed = response['times_used'] as int;
+      final responseUsageLimit = response['usage_limit'] as int;
+      return InviteCode(
+        id: response['token'] as String,
+        code: response['token'] as String,
+        role: UserRole.fromString(response['role'] as String?) ?? UserRole.student,
+        schoolId: response['school_id'] as String,
+        classId: response['specific_class_id'] as String?,
+        usageLimit: responseUsageLimit,
+        timesUsed: timesUsed,
+        isActive: timesUsed < responseUsageLimit,
+        expiresAt: response['expires_at'] != null
+            ? DateTime.tryParse(response['expires_at'] as String)
+            : null,
+        createdAt: response['created_at'] != null
+            ? DateTime.tryParse(response['created_at'] as String)
+            : null,
+      );
     } on PostgrestException catch (e) {
       throw AdminException('Failed to generate invite code: ${e.message}');
     } catch (e) {
@@ -227,7 +229,7 @@ class SupabaseAdminRepository implements AdminRepository {
       var colorIndex = 0;
       return (response as List).map((json) {
         final data = json as Map<String, dynamic>;
-        final color = _subjectColors[colorIndex % _subjectColors.length];
+        final color = SubjectColors.getColorForIndex(colorIndex);
         colorIndex++;
 
         return Subject(
@@ -249,25 +251,42 @@ class SupabaseAdminRepository implements AdminRepository {
   Future<List<InviteCode>> getSchoolInviteCodes(String schoolId) async {
     try {
       final response = await _supabase
-          .from('invite_codes')
+          .from('invite_tokens')
           .select('''
-            id,
-            code,
+            token,
             role,
             school_id,
-            class_id,
-            usage_limit,
+            specific_class_id,
             times_used,
-            is_active,
+            usage_limit,
             expires_at,
             created_at
           ''')
           .eq('school_id', schoolId)
           .order('created_at', ascending: false);
 
-      return (response as List)
-          .map((json) => InviteCode.fromJson(json as Map<String, dynamic>))
-          .toList();
+      // Map invite_tokens schema to InviteCode entities
+      return (response as List).map((json) {
+        final data = json as Map<String, dynamic>;
+        final timesUsed = data['times_used'] as int;
+        final usageLimit = data['usage_limit'] as int;
+        return InviteCode(
+          id: data['token'] as String,
+          code: data['token'] as String,
+          role: UserRole.fromString(data['role'] as String?) ?? UserRole.student,
+          schoolId: data['school_id'] as String,
+          classId: data['specific_class_id'] as String?,
+          usageLimit: usageLimit,
+          timesUsed: timesUsed,
+          isActive: timesUsed < usageLimit,
+          expiresAt: data['expires_at'] != null
+              ? DateTime.tryParse(data['expires_at'] as String)
+              : null,
+          createdAt: data['created_at'] != null
+              ? DateTime.tryParse(data['created_at'] as String)
+              : null,
+        );
+      }).toList();
     } on PostgrestException catch (e) {
       throw AdminException('Failed to fetch invite codes: ${e.message}');
     } catch (e) {
@@ -279,25 +298,51 @@ class SupabaseAdminRepository implements AdminRepository {
   @override
   Future<InviteCode> deactivateInviteCode(String codeId) async {
     try {
+      // In invite_tokens, codeId is the token itself (primary key)
+      // First get the usage_limit to set times_used equal to it
+      final tokenData = await _supabase
+          .from('invite_tokens')
+          .select('usage_limit')
+          .eq('token', codeId)
+          .single();
+      final usageLimit = tokenData['usage_limit'] as int;
+
+      // Deactivate by setting times_used to usage_limit
       final response = await _supabase
-          .from('invite_codes')
-          .update({'is_active': false})
-          .eq('id', codeId)
+          .from('invite_tokens')
+          .update({'times_used': usageLimit})
+          .eq('token', codeId)
           .select('''
-            id,
-            code,
+            token,
             role,
             school_id,
-            class_id,
-            usage_limit,
+            specific_class_id,
             times_used,
-            is_active,
+            usage_limit,
             expires_at,
             created_at
           ''')
           .single();
 
-      return InviteCode.fromJson(response);
+      // Map invite_tokens schema to InviteCode entity
+      final timesUsed = response['times_used'] as int;
+      final responseUsageLimit = response['usage_limit'] as int;
+      return InviteCode(
+        id: response['token'] as String,
+        code: response['token'] as String,
+        role: UserRole.fromString(response['role'] as String?) ?? UserRole.student,
+        schoolId: response['school_id'] as String,
+        classId: response['specific_class_id'] as String?,
+        usageLimit: responseUsageLimit,
+        timesUsed: timesUsed,
+        isActive: timesUsed < responseUsageLimit,
+        expiresAt: response['expires_at'] != null
+            ? DateTime.tryParse(response['expires_at'] as String)
+            : null,
+        createdAt: response['created_at'] != null
+            ? DateTime.tryParse(response['created_at'] as String)
+            : null,
+      );
     } on PostgrestException catch (e) {
       throw AdminException('Failed to deactivate invite code: ${e.message}');
     } catch (e) {
@@ -337,7 +382,7 @@ class SupabaseAdminRepository implements AdminRepository {
           ''')
           .single();
 
-      response['email'] = response['email'] ?? '${response['id']}@placeholder.com';
+      // Email may be null if not available - UI should handle this gracefully
       return AppUser.fromJson(response);
     } on PostgrestException catch (e) {
       throw AdminException('Failed to update user role: ${e.message}');
@@ -347,9 +392,10 @@ class SupabaseAdminRepository implements AdminRepository {
     }
   }
 
-  /// Generates a random alphanumeric code of the specified length.
+  /// Generates a cryptographically secure random alphanumeric code of the specified length.
+  /// Uses 62 characters (uppercase, lowercase, digits) for maximum entropy.
   String _generateRandomCode(int length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final random = Random.secure();
     return List.generate(length, (_) => chars[random.nextInt(chars.length)])
         .join();

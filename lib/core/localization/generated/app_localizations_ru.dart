@@ -12,497 +12,733 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appName => 'Classio';
 
   @override
-  String get welcomeMessage => 'Добро пожаловать в Classio';
+  String get welcomeMessage => 'Dobro pozhalovat v Classio';
 
   @override
-  String get settings => 'Настройки';
+  String get settings => 'Nastroyki';
 
   @override
-  String get language => 'Язык';
+  String get language => 'Yazik';
 
   @override
-  String get theme => 'Тема';
+  String get theme => 'Tema';
 
   @override
-  String get cleanTheme => 'Чистая';
+  String get cleanTheme => 'Chistaya';
 
   @override
-  String get playfulTheme => 'Игривая';
+  String get playfulTheme => 'Igrivaya';
 
   @override
-  String get home => 'Главная';
+  String get home => 'Glavnaya';
 
   @override
-  String get dashboard => 'Панель управления';
+  String get dashboard => 'Panel upravleniya';
 
   @override
-  String get selectLanguage => 'Выбрать язык';
+  String get selectLanguage => 'Vibrat yazik';
 
   @override
-  String get selectTheme => 'Выбрать тему';
+  String get selectTheme => 'Vibrat temu';
 
   @override
-  String get save => 'Сохранить';
+  String get save => 'Sokhranit';
 
   @override
-  String get cancel => 'Отмена';
+  String get cancel => 'Otmena';
 
   @override
-  String get login => 'Вход';
+  String get login => 'Vkhod';
 
   @override
-  String get logout => 'Выход';
+  String get logout => 'Vikhod';
 
   @override
-  String get email => 'Электронная почта';
+  String get email => 'Elektronnaya pochta';
 
   @override
-  String get password => 'Пароль';
+  String get password => 'Parol';
 
   @override
-  String get welcomeBack => 'С возвращением';
+  String get welcomeBack => 'S vozvrashcheniem';
 
   @override
-  String get signInToContinue => 'Войдите, чтобы продолжить';
+  String get signInToContinue => 'Voydite, chtobi prodolzhit';
 
   @override
-  String get forgotPassword => 'Забыли пароль?';
+  String get forgotPassword => 'Zabili parol?';
 
   @override
-  String get loginError => 'Ошибка входа. Проверьте свои данные.';
+  String get loginError => 'Oshibka vkhoda. Proverite svoi dannie.';
 
   @override
-  String get emailRequired => 'Электронная почта обязательна';
+  String get emailRequired => 'Elektronnaya pochta obyazatelna';
 
   @override
-  String get emailInvalid => 'Введите правильный адрес электронной почты';
+  String get emailInvalid => 'Vvedite pravilniy adres elektronnoy pochti';
 
   @override
-  String get passwordRequired => 'Пароль обязателен';
+  String get passwordRequired => 'Parol obyazatelen';
 
   @override
-  String get passwordTooShort => 'Пароль должен содержать не менее 6 символов';
+  String get passwordTooShort => 'Parol dolzhen soderzhat ne menee 6 simvolov';
 
   @override
-  String get loggingIn => 'Вход в систему...';
+  String get loggingIn => 'Vkhod v sistemu...';
 
   @override
-  String get dashboardGreetingMorning => 'Доброе утро';
+  String get dashboardGreetingMorning => 'Dobroe utro';
 
   @override
-  String get dashboardGreetingAfternoon => 'Добрый день';
+  String get dashboardGreetingAfternoon => 'Dobriy den';
 
   @override
-  String get dashboardGreetingEvening => 'Добрый вечер';
+  String get dashboardGreetingEvening => 'Dobriy vecher';
 
   @override
-  String get dashboardUpNext => 'Далее';
+  String get dashboardUpNext => 'Dalee';
 
   @override
-  String get dashboardTodaySchedule => 'Расписание на сегодня';
+  String get dashboardTodaySchedule => 'Raspisanie na segodnya';
 
   @override
-  String get dashboardDueSoon => 'Скоро срок сдачи';
+  String get dashboardDueSoon => 'Skoro srok sdachi';
 
   @override
-  String get lessonCancelled => 'Отменено';
+  String get lessonCancelled => 'Otmeneno';
 
   @override
-  String get lessonSubstitution => 'Замена';
+  String get lessonSubstitution => 'Zamena';
 
   @override
-  String get lessonInProgress => 'Идет сейчас';
+  String get lessonInProgress => 'Idet seychas';
 
   @override
   String lessonUpcoming(int minutes) {
-    return 'Начало через $minutes мин';
+    return 'Nachalo cherez $minutes min';
   }
 
   @override
   String lessonRoom(String room) {
-    return 'Кабинет $room';
+    return 'Kabinet $room';
   }
 
   @override
-  String get assignmentDueToday => 'Сдать сегодня';
+  String get assignmentDueToday => 'Sdat segodnya';
 
   @override
-  String get assignmentDueTomorrow => 'Сдать завтра';
+  String get assignmentDueTomorrow => 'Sdat zavtra';
 
   @override
   String assignmentDueIn(int days) {
-    return 'Сдать через $days дней';
+    return 'Sdat cherez $days dney';
   }
 
   @override
-  String get assignmentCompleted => 'Выполнено';
+  String get assignmentCompleted => 'Vipolneno';
 
   @override
-  String get assignmentOverdue => 'Просрочено';
+  String get assignmentOverdue => 'Prosrocheno';
 
   @override
-  String get noLessonsToday => 'Сегодня нет уроков';
+  String get noLessonsToday => 'Segodnya net urokov';
 
   @override
-  String get noUpcomingAssignments => 'Нет предстоящих заданий';
+  String get noUpcomingAssignments => 'Net predstoyashchikh zadaniy';
 
   @override
-  String get allDoneForToday => 'На сегодня все!';
+  String get allDoneForToday => 'Na segodnya vse!';
 
   @override
-  String get freeTime => 'Свободное время';
+  String get freeTime => 'Svobodnoe vremya';
 
   @override
-  String get dashboardLoading => 'Загрузка панели...';
+  String get dashboardLoading => 'Zagruzka paneli...';
 
   @override
-  String get dashboardError => 'Что-то пошло не так';
+  String get dashboardError => 'Chto-to poshlo ne tak';
 
   @override
-  String get dashboardRetry => 'Повторить';
+  String get dashboardRetry => 'Povtorit';
 
   @override
-  String get navHome => 'Главная';
+  String get navHome => 'Glavnaya';
 
   @override
-  String get navSchedule => 'Расписание';
+  String get navSchedule => 'Raspisanie';
 
   @override
-  String get navGrades => 'Оценки';
+  String get navGrades => 'Otsenki';
 
   @override
-  String get navProfile => 'Профиль';
+  String get navProfile => 'Profil';
 
   @override
-  String get scheduleTitle => 'Недельное расписание';
+  String get scheduleTitle => 'Nedelnoe raspisanie';
 
   @override
-  String get scheduleMonday => 'Пн';
+  String get scheduleMonday => 'Pn';
 
   @override
-  String get scheduleTuesday => 'Вт';
+  String get scheduleTuesday => 'Vt';
 
   @override
-  String get scheduleWednesday => 'Ср';
+  String get scheduleWednesday => 'Sr';
 
   @override
-  String get scheduleThursday => 'Чт';
+  String get scheduleThursday => 'Cht';
 
   @override
-  String get scheduleFriday => 'Пт';
+  String get scheduleFriday => 'Pt';
 
   @override
-  String get scheduleSaturday => 'Сб';
+  String get scheduleSaturday => 'Sb';
 
   @override
-  String get scheduleSunday => 'Вс';
+  String get scheduleSunday => 'Vs';
 
   @override
-  String get scheduleMondayFull => 'Понедельник';
+  String get scheduleMondayFull => 'Ponedelnik';
 
   @override
-  String get scheduleTuesdayFull => 'Вторник';
+  String get scheduleTuesdayFull => 'Vtornik';
 
   @override
-  String get scheduleWednesdayFull => 'Среда';
+  String get scheduleWednesdayFull => 'Sreda';
 
   @override
-  String get scheduleThursdayFull => 'Четверг';
+  String get scheduleThursdayFull => 'Chetverg';
 
   @override
-  String get scheduleFridayFull => 'Пятница';
+  String get scheduleFridayFull => 'Pyatnitsa';
 
   @override
-  String get scheduleNoLessons => 'Нет уроков';
+  String get scheduleNoLessons => 'Net urokov';
 
   @override
-  String get scheduleBreak => 'Перемена';
+  String get scheduleBreak => 'Peremena';
 
   @override
-  String get gradesTitle => 'Оценки';
+  String get gradesTitle => 'Otsenki';
 
   @override
-  String get gradesComingSoon => 'Оценки скоро появятся';
+  String get gradesComingSoon => 'Otsenki skoro poyavyatsya';
 
   @override
-  String get profileTitle => 'Профиль';
+  String get profileTitle => 'Profil';
 
   @override
-  String get profileThemeSection => 'Внешний вид';
+  String get profileThemeSection => 'Vneshniy vid';
 
   @override
-  String get profileLanguageSection => 'Язык';
+  String get profileLanguageSection => 'Yazik';
 
   @override
-  String get profileLogout => 'Выйти';
+  String get profileLogout => 'Viyti';
 
   @override
-  String get profileLogoutConfirm => 'Вы уверены, что хотите выйти?';
+  String get profileLogoutConfirm => 'Vi uvereni, chto khotite viyti?';
 
   @override
-  String get gradesAverage => 'Средний балл';
+  String get gradesAverage => 'Sredniy ball';
 
   @override
-  String get gradesWeight => 'Вес';
+  String get gradesWeight => 'Ves';
 
   @override
-  String get gradesDate => 'Дата';
+  String get gradesDate => 'Data';
 
   @override
-  String get gradesOverallAverage => 'Общий средний балл';
+  String get gradesOverallAverage => 'Obshchiy sredniy ball';
 
   @override
-  String get gradesNoGrades => 'Пока нет оценок';
+  String get gradesNoGrades => 'Poka net otsenok';
 
   @override
   String gradesWeightFormat(String weight) {
-    return 'Вес $weight';
+    return 'Ves $weight';
   }
 
   @override
-  String get subjectDetailStream => 'Лента';
+  String get subjectDetailStream => 'Lenta';
 
   @override
-  String get subjectDetailStreamDescription => 'Объявления и новости класса';
+  String get subjectDetailStreamDescription => 'Obyavleniya i novosti klassa';
 
   @override
-  String get subjectDetailAssignments => 'Задания';
+  String get subjectDetailAssignments => 'Zadaniya';
 
   @override
   String get subjectDetailAssignmentsDescription =>
-      'Ваши задания и домашняя работа';
+      'Vashi zadaniya i domashnyaya rabota';
 
   @override
-  String get subjectDetailMaterials => 'Материалы';
+  String get subjectDetailMaterials => 'Materiali';
 
   @override
-  String get subjectDetailMaterialsDescription => 'Ресурсы и файлы курса';
+  String get subjectDetailMaterialsDescription => 'Resursi i fayli kursa';
 
   @override
-  String get subjectDetailAnnouncement => 'Объявление';
+  String get subjectDetailAnnouncement => 'Obyavlenie';
 
   @override
-  String get subjectDetailAssignment => 'Задание';
+  String get subjectDetailAssignment => 'Zadanie';
 
   @override
-  String get subjectDetailSubmit => 'Отправить';
+  String get subjectDetailSubmit => 'Otpravit';
 
   @override
-  String get subjectDetailSubmitted => 'Задание сдано!';
+  String get subjectDetailSubmitted => 'Zadanie sdano!';
 
   @override
-  String get subjectDetailNoStream => 'Пока нет объявлений';
+  String get subjectDetailNoStream => 'Poka net obyavleniy';
 
   @override
-  String get subjectDetailNoAssignments => 'Пока нет заданий';
+  String get subjectDetailNoAssignments => 'Poka net zadaniy';
 
   @override
-  String get subjectDetailNoMaterials => 'Пока нет материалов';
+  String get subjectDetailNoMaterials => 'Poka net materialov';
 
   @override
   String subjectDetailDueDate(String date) {
-    return 'Срок $date';
+    return 'Srok $date';
   }
 
   @override
   String subjectDetailPostedBy(String author) {
-    return 'Опубликовал(а) $author';
+    return 'Opublikoval(a) $author';
   }
 
   @override
-  String get subjectDetailViewMaterial => 'Просмотреть материал';
+  String get subjectDetailViewMaterial => 'Prosmotret material';
 
   @override
-  String get dashboardInProgress => 'В процессе';
+  String get dashboardInProgress => 'V protsesse';
 
   @override
-  String get dashboardUpNextLabel => 'Далее';
+  String get dashboardUpNextLabel => 'Dalee';
 
   @override
-  String get dashboardStarted => 'Началось';
+  String get dashboardStarted => 'Nachalos';
 
   @override
-  String get dashboardStartingNow => 'Начинается сейчас';
+  String get dashboardStartingNow => 'Nachinaetsya seychas';
 
   @override
   String dashboardInHoursMinutes(int hours, int minutes) {
-    return 'через $hoursч $minutesм';
+    return 'cherez ${hours}ch ${minutes}m';
   }
 
   @override
   String dashboardInMinutes(int minutes) {
-    return 'через $minutesм';
+    return 'cherez ${minutes}m';
   }
 
   @override
-  String get dashboardCancelled => 'Отменено';
+  String get dashboardCancelled => 'Otmeneno';
 
   @override
   String dashboardSubstitution(String teacher) {
-    return 'Замена: $teacher';
+    return 'Zamena: $teacher';
   }
 
   @override
-  String get dashboardAllDone => 'Все сделано на сегодня!';
+  String get dashboardAllDone => 'Vse sdelano na segodnya!';
 
   @override
-  String get dashboardNoMoreLessons => 'Больше нет запланированных уроков';
+  String get dashboardNoMoreLessons => 'Bolshe net zaplanirovannikh urokov';
 
   @override
-  String get dashboardNoClassesToday => 'Сегодня нет занятий';
+  String get dashboardNoClassesToday => 'Segodnya net zanyatiy';
 
   @override
-  String get dashboardEnjoyFreeDay => 'Наслаждайтесь свободным днем!';
+  String get dashboardEnjoyFreeDay => 'Naslazhsaytes svobodnim dnem!';
 
   @override
-  String get dashboardSub => 'ЗАМ';
+  String get dashboardSub => 'ZAM';
 
   @override
-  String get dashboardToday => 'Сегодня';
+  String get dashboardToday => 'Segodnya';
 
   @override
-  String get dashboardTomorrow => 'Завтра';
+  String get dashboardTomorrow => 'Zavtra';
 
   @override
-  String get dashboardLater => 'Позже';
+  String get dashboardLater => 'Pozzhe';
 
   @override
-  String get dashboardAllCaughtUp => 'Все выполнено!';
+  String get dashboardAllCaughtUp => 'Vse vipolneno!';
 
   @override
-  String get dashboardNoAssignmentsDue => 'Нет заданий с близким сроком';
+  String get dashboardNoAssignmentsDue => 'Net zadaniy s blizkim srokom';
 
   @override
-  String get dashboardSomethingWrong => 'Что-то пошло не так';
+  String get dashboardSomethingWrong => 'Chto-to poshlo ne tak';
 
   @override
-  String get dashboardStudent => 'Студент';
+  String get dashboardStudent => 'Student';
 
   @override
-  String get dashboardAnError => 'Произошла ошибка';
+  String get dashboardAnError => 'Proizoshla oshibka';
 
   @override
-  String get dashboardNoData => 'Данные недоступны';
+  String get dashboardNoData => 'Dannie nedostupni';
 
   @override
   String scheduleLessonCount(int count) {
-    return '$count урок';
+    return '$count urok';
   }
 
   @override
   String scheduleLessonsCount(int count) {
-    return '$count уроков';
+    return '$count urokov';
   }
 
   @override
-  String get scheduleWeekend => 'Выходные!';
+  String get scheduleWeekend => 'Vikhodnie!';
 
   @override
-  String get scheduleEnjoyTimeOff => 'Наслаждайтесь отдыхом!';
+  String get scheduleEnjoyTimeOff => 'Naslazhsaytes otdikhom!';
 
   @override
-  String get scheduleFreeDay => 'У вас свободный день. Время отдохнуть!';
+  String get scheduleFreeDay => 'U vas svobodniy den. Vremya otdokhnut!';
 
   @override
-  String get scheduleUnknown => 'Неизвестно';
+  String get scheduleUnknown => 'Neizvestno';
 
   @override
-  String get gradesNoGradesYet => 'Оценок пока нет';
+  String get gradesNoGradesYet => 'Otsenok poka net';
 
   @override
   String get gradesWillAppear =>
-      'Ваши оценки появятся здесь, когда они будут доступны.';
+      'Vashi otsenki poyavyatsya zdes, kogda oni budut dostupni.';
 
   @override
-  String get gradesFailedToLoad => 'Не удалось загрузить оценки';
+  String get gradesFailedToLoad => 'Ne udalos zagruzit otsenki';
 
   @override
-  String get gradesRetry => 'Повторить';
+  String get gradesRetry => 'Povtorit';
 
   @override
-  String get gradesExcellent => 'Отлично';
+  String get gradesExcellent => 'Otlichno';
 
   @override
-  String get gradesGood => 'Хорошо';
+  String get gradesGood => 'Khorosho';
 
   @override
-  String get gradesFair => 'Удовлетворительно';
+  String get gradesFair => 'Udovletvoritelno';
 
   @override
-  String get gradesNeedsWork => 'Требует улучшения';
+  String get gradesNeedsWork => 'Trebuet uluchsheniya';
 
   @override
   String gradesWeightLabel(String weight) {
-    return 'Вес $weight';
+    return 'Ves $weight';
   }
 
   @override
-  String get subjectStream => 'Лента';
+  String get subjectStream => 'Lenta';
 
   @override
-  String get subjectAssignments => 'Задания';
+  String get subjectAssignments => 'Zadaniya';
 
   @override
-  String get subjectMaterials => 'Материалы';
+  String get subjectMaterials => 'Materiali';
 
   @override
-  String get subjectNoPostsYet => 'Пока нет записей';
+  String get subjectNoPostsYet => 'Poka net zapisey';
 
   @override
   String get subjectPostsWillAppear =>
-      'Записи появятся здесь, когда учитель опубликует обновления';
+      'Zapisi poyavyatsya zdes, kogda uchitel opublikuet obnovleniya';
 
   @override
   String subjectTodayAt(String time) {
-    return 'Сегодня в $time';
+    return 'Segodnya v $time';
   }
 
   @override
   String subjectYesterdayAt(String time) {
-    return 'Вчера в $time';
+    return 'Vchera v $time';
   }
 
   @override
   String subjectDayAt(String day, String time) {
-    return '$day в $time';
+    return '$day v $time';
   }
 
   @override
-  String get subjectNoAssignments => 'Нет заданий';
+  String get subjectNoAssignments => 'Net zadaniy';
 
   @override
   String get subjectAssignmentsWillAppear =>
-      'Задания появятся здесь, когда учитель их опубликует';
+      'Zadaniya poyavyatsya zdes, kogda uchitel ikh opublikuet';
 
   @override
-  String get subjectDueToday => 'Срок сегодня';
+  String get subjectDueToday => 'Srok segodnya';
 
   @override
-  String get subjectDueTomorrow => 'Срок завтра';
+  String get subjectDueTomorrow => 'Srok zavtra';
 
   @override
   String subjectDueDate(String date) {
-    return 'Срок $date';
+    return 'Srok $date';
   }
 
   @override
-  String get subjectSubmitted => 'Задание сдано!';
+  String get subjectSubmitted => 'Zadanie sdano!';
 
   @override
-  String get subjectSubmit => 'Отправить';
+  String get subjectSubmit => 'Otpravit';
 
   @override
-  String get subjectNoMaterials => 'Нет материалов';
+  String get subjectNoMaterials => 'Net materialov';
 
   @override
   String get subjectMaterialsWillAppear =>
-      'Материалы курса появятся здесь, когда учитель их опубликует';
+      'Materiali kursa poyavyatsya zdes, kogda uchitel ikh opublikuet';
 
   @override
   String subjectOpening(String url) {
-    return 'Открываю: $url';
+    return 'Otkryivayu: $url';
   }
 
   @override
-  String get subjectFailedToLoad => 'Не удалось загрузить предмет';
+  String get subjectFailedToLoad => 'Ne udalos zagruzit predmet';
+
+  @override
+  String get accessDenied => 'Dostup zapreshchen';
+
+  @override
+  String get noSchoolAssigned => 'Shkola ne naznachena';
+
+  @override
+  String get schoolAdmin => 'Administratsiya shkoli';
+
+  @override
+  String get users => 'Polzovateli';
+
+  @override
+  String get classes => 'Klassi';
+
+  @override
+  String get subjects => 'Predmeti';
+
+  @override
+  String get inviteCodes => 'Kodi priglasheniya';
+
+  @override
+  String get schoolDetails => 'Svedeniya o shkole';
+
+  @override
+  String get principalDashboard => 'Panel direktora';
+
+  @override
+  String get deputyDashboard => 'Panel zamestitelya direktora';
+
+  @override
+  String get deputyPanel => 'Panel zamestitelya direktora';
+
+  @override
+  String get emailLabel => 'Elektronnaya pochta';
+
+  @override
+  String get passwordLabel => 'Parol';
+
+  @override
+  String get inviteCodeLabel => 'Kod priglasheniya';
+
+  @override
+  String get signIn => 'Voyti';
+
+  @override
+  String get signUp => 'Zaregistrirovatsya';
+
+  @override
+  String get register => 'Zaregistrirovatsya';
+
+  @override
+  String get registerWithInviteCode => 'Registratsiya s kodom priglasheniya';
+
+  @override
+  String get dontHaveAccount => 'Net akkaunata?';
+
+  @override
+  String get alreadyHaveAccount => 'Uzhe est akkaunt?';
+
+  @override
+  String get iDontHaveAccount => 'U menya net akkaunta';
+
+  @override
+  String get inviteCodeRequiredError =>
+      'Pozhaluysta, vvedite kod priglasheniya';
+
+  @override
+  String get inviteCodeTooShort =>
+      'Kod priglasheniya dolzhen soderzhat ne menee 6 simvolov';
+
+  @override
+  String get firstNameLabel => 'Imya';
+
+  @override
+  String get lastNameLabel => 'Familiya';
+
+  @override
+  String get confirmPasswordLabel => 'Podtverdit parol';
+
+  @override
+  String get pleaseConfirmPassword => 'Pozhaluysta, podtverdite parol';
+
+  @override
+  String get passwordsDoNotMatch => 'Paroli ne sovpadayut';
+
+  @override
+  String get firstNameRequired => 'Pozhaluysta, vvedite imya';
+
+  @override
+  String get firstNameTooShort => 'Imya dolzhno soderzhat ne menee 2 simvolov';
+
+  @override
+  String get lastNameRequired => 'Pozhaluysta, vvedite familiyu';
+
+  @override
+  String get lastNameTooShort =>
+      'Familiya dolzhna soderzhat ne menee 2 simvolov';
+
+  @override
+  String get enterYourEmail => 'Vvedite adres elektronnoy pochti';
+
+  @override
+  String get enterYourPassword => 'Vvedite parol';
+
+  @override
+  String get enterYourInviteCode => 'Vvedite kod priglasheniya';
+
+  @override
+  String get enterYourFirstName => 'Vvedite imya';
+
+  @override
+  String get enterYourLastName => 'Vvedite familiyu';
+
+  @override
+  String get reEnterPassword => 'Vvedite parol snova';
+
+  @override
+  String get welcomeToClassio => 'Dobro pozhalovat v Classio';
+
+  @override
+  String get joinClassio => 'Prisoedinitsya k Classio';
+
+  @override
+  String get createAccountToGetStarted => 'Sozdayte akkaunt, chtobi nachat';
+
+  @override
+  String get dismiss => 'Zakrit';
+
+  @override
+  String get resetPassword => 'Sbrosit parol';
+
+  @override
+  String get resetPasswordInstructions =>
+      'Vvedite adres elektronnoy pochti, i mi otpravim vam ssilku dlya sbrosa parolya.';
+
+  @override
+  String get sendResetLink => 'Otpravit ssilku';
+
+  @override
+  String get passwordResetLinkSent =>
+      'Ssilka otpravlena! Proverite pochtoviy yashchik.';
+
+  @override
+  String get failedToSendResetLink =>
+      'Ne udalos otpravit ssilku. Poprobuite snova.';
+
+  @override
+  String get noPermissionToAccessPage =>
+      'U vas net razresheniya na dostup k etoy stranitse.';
+
+  @override
+  String get notAssignedToSchool => 'Vi ne prikrepleni ni k kakoy shkole.';
+
+  @override
+  String get generateInvite => 'Sozdat priglashenie';
+
+  @override
+  String get createClass => 'Sozdat klass';
+
+  @override
+  String get overview => 'Obzor';
+
+  @override
+  String get schedule => 'Raspisanie';
+
+  @override
+  String get parents => 'Roditeli';
+
+  @override
+  String get staff => 'Personal';
+
+  @override
+  String get invites => 'Priglasheniya';
+
+  @override
+  String get scheduleWeekPrevious => 'Previous Week';
+
+  @override
+  String get scheduleWeekCurrent => 'This Week';
+
+  @override
+  String get scheduleWeekNext => 'Next Week';
+
+  @override
+  String get scheduleWeekAfterNext => 'Week After';
+
+  @override
+  String get scheduleWeekStable => 'Stable';
+
+  @override
+  String get scheduleLessonModified => 'Modified';
+
+  @override
+  String get scheduleLessonTime => 'Time';
+
+  @override
+  String get scheduleLessonRoom => 'Room';
+
+  @override
+  String get scheduleLessonDate => 'Date';
+
+  @override
+  String get scheduleLessonSubstitute => 'Substitute Teacher';
+
+  @override
+  String get scheduleLessonNote => 'Note';
+
+  @override
+  String get scheduleLessonChangesFromStable => 'Changes from Stable Timetable';
+
+  @override
+  String get scheduleLessonStableDescription =>
+      'This is a stable lesson that repeats every week';
+
+  @override
+  String get scheduleLessonSubject => 'Subject';
+
+  @override
+  String get scheduleLessonStartTime => 'Start Time';
+
+  @override
+  String get scheduleLessonEndTime => 'End Time';
+
+  @override
+  String get scheduleLessonTeacher => 'Teacher';
+
+  @override
+  String get scheduleLessonCancelled => 'Cancelled';
+
+  @override
+  String get scheduleLessonSubstitution => 'Substitution';
+
+  @override
+  String get close => 'Close';
 }

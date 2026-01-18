@@ -1027,6 +1027,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load subject'**
   String get subjectFailedToLoad;
+
+  /// Access denied message
+  ///
+  /// In en, this message translates to:
+  /// **'Access Denied'**
+  String get accessDenied;
+
+  /// Message when user has no school assigned
+  ///
+  /// In en, this message translates to:
+  /// **'No School Assigned'**
+  String get noSchoolAssigned;
+
+  /// School admin page title
+  ///
+  /// In en, this message translates to:
+  /// **'School Admin'**
+  String get schoolAdmin;
+
+  /// Users tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// Classes tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Classes'**
+  String get classes;
+
+  /// Subjects label
+  ///
+  /// In en, this message translates to:
+  /// **'Subjects'**
+  String get subjects;
+
+  /// Invite codes section label
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Codes'**
+  String get inviteCodes;
+
+  /// School details page title
+  ///
+  /// In en, this message translates to:
+  /// **'School Details'**
+  String get schoolDetails;
+
+  /// Principal dashboard page title
+  ///
+  /// In en, this message translates to:
+  /// **'Principal Dashboard'**
+  String get principalDashboard;
+
+  /// Deputy dashboard page title
+  ///
+  /// In en, this message translates to:
+  /// **'Deputy Dashboard'**
+  String get deputyDashboard;
+
+  /// Deputy panel page title
+  ///
+  /// In en, this message translates to:
+  /// **'Deputy Panel'**
+  String get deputyPanel;
+
+  /// Email field label
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// Password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// Invite code field label
+  ///
+  /// In en, this message translates to:
+  /// **'Invite Code'**
+  String get inviteCodeLabel;
+
+  /// Sign in button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get signIn;
+
+  /// Sign up button text
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get signUp;
+
+  /// Register button text
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// Registration with invite code heading
+  ///
+  /// In en, this message translates to:
+  /// **'Register with Invite Code'**
+  String get registerWithInviteCode;
+
+  /// Prompt for users without account
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get dontHaveAccount;
+
+  /// Prompt for users with account
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get alreadyHaveAccount;
+
+  /// Link text for users without account
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t have an account'**
+  String get iDontHaveAccount;
+
+  /// Validation error when invite code is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your invite code'**
+  String get inviteCodeRequiredError;
+
+  /// Validation error when invite code is too short
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code must be at least 6 characters'**
+  String get inviteCodeTooShort;
+
+  /// First name field label
+  ///
+  /// In en, this message translates to:
+  /// **'First Name'**
+  String get firstNameLabel;
+
+  /// Last name field label
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name'**
+  String get lastNameLabel;
+
+  /// Confirm password field label
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPasswordLabel;
+
+  /// Validation error when confirm password is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get pleaseConfirmPassword;
+
+  /// Validation error when passwords do not match
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// Validation error when first name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your first name'**
+  String get firstNameRequired;
+
+  /// Validation error when first name is too short
+  ///
+  /// In en, this message translates to:
+  /// **'First name must be at least 2 characters'**
+  String get firstNameTooShort;
+
+  /// Validation error when last name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your last name'**
+  String get lastNameRequired;
+
+  /// Validation error when last name is too short
+  ///
+  /// In en, this message translates to:
+  /// **'Last name must be at least 2 characters'**
+  String get lastNameTooShort;
+
+  /// Email hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address'**
+  String get enterYourEmail;
+
+  /// Password hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get enterYourPassword;
+
+  /// Invite code hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your invite code'**
+  String get enterYourInviteCode;
+
+  /// First name hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your first name'**
+  String get enterYourFirstName;
+
+  /// Last name hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your last name'**
+  String get enterYourLastName;
+
+  /// Confirm password hint text
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get reEnterPassword;
+
+  /// Welcome message on login page
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Classio'**
+  String get welcomeToClassio;
+
+  /// Join message on registration page
+  ///
+  /// In en, this message translates to:
+  /// **'Join Classio'**
+  String get joinClassio;
+
+  /// Subtitle on registration page
+  ///
+  /// In en, this message translates to:
+  /// **'Create your account to get started'**
+  String get createAccountToGetStarted;
+
+  /// Dismiss button text
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get dismiss;
+
+  /// Reset password dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// Reset password instructions
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email address and we\'ll send you a link to reset your password.'**
+  String get resetPasswordInstructions;
+
+  /// Send reset link button text
+  ///
+  /// In en, this message translates to:
+  /// **'Send Reset Link'**
+  String get sendResetLink;
+
+  /// Success message after sending reset link
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset link sent! Check your email inbox.'**
+  String get passwordResetLinkSent;
+
+  /// Error message when reset link fails to send
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send reset link. Please try again.'**
+  String get failedToSendResetLink;
+
+  /// Message when user lacks permission
+  ///
+  /// In en, this message translates to:
+  /// **'You do not have permission to access this page.'**
+  String get noPermissionToAccessPage;
+
+  /// Message when user is not assigned to a school
+  ///
+  /// In en, this message translates to:
+  /// **'You are not assigned to any school.'**
+  String get notAssignedToSchool;
+
+  /// Generate invite button label
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Invite'**
+  String get generateInvite;
+
+  /// Create class button label
+  ///
+  /// In en, this message translates to:
+  /// **'Create Class'**
+  String get createClass;
+
+  /// Overview tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get overview;
+
+  /// Schedule tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule'**
+  String get schedule;
+
+  /// Parents tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Parents'**
+  String get parents;
+
+  /// Staff tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Staff'**
+  String get staff;
+
+  /// Invites tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Invites'**
+  String get invites;
+
+  /// Previous week label for week selector
+  ///
+  /// In en, this message translates to:
+  /// **'Previous Week'**
+  String get scheduleWeekPrevious;
+
+  /// Current week label for week selector
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get scheduleWeekCurrent;
+
+  /// Next week label for week selector
+  ///
+  /// In en, this message translates to:
+  /// **'Next Week'**
+  String get scheduleWeekNext;
+
+  /// Week after next label for week selector
+  ///
+  /// In en, this message translates to:
+  /// **'Week After'**
+  String get scheduleWeekAfterNext;
+
+  /// Stable timetable label for week selector
+  ///
+  /// In en, this message translates to:
+  /// **'Stable'**
+  String get scheduleWeekStable;
+
+  /// Label indicating a lesson was modified from stable
+  ///
+  /// In en, this message translates to:
+  /// **'Modified'**
+  String get scheduleLessonModified;
+
+  /// Time label for lesson detail
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get scheduleLessonTime;
+
+  /// Room label for lesson detail
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get scheduleLessonRoom;
+
+  /// Date label for lesson detail
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get scheduleLessonDate;
+
+  /// Substitute teacher label for lesson detail
+  ///
+  /// In en, this message translates to:
+  /// **'Substitute Teacher'**
+  String get scheduleLessonSubstitute;
+
+  /// Note label for lesson detail
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get scheduleLessonNote;
+
+  /// Section header for changes from stable
+  ///
+  /// In en, this message translates to:
+  /// **'Changes from Stable Timetable'**
+  String get scheduleLessonChangesFromStable;
+
+  /// Description for stable lesson indicator
+  ///
+  /// In en, this message translates to:
+  /// **'This is a stable lesson that repeats every week'**
+  String get scheduleLessonStableDescription;
+
+  /// Subject label for changes
+  ///
+  /// In en, this message translates to:
+  /// **'Subject'**
+  String get scheduleLessonSubject;
+
+  /// Start time label for changes
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get scheduleLessonStartTime;
+
+  /// End time label for changes
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get scheduleLessonEndTime;
+
+  /// Teacher label for changes
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get scheduleLessonTeacher;
+
+  /// Cancelled status for lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get scheduleLessonCancelled;
+
+  /// Substitution status for lesson
+  ///
+  /// In en, this message translates to:
+  /// **'Substitution'**
+  String get scheduleLessonSubstitution;
+
+  /// Close button text
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
 }
 
 class _AppLocalizationsDelegate

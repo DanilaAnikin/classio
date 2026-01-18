@@ -16,6 +16,10 @@ enum LessonStatus {
 ///
 /// Contains information about when the lesson takes place, what subject it is,
 /// where it takes place, and any special status (cancelled, substitution).
+///
+/// Supports stable timetable functionality where lessons can be either:
+/// - Stable: baseline lessons that repeat every week
+/// - Week-specific: copies of stable lessons for a specific week that can be modified
 class Lesson {
   /// Creates a [Lesson] instance.
   const Lesson({
@@ -27,6 +31,11 @@ class Lesson {
     this.status = LessonStatus.normal,
     this.substituteTeacher,
     this.note,
+    this.isStable = false,
+    this.stableLessonId,
+    this.modifiedFromStable = false,
+    this.weekStartDate,
+    this.stableLesson,
   });
 
   /// Unique identifier for the lesson.
@@ -52,6 +61,21 @@ class Lesson {
 
   /// Optional note about the lesson.
   final String? note;
+
+  /// Whether this is a stable/baseline lesson that repeats weekly.
+  final bool isStable;
+
+  /// Reference to the original stable lesson if this is a week-specific copy.
+  final String? stableLessonId;
+
+  /// Whether this week-specific lesson differs from its stable version.
+  final bool modifiedFromStable;
+
+  /// The Monday of the week this lesson belongs to (null for stable lessons).
+  final DateTime? weekStartDate;
+
+  /// The original stable lesson for comparison (populated when needed).
+  final Lesson? stableLesson;
 
   /// Returns true if this lesson is currently in progress.
   bool get isInProgress {
@@ -80,6 +104,11 @@ class Lesson {
     LessonStatus? status,
     String? substituteTeacher,
     String? note,
+    bool? isStable,
+    String? stableLessonId,
+    bool? modifiedFromStable,
+    DateTime? weekStartDate,
+    Lesson? stableLesson,
   }) {
     return Lesson(
       id: id ?? this.id,
@@ -90,7 +119,51 @@ class Lesson {
       status: status ?? this.status,
       substituteTeacher: substituteTeacher ?? this.substituteTeacher,
       note: note ?? this.note,
+      isStable: isStable ?? this.isStable,
+      stableLessonId: stableLessonId ?? this.stableLessonId,
+      modifiedFromStable: modifiedFromStable ?? this.modifiedFromStable,
+      weekStartDate: weekStartDate ?? this.weekStartDate,
+      stableLesson: stableLesson ?? this.stableLesson,
     );
+  }
+
+  /// Returns the changes from the stable lesson, if any.
+  /// Returns a map of field names to (stable value, current value) pairs.
+  Map<String, (String, String)> getChangesFromStable() {
+    final changes = <String, (String, String)>{};
+
+    if (stableLesson == null || !modifiedFromStable) {
+      return changes;
+    }
+
+    if (subject.id != stableLesson!.subject.id) {
+      changes['subject'] = (stableLesson!.subject.name, subject.name);
+    }
+
+    if (room != stableLesson!.room) {
+      changes['room'] = (stableLesson!.room, room);
+    }
+
+    final stableStartStr = '${stableLesson!.startTime.hour}:${stableLesson!.startTime.minute.toString().padLeft(2, '0')}';
+    final currentStartStr = '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}';
+    if (stableStartStr != currentStartStr) {
+      changes['startTime'] = (stableStartStr, currentStartStr);
+    }
+
+    final stableEndStr = '${stableLesson!.endTime.hour}:${stableLesson!.endTime.minute.toString().padLeft(2, '0')}';
+    final currentEndStr = '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}';
+    if (stableEndStr != currentEndStr) {
+      changes['endTime'] = (stableEndStr, currentEndStr);
+    }
+
+    if (stableLesson!.subject.teacherName != subject.teacherName) {
+      changes['teacher'] = (
+        stableLesson!.subject.teacherName ?? 'N/A',
+        subject.teacherName ?? 'N/A',
+      );
+    }
+
+    return changes;
   }
 
   @override
@@ -105,7 +178,11 @@ class Lesson {
         other.room == room &&
         other.status == status &&
         other.substituteTeacher == substituteTeacher &&
-        other.note == note;
+        other.note == note &&
+        other.isStable == isStable &&
+        other.stableLessonId == stableLessonId &&
+        other.modifiedFromStable == modifiedFromStable &&
+        other.weekStartDate == weekStartDate;
   }
 
   @override
@@ -118,10 +195,15 @@ class Lesson {
         status,
         substituteTeacher,
         note,
+        isStable,
+        stableLessonId,
+        modifiedFromStable,
+        weekStartDate,
       );
 
   @override
   String toString() =>
       'Lesson(id: $id, subject: ${subject.name}, startTime: $startTime, '
-      'endTime: $endTime, room: $room, status: $status)';
+      'endTime: $endTime, room: $room, status: $status, isStable: $isStable, '
+      'modifiedFromStable: $modifiedFromStable)';
 }

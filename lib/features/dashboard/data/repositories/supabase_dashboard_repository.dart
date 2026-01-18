@@ -1,7 +1,30 @@
-import 'package:flutter/material.dart';
+import 'package:classio/core/utils/subject_colors.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/domain.dart';
+
+/// Safely parses a time string (HH:MM or HH:MM:SS) into a DateTime.
+/// Returns null if parsing fails.
+DateTime? _parseTimeString(String? timeStr, DateTime date) {
+  if (timeStr == null || timeStr.isEmpty) return null;
+
+  try {
+    final parts = timeStr.split(':');
+    if (parts.length < 2) return null;
+
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+
+    if (hour == null || minute == null) return null;
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+
+    return DateTime(date.year, date.month, date.day, hour, minute);
+  } catch (e) {
+    debugPrint('Failed to parse time string "$timeStr": $e');
+    return null;
+  }
+}
 
 /// Exception thrown when dashboard operations fail.
 class DashboardException implements Exception {
@@ -34,25 +57,6 @@ class SupabaseDashboardRepository implements DashboardRepository {
 
   /// Cache for the current user's class ID to avoid repeated queries.
   String? _cachedClassId;
-
-  /// Predefined colors for subjects based on hash of subject ID.
-  static const List<Color> _subjectColors = [
-    Colors.blue,
-    Colors.red,
-    Colors.green,
-    Colors.orange,
-    Colors.purple,
-    Colors.teal,
-    Colors.pink,
-    Colors.indigo,
-    Colors.amber,
-    Colors.cyan,
-    Colors.deepOrange,
-    Colors.lightBlue,
-    Colors.lime,
-    Colors.deepPurple,
-    Colors.brown,
-  ];
 
   /// Gets the current authenticated user's ID.
   String? get _currentUserId => _supabase.auth.currentUser?.id;
@@ -90,12 +94,6 @@ class SupabaseDashboardRepository implements DashboardRepository {
     }
   }
 
-  /// Generates a deterministic color for a subject based on its ID.
-  Color _getSubjectColor(String subjectId) {
-    final hash = subjectId.hashCode.abs();
-    return _subjectColors[hash % _subjectColors.length];
-  }
-
   /// Converts a weekday number (1=Monday to 7=Sunday) to the database
   /// day_of_week format (0=Sunday to 6=Saturday).
   int _dartWeekdayToDbDayOfWeek(int dartWeekday) {
@@ -107,36 +105,16 @@ class SupabaseDashboardRepository implements DashboardRepository {
     final subjectData = row['subjects'] as Map<String, dynamic>?;
     final teacherData = subjectData?['teacher'] as Map<String, dynamic>?;
 
-    // Parse start and end times from the database
+    // Parse start and end times from the database using safe parsing
     final startTimeStr = row['start_time'] as String?;
     final endTimeStr = row['end_time'] as String?;
 
-    DateTime startTime;
-    DateTime endTime;
+    // Default times if parsing fails
+    final defaultStart = DateTime(date.year, date.month, date.day, 8, 0);
+    final defaultEnd = DateTime(date.year, date.month, date.day, 8, 45);
 
-    if (startTimeStr != null && endTimeStr != null) {
-      final startParts = startTimeStr.split(':');
-      final endParts = endTimeStr.split(':');
-
-      startTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        int.parse(startParts[0]),
-        int.parse(startParts[1]),
-      );
-
-      endTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        int.parse(endParts[0]),
-        int.parse(endParts[1]),
-      );
-    } else {
-      startTime = DateTime(date.year, date.month, date.day, 8, 0);
-      endTime = DateTime(date.year, date.month, date.day, 8, 45);
-    }
+    final startTime = _parseTimeString(startTimeStr, date) ?? defaultStart;
+    final endTime = _parseTimeString(endTimeStr, date) ?? defaultEnd;
 
     // Build teacher name from profile data
     String? teacherName;
@@ -157,7 +135,7 @@ class SupabaseDashboardRepository implements DashboardRepository {
     final subject = Subject(
       id: subjectId,
       name: subjectName,
-      color: _getSubjectColor(subjectId),
+      color: SubjectColors.getColorForId(subjectId),
       teacherName: teacherName,
     );
 
@@ -193,7 +171,7 @@ class SupabaseDashboardRepository implements DashboardRepository {
     final subject = Subject(
       id: subjectId,
       name: subjectName,
-      color: _getSubjectColor(subjectId),
+      color: SubjectColors.getColorForId(subjectId),
       teacherName: teacherName,
     );
 
@@ -252,12 +230,25 @@ class SupabaseDashboardRepository implements DashboardRepository {
     final dbDayOfWeek = _dartWeekdayToDbDayOfWeek(now.weekday);
 
     try {
+      // First get subject IDs for this class, then query lessons
+      // (lessons don't have class_id - they link through subjects)
+      final subjectsResponse = await _supabase
+          .from('subjects')
+          .select('id')
+          .eq('class_id', classId);
+
+      final subjectIds =
+          subjectsResponse.map((s) => s['id'] as String).toList();
+
+      if (subjectIds.isEmpty) {
+        return [];
+      }
+
       final response = await _supabase
           .from('lessons')
           .select('''
             id,
             subject_id,
-            class_id,
             day_of_week,
             start_time,
             end_time,
@@ -271,7 +262,7 @@ class SupabaseDashboardRepository implements DashboardRepository {
               )
             )
           ''')
-          .eq('class_id', classId)
+          .inFilter('subject_id', subjectIds)
           .eq('day_of_week', dbDayOfWeek)
           .order('start_time', ascending: true);
 

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/utils/subject_colors.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/grades_repository.dart';
 
@@ -34,24 +34,6 @@ class SupabaseGradesRepository implements GradesRepository {
       : _supabase = supabaseClient ?? Supabase.instance.client;
 
   final SupabaseClient _supabase;
-
-  /// Default colors for subjects that don't have a specified color.
-  ///
-  /// Colors are assigned based on subject index for visual distinction.
-  static const List<Color> _subjectColors = [
-    Colors.blue,
-    Colors.orange,
-    Colors.green,
-    Colors.purple,
-    Colors.teal,
-    Colors.red,
-    Colors.indigo,
-    Colors.amber,
-    Colors.cyan,
-    Colors.pink,
-    Colors.lime,
-    Colors.brown,
-  ];
 
   /// Gets the current authenticated user's ID.
   ///
@@ -116,8 +98,8 @@ class SupabaseGradesRepository implements GradesRepository {
         // Calculate weighted average
         final average = _calculateWeightedAverage(grades);
 
-        // Assign color based on index
-        final color = _subjectColors[colorIndex % _subjectColors.length];
+        // Assign color based on index using SubjectColors utility
+        final color = SubjectColors.getColorForIndex(colorIndex);
         colorIndex++;
 
         subjectStats.add(SubjectGradeStats(
@@ -185,9 +167,8 @@ class SupabaseGradesRepository implements GradesRepository {
       // If no grades exist for this subject, return stats with empty grades
       final average = _calculateWeightedAverage(grades);
 
-      // Get a consistent color for this subject based on its ID
-      final colorIndex = subjectId.hashCode.abs() % _subjectColors.length;
-      final color = _subjectColors[colorIndex];
+      // Get a consistent color for this subject based on its ID using SubjectColors utility
+      final color = SubjectColors.getColorForId(subjectId);
 
       return SubjectGradeStats(
         subjectId: subjectId,

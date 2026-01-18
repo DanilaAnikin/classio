@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/routes.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../auth/auth.dart';
@@ -124,21 +126,8 @@ class TeacherDashboardPage extends ConsumerWidget {
   }
 
   void _onSubjectTapped(BuildContext context, TeacherSubject subject) {
-    // TODO: Navigate to TeacherSubjectDetailPage when created
-    // For now, show a snackbar indicating the navigation
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Opening "${subject.name}" in Teacher Mode...'),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-
-    // Placeholder navigation - uncomment when TeacherSubjectDetailPage is created:
-    // context.push('/teacher/subject/${subject.id}');
+    // Navigate to the teacher subject detail page (uses shared SubjectDetailPage)
+    context.push(AppRoutes.getTeacherSubjectDetail(subject.id));
   }
 
   Widget _buildEmptyState(ThemeData theme, bool isPlayful) {
@@ -356,8 +345,8 @@ class _SubjectCard extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  subject.color.withValues(alpha: 0.12),
-                  subject.color.withValues(alpha: 0.04),
+                  Color(subject.color).withValues(alpha: 0.12),
+                  Color(subject.color).withValues(alpha: 0.04),
                 ],
               )
             : null,
@@ -371,7 +360,7 @@ class _SubjectCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isPlayful
-                ? subject.color.withValues(alpha: 0.2)
+                ? Color(subject.color).withValues(alpha: 0.2)
                 : Colors.black.withValues(alpha: 0.03),
             blurRadius: isPlayful ? 12 : 6,
             offset: Offset(0, isPlayful ? 4 : 2),
@@ -390,12 +379,12 @@ class _SubjectCard extends StatelessWidget {
                 width: isPlayful ? 12 : 10,
                 height: isPlayful ? 60 : 50,
                 decoration: BoxDecoration(
-                  color: subject.color,
+                  color: Color(subject.color),
                   borderRadius: BorderRadius.circular(isPlayful ? 6 : 4),
                   boxShadow: isPlayful
                       ? [
                           BoxShadow(
-                            color: subject.color.withValues(alpha: 0.4),
+                            color: Color(subject.color).withValues(alpha: 0.4),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),

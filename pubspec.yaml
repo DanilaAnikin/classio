@@ -65,6 +65,9 @@ dependencies:
   # File picking
   file_picker: ^8.0.0
 
+  # UUID generation
+  uuid: ^4.3.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -93,9 +96,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
+  # Assets for Flutter Web (required for dotenv to load .env file)
   assets:
-    - .env
+    - assets/.env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

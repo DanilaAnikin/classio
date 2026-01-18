@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/router/routes.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/admin_providers.dart';
@@ -324,16 +326,7 @@ class _SchoolCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return InkWell(
-      onTap: () {
-        // TODO: Navigate to school details page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Tapped on ${school.name}'),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      },
+      onTap: () => context.push(AppRoutes.getSuperadminSchoolDetail(school.id)),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(18),

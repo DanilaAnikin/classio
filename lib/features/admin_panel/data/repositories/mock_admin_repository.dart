@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
-
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../dashboard/domain/entities/subject.dart';
 import '../../domain/entities/entities.dart';
@@ -181,31 +179,31 @@ class MockAdminRepository implements AdminRepository {
       const Subject(
         id: 'subject-1',
         name: 'Mathematics',
-        color: Colors.blue,
+        color: 0xFF2196F3, // Blue
         teacherName: 'Emily Johnson',
       ),
       const Subject(
         id: 'subject-2',
         name: 'Physics',
-        color: Colors.orange,
+        color: 0xFFFF5722, // Deep Orange
         teacherName: 'Emily Johnson',
       ),
       const Subject(
         id: 'subject-3',
         name: 'Chemistry',
-        color: Colors.green,
+        color: 0xFF4CAF50, // Green
         teacherName: 'Michael Brown',
       ),
       const Subject(
         id: 'subject-4',
         name: 'Biology',
-        color: Colors.teal,
+        color: 0xFF009688, // Teal
         teacherName: 'Michael Brown',
       ),
       const Subject(
         id: 'subject-5',
         name: 'English Literature',
-        color: Colors.purple,
+        color: 0xFF9C27B0, // Purple
         teacherName: 'Jennifer Wilson',
       ),
     ];
@@ -324,7 +322,7 @@ class MockAdminRepository implements AdminRepository {
   }) async {
     await Future.delayed(const Duration(milliseconds: 300));
 
-    final code = _generateRandomCode(8);
+    final code = _generateRandomCode(16);
     final newInviteCode = InviteCode(
       id: 'invite-${_inviteCodes.length + 1}',
       code: code,
@@ -410,10 +408,11 @@ class MockAdminRepository implements AdminRepository {
     return updatedUser;
   }
 
-  /// Generates a random alphanumeric code of the specified length.
+  /// Generates a cryptographically secure random alphanumeric code of the specified length.
+  /// Uses 62 characters (uppercase, lowercase, digits) for maximum entropy.
   String _generateRandomCode(int length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random();
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    final random = Random.secure();
     return List.generate(length, (_) => chars[random.nextInt(chars.length)])
         .join();
   }

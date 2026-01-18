@@ -36,9 +36,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
--- 1. SCHOOL: Gymnazium Budoucnost
+-- 1. SCHOOLS
 -- =====================================================
 
+-- System School (Fallback) - ensures trigger fallback logic always has a school
+INSERT INTO schools (id, name, created_at)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'System School (Fallback)',
+  now()
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Gymnazium Budoucnost
 INSERT INTO schools (id, name, created_at)
 VALUES (
   'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
@@ -189,6 +199,145 @@ VALUES (
   now()
 )
 ON CONFLICT (code) DO NOTHING;
+
+-- ===========================================
+-- ADMIN INVITE CODES
+-- ===========================================
+
+-- SuperAdmin invite code (no school assignment needed)
+INSERT INTO invite_codes (
+  id,
+  code,
+  role,
+  school_id,
+  class_id,
+  usage_limit,
+  times_used,
+  is_active,
+  expires_at,
+  created_at
+) VALUES (
+  'd1eebc99-9c0b-4ef8-bb6d-6bb9bd380a44',
+  'SUPERADMIN-START',
+  'superadmin',
+  NULL,  -- Superadmins don't belong to a specific school
+  NULL,
+  10,
+  0,
+  true,
+  now() + interval '1 year',
+  now()
+) ON CONFLICT (code) DO UPDATE SET
+  is_active = true,
+  expires_at = now() + interval '1 year';
+
+-- BigAdmin (Principal) invite code for Gymnazium Budoucnost
+INSERT INTO invite_codes (
+  id,
+  code,
+  role,
+  school_id,
+  class_id,
+  usage_limit,
+  times_used,
+  is_active,
+  expires_at,
+  created_at
+) VALUES (
+  'd2eebc99-9c0b-4ef8-bb6d-6bb9bd380a55',
+  'BIGADMIN-START',
+  'bigadmin',
+  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',  -- Gymnazium Budoucnost
+  NULL,
+  5,
+  0,
+  true,
+  now() + interval '1 year',
+  now()
+) ON CONFLICT (code) DO UPDATE SET
+  is_active = true,
+  expires_at = now() + interval '1 year';
+
+-- Admin (School IT) invite code for Gymnazium Budoucnost
+INSERT INTO invite_codes (
+  id,
+  code,
+  role,
+  school_id,
+  class_id,
+  usage_limit,
+  times_used,
+  is_active,
+  expires_at,
+  created_at
+) VALUES (
+  'd3eebc99-9c0b-4ef8-bb6d-6bb9bd380a66',
+  'ADMIN-START',
+  'admin',
+  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',  -- Gymnazium Budoucnost
+  NULL,
+  10,
+  0,
+  true,
+  now() + interval '1 year',
+  now()
+) ON CONFLICT (code) DO UPDATE SET
+  is_active = true,
+  expires_at = now() + interval '1 year';
+
+-- Teacher invite code for Gymnazium Budoucnost
+INSERT INTO invite_codes (
+  id,
+  code,
+  role,
+  school_id,
+  class_id,
+  usage_limit,
+  times_used,
+  is_active,
+  expires_at,
+  created_at
+) VALUES (
+  'd4eebc99-9c0b-4ef8-bb6d-6bb9bd380a77',
+  'TEACHER-START',
+  'teacher',
+  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',  -- Gymnazium Budoucnost
+  NULL,
+  50,
+  0,
+  true,
+  now() + interval '1 year',
+  now()
+) ON CONFLICT (code) DO UPDATE SET
+  is_active = true,
+  expires_at = now() + interval '1 year';
+
+-- Parent invite code for Gymnazium Budoucnost
+INSERT INTO invite_codes (
+  id,
+  code,
+  role,
+  school_id,
+  class_id,
+  usage_limit,
+  times_used,
+  is_active,
+  expires_at,
+  created_at
+) VALUES (
+  'd5eebc99-9c0b-4ef8-bb6d-6bb9bd380a88',
+  'PARENT-START',
+  'parent',
+  'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',  -- Gymnazium Budoucnost
+  NULL,
+  100,
+  0,
+  true,
+  now() + interval '1 year',
+  now()
+) ON CONFLICT (code) DO UPDATE SET
+  is_active = true,
+  expires_at = now() + interval '1 year';
 
 -- =====================================================
 -- 6. LESSONS - FULL WEEKLY SCHEDULE (Mon-Fri)

@@ -135,7 +135,7 @@ class SupabaseSubjectDetailRepository implements SubjectDetailRepository {
       final subject = Subject(
         id: subjectId,
         name: subjectName,
-        color: _getSubjectColor(subjectName),
+        color: _getSubjectColor(subjectName).toARGB32(),
         teacherName: teacherName,
       );
 

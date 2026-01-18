@@ -37,7 +37,7 @@ class ProfilePage extends ConsumerWidget {
             // User Info Section (if available)
             if (currentUser != null) ...[
               _UserInfoCard(
-                email: currentUser.email,
+                email: currentUser.email ?? '',
                 isPlayful: isPlayful,
               ),
               const SizedBox(height: 24),

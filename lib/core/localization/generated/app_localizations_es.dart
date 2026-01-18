@@ -89,157 +89,158 @@ class AppLocalizationsEs extends AppLocalizations {
   String get loggingIn => 'Iniciando sesion...';
 
   @override
-  String get dashboardGreetingMorning => 'Good Morning';
+  String get dashboardGreetingMorning => 'Buenos dias';
 
   @override
-  String get dashboardGreetingAfternoon => 'Good Afternoon';
+  String get dashboardGreetingAfternoon => 'Buenas tardes';
 
   @override
-  String get dashboardGreetingEvening => 'Good Evening';
+  String get dashboardGreetingEvening => 'Buenas noches';
 
   @override
-  String get dashboardUpNext => 'Up Next';
+  String get dashboardUpNext => 'A continuacion';
 
   @override
-  String get dashboardTodaySchedule => 'Today\'s Schedule';
+  String get dashboardTodaySchedule => 'Horario de hoy';
 
   @override
-  String get dashboardDueSoon => 'Due Soon';
+  String get dashboardDueSoon => 'Proximas entregas';
 
   @override
-  String get lessonCancelled => 'Cancelled';
+  String get lessonCancelled => 'Cancelada';
 
   @override
-  String get lessonSubstitution => 'Substitution';
+  String get lessonSubstitution => 'Sustitucion';
 
   @override
-  String get lessonInProgress => 'In Progress';
+  String get lessonInProgress => 'En curso';
 
   @override
   String lessonUpcoming(int minutes) {
-    return 'Starting in $minutes min';
+    return 'Comienza en $minutes min';
   }
 
   @override
   String lessonRoom(String room) {
-    return 'Room $room';
+    return 'Aula $room';
   }
 
   @override
-  String get assignmentDueToday => 'Due Today';
+  String get assignmentDueToday => 'Entrega hoy';
 
   @override
-  String get assignmentDueTomorrow => 'Due Tomorrow';
+  String get assignmentDueTomorrow => 'Entrega manana';
 
   @override
   String assignmentDueIn(int days) {
-    return 'Due in $days days';
+    return 'Entrega en $days dias';
   }
 
   @override
-  String get assignmentCompleted => 'Completed';
+  String get assignmentCompleted => 'Completada';
 
   @override
-  String get assignmentOverdue => 'Overdue';
+  String get assignmentOverdue => 'Atrasada';
 
   @override
-  String get noLessonsToday => 'No lessons today';
+  String get noLessonsToday => 'No hay clases hoy';
 
   @override
-  String get noUpcomingAssignments => 'No upcoming assignments';
+  String get noUpcomingAssignments => 'No hay tareas pendientes';
 
   @override
-  String get allDoneForToday => 'All done for today!';
+  String get allDoneForToday => 'Todo listo por hoy!';
 
   @override
-  String get freeTime => 'Free Time';
+  String get freeTime => 'Tiempo libre';
 
   @override
-  String get dashboardLoading => 'Loading your dashboard...';
+  String get dashboardLoading => 'Cargando tu panel...';
 
   @override
-  String get dashboardError => 'Something went wrong';
+  String get dashboardError => 'Algo salio mal';
 
   @override
-  String get dashboardRetry => 'Retry';
+  String get dashboardRetry => 'Reintentar';
 
   @override
-  String get navHome => 'Home';
+  String get navHome => 'Inicio';
 
   @override
-  String get navSchedule => 'Schedule';
+  String get navSchedule => 'Horario';
 
   @override
-  String get navGrades => 'Grades';
+  String get navGrades => 'Calificaciones';
 
   @override
-  String get navProfile => 'Profile';
+  String get navProfile => 'Perfil';
 
   @override
-  String get scheduleTitle => 'Weekly Schedule';
+  String get scheduleTitle => 'Horario semanal';
 
   @override
-  String get scheduleMonday => 'Mon';
+  String get scheduleMonday => 'Lun';
 
   @override
-  String get scheduleTuesday => 'Tue';
+  String get scheduleTuesday => 'Mar';
 
   @override
-  String get scheduleWednesday => 'Wed';
+  String get scheduleWednesday => 'Mie';
 
   @override
-  String get scheduleThursday => 'Thu';
+  String get scheduleThursday => 'Jue';
 
   @override
-  String get scheduleFriday => 'Fri';
+  String get scheduleFriday => 'Vie';
 
   @override
-  String get scheduleSaturday => 'Sat';
+  String get scheduleSaturday => 'Sab';
 
   @override
-  String get scheduleSunday => 'Sun';
+  String get scheduleSunday => 'Dom';
 
   @override
-  String get scheduleMondayFull => 'Monday';
+  String get scheduleMondayFull => 'Lunes';
 
   @override
-  String get scheduleTuesdayFull => 'Tuesday';
+  String get scheduleTuesdayFull => 'Martes';
 
   @override
-  String get scheduleWednesdayFull => 'Wednesday';
+  String get scheduleWednesdayFull => 'Miercoles';
 
   @override
-  String get scheduleThursdayFull => 'Thursday';
+  String get scheduleThursdayFull => 'Jueves';
 
   @override
-  String get scheduleFridayFull => 'Friday';
+  String get scheduleFridayFull => 'Viernes';
 
   @override
-  String get scheduleNoLessons => 'No lessons scheduled';
+  String get scheduleNoLessons => 'Sin clases programadas';
 
   @override
-  String get scheduleBreak => 'Break';
+  String get scheduleBreak => 'Descanso';
 
   @override
   String get gradesTitle => 'Calificaciones';
 
   @override
-  String get gradesComingSoon => 'Grades coming soon';
+  String get gradesComingSoon => 'Calificaciones proximamente';
 
   @override
-  String get profileTitle => 'Profile';
+  String get profileTitle => 'Perfil';
 
   @override
-  String get profileThemeSection => 'Appearance';
+  String get profileThemeSection => 'Apariencia';
 
   @override
-  String get profileLanguageSection => 'Language';
+  String get profileLanguageSection => 'Idioma';
 
   @override
-  String get profileLogout => 'Log out';
+  String get profileLogout => 'Cerrar sesion';
 
   @override
-  String get profileLogoutConfirm => 'Are you sure you want to log out?';
+  String get profileLogoutConfirm =>
+      'Estas seguro de que quieres cerrar sesion?';
 
   @override
   String get gradesAverage => 'Promedio';
@@ -262,249 +263,485 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get subjectDetailStream => 'Stream';
+  String get subjectDetailStream => 'Novedades';
 
   @override
   String get subjectDetailStreamDescription =>
-      'Class announcements and updates';
+      'Anuncios y actualizaciones de la clase';
 
   @override
-  String get subjectDetailAssignments => 'Assignments';
+  String get subjectDetailAssignments => 'Tareas';
 
   @override
-  String get subjectDetailAssignmentsDescription => 'Your tasks and homework';
+  String get subjectDetailAssignmentsDescription => 'Tus tareas y deberes';
 
   @override
-  String get subjectDetailMaterials => 'Materials';
+  String get subjectDetailMaterials => 'Materiales';
 
   @override
-  String get subjectDetailMaterialsDescription => 'Course resources and files';
+  String get subjectDetailMaterialsDescription =>
+      'Recursos y archivos del curso';
 
   @override
-  String get subjectDetailAnnouncement => 'Announcement';
+  String get subjectDetailAnnouncement => 'Anuncio';
 
   @override
-  String get subjectDetailAssignment => 'Assignment';
+  String get subjectDetailAssignment => 'Tarea';
 
   @override
-  String get subjectDetailSubmit => 'Submit';
+  String get subjectDetailSubmit => 'Entregar';
 
   @override
-  String get subjectDetailSubmitted => 'Assignment Submitted!';
+  String get subjectDetailSubmitted => 'Tarea entregada!';
 
   @override
-  String get subjectDetailNoStream => 'No announcements yet';
+  String get subjectDetailNoStream => 'Sin anuncios todavia';
 
   @override
-  String get subjectDetailNoAssignments => 'No assignments yet';
+  String get subjectDetailNoAssignments => 'Sin tareas todavia';
 
   @override
-  String get subjectDetailNoMaterials => 'No materials yet';
+  String get subjectDetailNoMaterials => 'Sin materiales todavia';
 
   @override
   String subjectDetailDueDate(String date) {
-    return 'Due $date';
+    return 'Fecha limite $date';
   }
 
   @override
   String subjectDetailPostedBy(String author) {
-    return 'Posted by $author';
+    return 'Publicado por $author';
   }
 
   @override
-  String get subjectDetailViewMaterial => 'View Material';
+  String get subjectDetailViewMaterial => 'Ver material';
 
   @override
-  String get dashboardInProgress => 'In Progress';
+  String get dashboardInProgress => 'En curso';
 
   @override
-  String get dashboardUpNextLabel => 'Up Next';
+  String get dashboardUpNextLabel => 'A continuacion';
 
   @override
-  String get dashboardStarted => 'Started';
+  String get dashboardStarted => 'Iniciada';
 
   @override
-  String get dashboardStartingNow => 'Starting now';
+  String get dashboardStartingNow => 'Comenzando ahora';
 
   @override
   String dashboardInHoursMinutes(int hours, int minutes) {
-    return 'in ${hours}h ${minutes}m';
+    return 'en ${hours}h ${minutes}m';
   }
 
   @override
   String dashboardInMinutes(int minutes) {
-    return 'in ${minutes}m';
+    return 'en ${minutes}m';
   }
 
   @override
-  String get dashboardCancelled => 'Cancelled';
+  String get dashboardCancelled => 'Cancelada';
 
   @override
   String dashboardSubstitution(String teacher) {
-    return 'Substitution: $teacher';
+    return 'Sustitucion: $teacher';
   }
 
   @override
-  String get dashboardAllDone => 'All done for today!';
+  String get dashboardAllDone => 'Todo listo por hoy!';
 
   @override
-  String get dashboardNoMoreLessons => 'No more lessons scheduled';
+  String get dashboardNoMoreLessons => 'No hay mas clases programadas';
 
   @override
-  String get dashboardNoClassesToday => 'No classes today';
+  String get dashboardNoClassesToday => 'No hay clases hoy';
 
   @override
-  String get dashboardEnjoyFreeDay => 'Enjoy your free day!';
+  String get dashboardEnjoyFreeDay => 'Disfruta tu dia libre!';
 
   @override
-  String get dashboardSub => 'SUB';
+  String get dashboardSub => 'SUST';
 
   @override
-  String get dashboardToday => 'Today';
+  String get dashboardToday => 'Hoy';
 
   @override
-  String get dashboardTomorrow => 'Tomorrow';
+  String get dashboardTomorrow => 'Manana';
 
   @override
-  String get dashboardLater => 'Later';
+  String get dashboardLater => 'Mas tarde';
 
   @override
-  String get dashboardAllCaughtUp => 'All caught up!';
+  String get dashboardAllCaughtUp => 'Todo al dia!';
 
   @override
-  String get dashboardNoAssignmentsDue => 'No assignments due soon';
+  String get dashboardNoAssignmentsDue => 'Sin tareas proximas';
 
   @override
-  String get dashboardSomethingWrong => 'Something went wrong';
+  String get dashboardSomethingWrong => 'Algo salio mal';
 
   @override
-  String get dashboardStudent => 'Student';
+  String get dashboardStudent => 'Estudiante';
 
   @override
-  String get dashboardAnError => 'An error occurred';
+  String get dashboardAnError => 'Ocurrio un error';
 
   @override
-  String get dashboardNoData => 'No data available';
+  String get dashboardNoData => 'Sin datos disponibles';
 
   @override
   String scheduleLessonCount(int count) {
-    return '$count lesson';
+    return '$count clase';
   }
 
   @override
   String scheduleLessonsCount(int count) {
-    return '$count lessons';
+    return '$count clases';
   }
 
   @override
-  String get scheduleWeekend => 'Weekend!';
+  String get scheduleWeekend => 'Fin de semana!';
 
   @override
-  String get scheduleEnjoyTimeOff => 'Enjoy your time off!';
+  String get scheduleEnjoyTimeOff => 'Disfruta tu tiempo libre!';
 
   @override
-  String get scheduleFreeDay => 'You have a free day. Time to relax!';
+  String get scheduleFreeDay => 'Tienes un dia libre. Hora de relajarse!';
 
   @override
-  String get scheduleUnknown => 'Unknown';
+  String get scheduleUnknown => 'Desconocido';
 
   @override
-  String get gradesNoGradesYet => 'No grades yet';
+  String get gradesNoGradesYet => 'Sin calificaciones todavia';
 
   @override
   String get gradesWillAppear =>
-      'Your grades will appear here once they are available.';
+      'Tus calificaciones apareceran aqui cuando esten disponibles.';
 
   @override
-  String get gradesFailedToLoad => 'Failed to load grades';
+  String get gradesFailedToLoad => 'Error al cargar calificaciones';
 
   @override
-  String get gradesRetry => 'Retry';
+  String get gradesRetry => 'Reintentar';
 
   @override
-  String get gradesExcellent => 'Excellent';
+  String get gradesExcellent => 'Excelente';
 
   @override
-  String get gradesGood => 'Good';
+  String get gradesGood => 'Bueno';
 
   @override
-  String get gradesFair => 'Fair';
+  String get gradesFair => 'Regular';
 
   @override
-  String get gradesNeedsWork => 'Needs Work';
+  String get gradesNeedsWork => 'Necesita mejorar';
 
   @override
   String gradesWeightLabel(String weight) {
-    return 'Weight $weight';
+    return 'Peso $weight';
   }
 
   @override
-  String get subjectStream => 'Stream';
+  String get subjectStream => 'Novedades';
 
   @override
-  String get subjectAssignments => 'Assignments';
+  String get subjectAssignments => 'Tareas';
 
   @override
-  String get subjectMaterials => 'Materials';
+  String get subjectMaterials => 'Materiales';
 
   @override
-  String get subjectNoPostsYet => 'No posts yet';
+  String get subjectNoPostsYet => 'Sin publicaciones todavia';
 
   @override
   String get subjectPostsWillAppear =>
-      'Posts will appear here when your teacher shares updates';
+      'Las publicaciones apareceran aqui cuando tu profesor comparta actualizaciones';
 
   @override
   String subjectTodayAt(String time) {
-    return 'Today at $time';
+    return 'Hoy a las $time';
   }
 
   @override
   String subjectYesterdayAt(String time) {
-    return 'Yesterday at $time';
+    return 'Ayer a las $time';
   }
 
   @override
   String subjectDayAt(String day, String time) {
-    return '$day at $time';
+    return '$day a las $time';
   }
 
   @override
-  String get subjectNoAssignments => 'No assignments';
+  String get subjectNoAssignments => 'Sin tareas';
 
   @override
   String get subjectAssignmentsWillAppear =>
-      'Assignments will appear here when your teacher posts them';
+      'Las tareas apareceran aqui cuando tu profesor las publique';
 
   @override
-  String get subjectDueToday => 'Due today';
+  String get subjectDueToday => 'Entrega hoy';
 
   @override
-  String get subjectDueTomorrow => 'Due tomorrow';
+  String get subjectDueTomorrow => 'Entrega manana';
 
   @override
   String subjectDueDate(String date) {
-    return 'Due $date';
+    return 'Fecha limite $date';
   }
 
   @override
-  String get subjectSubmitted => 'Assignment Submitted!';
+  String get subjectSubmitted => 'Tarea entregada!';
 
   @override
-  String get subjectSubmit => 'Submit';
+  String get subjectSubmit => 'Entregar';
 
   @override
-  String get subjectNoMaterials => 'No materials';
+  String get subjectNoMaterials => 'Sin materiales';
 
   @override
   String get subjectMaterialsWillAppear =>
-      'Course materials will appear here when your teacher shares them';
+      'Los materiales del curso apareceran aqui cuando tu profesor los comparta';
 
   @override
   String subjectOpening(String url) {
-    return 'Opening: $url';
+    return 'Abriendo: $url';
   }
 
   @override
-  String get subjectFailedToLoad => 'Failed to load subject';
+  String get subjectFailedToLoad => 'Error al cargar la materia';
+
+  @override
+  String get accessDenied => 'Acceso denegado';
+
+  @override
+  String get noSchoolAssigned => 'Sin escuela asignada';
+
+  @override
+  String get schoolAdmin => 'Administrador escolar';
+
+  @override
+  String get users => 'Usuarios';
+
+  @override
+  String get classes => 'Clases';
+
+  @override
+  String get subjects => 'Materias';
+
+  @override
+  String get inviteCodes => 'Codigos de invitacion';
+
+  @override
+  String get schoolDetails => 'Detalles de la escuela';
+
+  @override
+  String get principalDashboard => 'Panel del director';
+
+  @override
+  String get deputyDashboard => 'Panel del subdirector';
+
+  @override
+  String get deputyPanel => 'Panel del subdirector';
+
+  @override
+  String get emailLabel => 'Correo electronico';
+
+  @override
+  String get passwordLabel => 'Contrasena';
+
+  @override
+  String get inviteCodeLabel => 'Codigo de invitacion';
+
+  @override
+  String get signIn => 'Iniciar sesion';
+
+  @override
+  String get signUp => 'Registrarse';
+
+  @override
+  String get register => 'Registrar';
+
+  @override
+  String get registerWithInviteCode => 'Registrarse con codigo de invitacion';
+
+  @override
+  String get dontHaveAccount => 'No tienes cuenta?';
+
+  @override
+  String get alreadyHaveAccount => 'Ya tienes cuenta?';
+
+  @override
+  String get iDontHaveAccount => 'No tengo cuenta';
+
+  @override
+  String get inviteCodeRequiredError =>
+      'Por favor ingresa tu codigo de invitacion';
+
+  @override
+  String get inviteCodeTooShort =>
+      'El codigo de invitacion debe tener al menos 6 caracteres';
+
+  @override
+  String get firstNameLabel => 'Nombre';
+
+  @override
+  String get lastNameLabel => 'Apellido';
+
+  @override
+  String get confirmPasswordLabel => 'Confirmar contrasena';
+
+  @override
+  String get pleaseConfirmPassword => 'Por favor confirma tu contrasena';
+
+  @override
+  String get passwordsDoNotMatch => 'Las contrasenas no coinciden';
+
+  @override
+  String get firstNameRequired => 'Por favor ingresa tu nombre';
+
+  @override
+  String get firstNameTooShort => 'El nombre debe tener al menos 2 caracteres';
+
+  @override
+  String get lastNameRequired => 'Por favor ingresa tu apellido';
+
+  @override
+  String get lastNameTooShort => 'El apellido debe tener al menos 2 caracteres';
+
+  @override
+  String get enterYourEmail => 'Ingresa tu correo electronico';
+
+  @override
+  String get enterYourPassword => 'Ingresa tu contrasena';
+
+  @override
+  String get enterYourInviteCode => 'Ingresa tu codigo de invitacion';
+
+  @override
+  String get enterYourFirstName => 'Ingresa tu nombre';
+
+  @override
+  String get enterYourLastName => 'Ingresa tu apellido';
+
+  @override
+  String get reEnterPassword => 'Vuelve a ingresar tu contrasena';
+
+  @override
+  String get welcomeToClassio => 'Bienvenido a Classio';
+
+  @override
+  String get joinClassio => 'Unete a Classio';
+
+  @override
+  String get createAccountToGetStarted => 'Crea tu cuenta para comenzar';
+
+  @override
+  String get dismiss => 'Cerrar';
+
+  @override
+  String get resetPassword => 'Restablecer contrasena';
+
+  @override
+  String get resetPasswordInstructions =>
+      'Ingresa tu correo electronico y te enviaremos un enlace para restablecer tu contrasena.';
+
+  @override
+  String get sendResetLink => 'Enviar enlace';
+
+  @override
+  String get passwordResetLinkSent =>
+      'Enlace enviado! Revisa tu bandeja de entrada.';
+
+  @override
+  String get failedToSendResetLink =>
+      'Error al enviar el enlace. Por favor intenta de nuevo.';
+
+  @override
+  String get noPermissionToAccessPage =>
+      'No tienes permiso para acceder a esta pagina.';
+
+  @override
+  String get notAssignedToSchool => 'No estas asignado a ninguna escuela.';
+
+  @override
+  String get generateInvite => 'Generar invitacion';
+
+  @override
+  String get createClass => 'Crear clase';
+
+  @override
+  String get overview => 'Resumen';
+
+  @override
+  String get schedule => 'Horario';
+
+  @override
+  String get parents => 'Padres';
+
+  @override
+  String get staff => 'Personal';
+
+  @override
+  String get invites => 'Invitaciones';
+
+  @override
+  String get scheduleWeekPrevious => 'Previous Week';
+
+  @override
+  String get scheduleWeekCurrent => 'This Week';
+
+  @override
+  String get scheduleWeekNext => 'Next Week';
+
+  @override
+  String get scheduleWeekAfterNext => 'Week After';
+
+  @override
+  String get scheduleWeekStable => 'Stable';
+
+  @override
+  String get scheduleLessonModified => 'Modified';
+
+  @override
+  String get scheduleLessonTime => 'Time';
+
+  @override
+  String get scheduleLessonRoom => 'Room';
+
+  @override
+  String get scheduleLessonDate => 'Date';
+
+  @override
+  String get scheduleLessonSubstitute => 'Substitute Teacher';
+
+  @override
+  String get scheduleLessonNote => 'Note';
+
+  @override
+  String get scheduleLessonChangesFromStable => 'Changes from Stable Timetable';
+
+  @override
+  String get scheduleLessonStableDescription =>
+      'This is a stable lesson that repeats every week';
+
+  @override
+  String get scheduleLessonSubject => 'Subject';
+
+  @override
+  String get scheduleLessonStartTime => 'Start Time';
+
+  @override
+  String get scheduleLessonEndTime => 'End Time';
+
+  @override
+  String get scheduleLessonTeacher => 'Teacher';
+
+  @override
+  String get scheduleLessonCancelled => 'Cancelled';
+
+  @override
+  String get scheduleLessonSubstitution => 'Substitution';
+
+  @override
+  String get close => 'Close';
 }

@@ -46,7 +46,7 @@ class AppUser {
   /// Creates an [AppUser] instance.
   const AppUser({
     required this.id,
-    required this.email,
+    this.email,
     required this.role,
     this.firstName,
     this.lastName,
@@ -58,8 +58,8 @@ class AppUser {
   /// Unique identifier for the user.
   final String id;
 
-  /// User's email address.
-  final String email;
+  /// User's email address (may be null if not available from database).
+  final String? email;
 
   /// User's role in the application.
   final UserRole role;
@@ -82,14 +82,15 @@ class AppUser {
   /// Creates an [AppUser] from a JSON map.
   ///
   /// Returns null if the JSON is invalid or missing required fields.
+  /// Note: email is optional and may be null if not available from the database.
   factory AppUser.fromJson(Map<String, dynamic> json) {
     final id = json['id'] as String?;
     final email = json['email'] as String?;
     final roleString = json['role'] as String?;
     final role = UserRole.fromString(roleString);
 
-    if (id == null || email == null || role == null) {
-      throw ArgumentError('Invalid JSON: missing required fields');
+    if (id == null || role == null) {
+      throw ArgumentError('Invalid JSON: missing required fields (id, role)');
     }
 
     // Parse createdAt from string if present
@@ -187,6 +188,7 @@ class AppUser {
   // RBAC Helper Methods
 
   /// Returns the user's full name.
+  /// Falls back to email if name is not available, or 'Unknown User' if both are null.
   String get fullName {
     if (firstName != null && lastName != null) {
       return '$firstName $lastName';
@@ -195,7 +197,16 @@ class AppUser {
     } else if (lastName != null) {
       return lastName!;
     }
-    return email;
+    return email ?? 'Unknown User';
+  }
+
+  /// Returns the display name with special handling for superadmin role.
+  /// Superadmins are displayed as "Admin FirstName" instead of their full name.
+  String get displayName {
+    if (role == UserRole.superadmin) {
+      return 'Admin ${firstName ?? ''}'.trim();
+    }
+    return fullName;
   }
 
   /// Checks if the user is a superadmin.

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/utils/subject_colors.dart';
 import '../../domain/domain.dart';
 
 /// Exception thrown when teacher operations fail.
@@ -28,31 +28,6 @@ class SupabaseTeacherRepository implements TeacherRepository {
 
   final SupabaseClient _supabase;
 
-  /// Predefined colors for subjects based on hash of subject ID.
-  static const List<Color> _subjectColors = [
-    Colors.blue,
-    Colors.red,
-    Colors.green,
-    Colors.orange,
-    Colors.purple,
-    Colors.teal,
-    Colors.pink,
-    Colors.indigo,
-    Colors.amber,
-    Colors.cyan,
-    Colors.deepOrange,
-    Colors.lightBlue,
-    Colors.lime,
-    Colors.deepPurple,
-    Colors.brown,
-  ];
-
-  /// Generates a deterministic color for a subject based on its ID.
-  Color _getSubjectColor(String subjectId) {
-    final hash = subjectId.hashCode.abs();
-    return _subjectColors[hash % _subjectColors.length];
-  }
-
   @override
   Future<List<TeacherSubject>> getTeacherSubjects(String teacherId) async {
     try {
@@ -76,23 +51,12 @@ class SupabaseTeacherRepository implements TeacherRepository {
         final description = row['description'] as String?;
 
         // Count unique classes where this subject is taught
-        // This queries the lessons table to count distinct class_ids
+        // Subjects have class_id directly (not lessons)
         int classCount = 0;
         try {
-          final lessonsResponse = await _supabase
-              .from('lessons')
-              .select('class_id')
-              .eq('subject_id', subjectId);
-
-          // Count unique class_ids
-          final uniqueClassIds = <String>{};
-          for (final lesson in lessonsResponse) {
-            final classId = lesson['class_id'] as String?;
-            if (classId != null) {
-              uniqueClassIds.add(classId);
-            }
-          }
-          classCount = uniqueClassIds.length;
+          // Each subject belongs to one class, so just check if class_id exists
+          final classId = row['class_id'] as String?;
+          classCount = classId != null ? 1 : 0;
         } catch (_) {
           // If we can't get the class count, default to 0
           classCount = 0;
@@ -102,7 +66,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
           id: subjectId,
           name: name,
           description: description,
-          color: _getSubjectColor(subjectId),
+          color: SubjectColors.getColorForId(subjectId),
           classCount: classCount,
         ));
       }

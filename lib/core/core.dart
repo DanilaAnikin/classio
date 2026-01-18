@@ -56,3 +56,10 @@ export 'router/router.dart';
 
 /// Localization configuration and generated translations
 export 'localization/app_localizations.dart';
+
+// ============================================================================
+// Utils
+// ============================================================================
+
+/// Subject color utilities
+export 'utils/subject_colors.dart';

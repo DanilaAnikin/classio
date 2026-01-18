@@ -361,8 +361,8 @@ class _SubjectGradeCard extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  subject.subjectColor.withValues(alpha: 0.12),
-                  subject.subjectColor.withValues(alpha: 0.04),
+                  Color(subject.subjectColor).withValues(alpha: 0.12),
+                  Color(subject.subjectColor).withValues(alpha: 0.04),
                 ],
               )
             : null,
@@ -376,7 +376,7 @@ class _SubjectGradeCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isPlayful
-                ? subject.subjectColor.withValues(alpha: 0.2)
+                ? Color(subject.subjectColor).withValues(alpha: 0.2)
                 : Colors.black.withValues(alpha: 0.03),
             blurRadius: isPlayful ? 12 : 6,
             offset: Offset(0, isPlayful ? 4 : 2),
@@ -398,12 +398,12 @@ class _SubjectGradeCard extends StatelessWidget {
                     width: isPlayful ? 12 : 10,
                     height: isPlayful ? 12 : 10,
                     decoration: BoxDecoration(
-                      color: subject.subjectColor,
+                      color: Color(subject.subjectColor),
                       shape: BoxShape.circle,
                       boxShadow: isPlayful
                           ? [
                               BoxShadow(
-                                color: subject.subjectColor.withValues(alpha: 0.4),
+                                color: Color(subject.subjectColor).withValues(alpha: 0.4),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),

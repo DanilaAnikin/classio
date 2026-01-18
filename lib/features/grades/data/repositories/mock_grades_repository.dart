@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-
+import '../../../../core/utils/subject_colors.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/grades_repository.dart';
 
@@ -377,42 +376,42 @@ class MockGradesRepository implements GradesRepository {
       SubjectGradeStats(
         subjectId: 'math-1',
         subjectName: 'Mathematics',
-        subjectColor: Colors.blue,
+        subjectColor: SubjectColors.palette[0], // Blue
         average: _calculateWeightedAverage(mathGrades),
         grades: mathGrades,
       ),
       SubjectGradeStats(
         subjectId: 'phys-1',
         subjectName: 'Physics',
-        subjectColor: Colors.orange,
+        subjectColor: SubjectColors.palette[1], // Deep Orange
         average: _calculateWeightedAverage(physicsGrades),
         grades: physicsGrades,
       ),
       SubjectGradeStats(
         subjectId: 'chem-1',
         subjectName: 'Chemistry',
-        subjectColor: Colors.green,
+        subjectColor: SubjectColors.palette[2], // Green
         average: _calculateWeightedAverage(chemistryGrades),
         grades: chemistryGrades,
       ),
       SubjectGradeStats(
         subjectId: 'hist-1',
         subjectName: 'History',
-        subjectColor: Colors.brown,
+        subjectColor: SubjectColors.palette[11], // Brown
         average: _calculateWeightedAverage(historyGrades),
         grades: historyGrades,
       ),
       SubjectGradeStats(
         subjectId: 'eng-1',
         subjectName: 'English',
-        subjectColor: Colors.purple,
+        subjectColor: SubjectColors.palette[3], // Purple
         average: _calculateWeightedAverage(englishGrades),
         grades: englishGrades,
       ),
       SubjectGradeStats(
         subjectId: 'cs-1',
         subjectName: 'Computer Science',
-        subjectColor: Colors.teal,
+        subjectColor: SubjectColors.palette[4], // Teal
         average: _calculateWeightedAverage(csGrades),
         grades: csGrades,
       ),
