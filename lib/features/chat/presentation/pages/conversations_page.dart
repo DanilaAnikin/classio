@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/chat_provider.dart';
@@ -87,7 +88,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
                     : theme.colorScheme.surface,
                 elevation: isPlayful ? 0 : 1,
                 flexibleSpace: FlexibleSpaceBar(
-                  titlePadding: const EdgeInsets.only(left: 16, bottom: 50),
+                  titlePadding: EdgeInsets.only(left: AppSpacing.md, bottom: 50),
                   title: Text(
                     'Messages',
                     style: TextStyle(
@@ -154,23 +155,22 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
                 return ResponsiveCenterScrollView(
                   maxWidth: 800,
                   padding: EdgeInsets.symmetric(
-                    horizontal: isPlayful ? 12 : 8,
-                    vertical: isPlayful ? 8 : 4,
+                    horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+                    vertical: isPlayful ? AppSpacing.xs : AppSpacing.xxs,
                   ),
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
                       ...conversations.map((conversation) => Padding(
                             padding: EdgeInsets.symmetric(
-                              vertical: isPlayful ? 4 : 2,
+                              vertical: isPlayful ? AppSpacing.xxs : 2,
                             ),
                             child: ConversationTile(
                               conversation: conversation,
-                              isPlayful: isPlayful,
                               onTap: () => _openConversation(conversation),
                             ),
                           )),
-                      const SizedBox(height: 80),
+                      SizedBox(height: AppSpacing.xxxl * 2),
                     ],
                   ),
                 );
@@ -233,12 +233,12 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(isPlayful ? 28 : 24),
+              padding: EdgeInsets.all(isPlayful ? 28 : AppSpacing.xl),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -249,7 +249,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
                 color: theme.colorScheme.primary.withValues(alpha: 0.6),
               ),
             ),
-            SizedBox(height: isPlayful ? 28 : 24),
+            SizedBox(height: isPlayful ? 28 : AppSpacing.xl),
             Text(
               title,
               style: TextStyle(
@@ -259,7 +259,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
                 letterSpacing: isPlayful ? 0.3 : 0,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               subtitle,
               style: TextStyle(
@@ -277,7 +277,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
   Widget _buildErrorState(ThemeData theme, bool isPlayful, String error) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -286,7 +286,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
               size: isPlayful ? 72 : 64,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            SizedBox(height: isPlayful ? 24 : 20),
+            SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
             Text(
               'Something went wrong',
               style: TextStyle(
@@ -295,7 +295,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               error,
               style: TextStyle(
@@ -304,7 +304,7 @@ class _ConversationsPageState extends ConsumerState<ConversationsPage>
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
               onPressed: () {
                 ref.read(conversationsNotifierProvider.notifier).refresh();

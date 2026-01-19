@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../student/domain/entities/entities.dart';
@@ -51,18 +53,18 @@ class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
         },
         child: ResponsiveCenterScrollView(
           maxWidth: 800,
-          padding: EdgeInsets.all(isPlayful ? 16 : 12),
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Welcome Card
               _WelcomeCard(isPlayful: isPlayful),
-              SizedBox(height: isPlayful ? 16 : 12),
+              SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
 
               // Quick Actions Row
               _QuickAccessRow(isPlayful: isPlayful),
-              SizedBox(height: isPlayful ? 24 : 20),
+              SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
               // My Children Section
               Text(
@@ -71,7 +73,7 @@ class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: isPlayful ? 12 : 8),
+              SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
 
               // Children List
               childrenAsync.when(
@@ -91,7 +93,7 @@ class _ParentDashboardPageState extends ConsumerState<ParentDashboardPage> {
                   isPlayful: isPlayful,
                 ),
               ),
-              const SizedBox(height: 80),
+              const SizedBox(height: AppSpacing.xxxl * 2),
             ],
           ),
         ),
@@ -111,9 +113,9 @@ class _WelcomeCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 24 : 20),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.lg),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 24 : 16),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.xl : AppRadius.lg),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -130,15 +132,15 @@ class _WelcomeCard extends StatelessWidget {
             height: isPlayful ? 64 : 56,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
+              borderRadius: BorderRadius.circular(isPlayful ? AppSpacing.lg : AppRadius.lg),
             ),
             child: Icon(
               Icons.family_restroom_rounded,
-              size: isPlayful ? 36 : 32,
+              size: isPlayful ? 36 : AppSpacing.xxl,
               color: Colors.white,
             ),
           ),
-          SizedBox(width: isPlayful ? 20 : 16),
+          SizedBox(width: isPlayful ? AppSpacing.lg : AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +153,7 @@ class _WelcomeCard extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Text(
                   'Monitor your children\'s progress',
                   style: TextStyle(
@@ -185,9 +187,9 @@ class _ChildCard extends ConsumerWidget {
 
     return Card(
       elevation: isPlayful ? 2 : 0,
-      margin: EdgeInsets.only(bottom: isPlayful ? 16 : 12),
+      margin: EdgeInsets.only(bottom: isPlayful ? AppSpacing.md : AppSpacing.sm),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
+        borderRadius: BorderRadius.circular(isPlayful ? AppSpacing.lg : AppRadius.lg),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
@@ -195,9 +197,9 @@ class _ChildCard extends ConsumerWidget {
       ),
       child: InkWell(
         onTap: () => context.push('/parent/child/${child.id}'),
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
+        borderRadius: BorderRadius.circular(isPlayful ? AppSpacing.lg : AppRadius.lg),
         child: Padding(
-          padding: EdgeInsets.all(isPlayful ? 20 : 16),
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -222,7 +224,7 @@ class _ChildCard extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: isPlayful ? 16 : 12),
+                  SizedBox(width: isPlayful ? AppSpacing.md : AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,12 +232,12 @@ class _ChildCard extends ConsumerWidget {
                         Text(
                           child.fullName,
                           style: TextStyle(
-                            fontSize: isPlayful ? 18 : 16,
+                            fontSize: isPlayful ? 18 : AppSpacing.md,
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: AppSpacing.xxs),
                         Text(
                           child.email ?? '',
                           style: TextStyle(
@@ -253,7 +255,7 @@ class _ChildCard extends ConsumerWidget {
                   ),
                 ],
               ),
-              SizedBox(height: isPlayful ? 16 : 12),
+              SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
 
               // Attendance Summary
               attendanceStats.when(
@@ -264,7 +266,7 @@ class _ChildCard extends ConsumerWidget {
                 loading: () => _LoadingRow(isPlayful: isPlayful),
                 error: (_, _) => const SizedBox.shrink(),
               ),
-              SizedBox(height: isPlayful ? 16 : 12),
+              SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
 
               // Quick Actions
               Row(
@@ -278,7 +280,7 @@ class _ChildCard extends ConsumerWidget {
                       isPlayful: isPlayful,
                     ),
                   ),
-                  SizedBox(width: isPlayful ? 12 : 8),
+                  SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                   Expanded(
                     child: _QuickActionButton(
                       icon: Icons.fact_check_rounded,
@@ -288,7 +290,7 @@ class _ChildCard extends ConsumerWidget {
                       isPlayful: isPlayful,
                     ),
                   ),
-                  SizedBox(width: isPlayful ? 12 : 8),
+                  SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                   Expanded(
                     child: _QuickActionButton(
                       icon: Icons.calendar_month_rounded,
@@ -331,51 +333,63 @@ class _AttendanceSummaryRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 12 : 10),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : 10),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(isPlayful ? 12 : 10),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : 10),
       ),
-      child: Row(
+      child: Wrap(
+        spacing: isPlayful ? 10 : AppSpacing.xs,
+        runSpacing: isPlayful ? AppSpacing.xs : 6,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Icon(
-            Icons.pie_chart_rounded,
-            size: isPlayful ? 20 : 18,
-            color: theme.colorScheme.primary,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.pie_chart_rounded,
+                size: isPlayful ? AppSpacing.lg : 18,
+                color: theme.colorScheme.primary,
+              ),
+              SizedBox(width: isPlayful ? 10 : AppSpacing.xs),
+              Text(
+                'Attendance: ',
+                style: TextStyle(
+                  fontSize: isPlayful ? 14 : 13,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              ),
+              Text(
+                '${stats.attendancePercentage.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  fontSize: isPlayful ? 14 : 13,
+                  fontWeight: FontWeight.w700,
+                  color: stats.percentageColor,
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: isPlayful ? 10 : 8),
-          Text(
-            'Attendance: ',
-            style: TextStyle(
-              fontSize: isPlayful ? 14 : 13,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-          ),
-          Text(
-            '${stats.attendancePercentage.toStringAsFixed(0)}%',
-            style: TextStyle(
-              fontSize: isPlayful ? 14 : 13,
-              fontWeight: FontWeight.w700,
-              color: stats.percentageColor,
-            ),
-          ),
-          const Spacer(),
-          _StatChip(
-            value: stats.presentDays,
-            color: AttendanceStatus.present.color,
-            isPlayful: isPlayful,
-          ),
-          SizedBox(width: isPlayful ? 8 : 6),
-          _StatChip(
-            value: stats.absentDays,
-            color: AttendanceStatus.absent.color,
-            isPlayful: isPlayful,
-          ),
-          SizedBox(width: isPlayful ? 8 : 6),
-          _StatChip(
-            value: stats.lateDays,
-            color: AttendanceStatus.late.color,
-            isPlayful: isPlayful,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _StatChip(
+                value: stats.presentDays,
+                color: AttendanceStatus.present.color,
+                isPlayful: isPlayful,
+              ),
+              SizedBox(width: isPlayful ? AppSpacing.xs : 6),
+              _StatChip(
+                value: stats.absentDays,
+                color: AttendanceStatus.absent.color,
+                isPlayful: isPlayful,
+              ),
+              SizedBox(width: isPlayful ? AppSpacing.xs : 6),
+              _StatChip(
+                value: stats.lateDays,
+                color: AttendanceStatus.late.color,
+                isPlayful: isPlayful,
+              ),
+            ],
           ),
         ],
       ),
@@ -399,12 +413,12 @@ class _StatChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 8 : 6,
-        vertical: isPlayful ? 4 : 3,
+        horizontal: isPlayful ? AppSpacing.xs : 6,
+        vertical: isPlayful ? AppSpacing.xxs : 3,
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(isPlayful ? 8 : 6),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.sm : 6),
       ),
       child: Text(
         value.toString(),
@@ -438,23 +452,23 @@ class _QuickActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(isPlayful ? 12 : 10),
+      borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : 10),
       child: Container(
         padding: EdgeInsets.symmetric(
-          vertical: isPlayful ? 12 : 10,
+          vertical: isPlayful ? AppSpacing.sm : 10,
         ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(isPlayful ? 12 : 10),
+          borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : 10),
         ),
         child: Column(
           children: [
             Icon(
               icon,
-              size: isPlayful ? 24 : 20,
+              size: isPlayful ? AppSpacing.xl : AppSpacing.lg,
               color: color,
             ),
-            SizedBox(height: isPlayful ? 6 : 4),
+            SizedBox(height: isPlayful ? 6 : AppSpacing.xxs),
             Text(
               label,
               style: TextStyle(
@@ -481,23 +495,23 @@ class _LoadingRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 12 : 10),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : 10),
       decoration: BoxDecoration(
         color: theme.colorScheme.outline.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(isPlayful ? 12 : 10),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : 10),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: 16,
-            height: 16,
+            width: AppSpacing.md,
+            height: AppSpacing.md,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: AppSpacing.xs),
           Text(
             'Loading stats...',
             style: TextStyle(
@@ -524,29 +538,29 @@ class _EmptyChildrenCard extends ConsumerWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 24 : 16),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.md),
         child: Column(
           children: [
             Icon(
               Icons.child_care_outlined,
-              size: 48,
+              size: AppIconSize.xxl,
               color: theme.colorScheme.primary.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               'No children linked yet',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               'If you just registered using a parent invite code, '
               'your child should appear here shortly. Try pulling down to refresh.',
@@ -555,7 +569,7 @@ class _EmptyChildrenCard extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             FilledButton.tonal(
               onPressed: () {
                 ref.invalidate(myChildrenProvider);
@@ -564,12 +578,12 @@ class _EmptyChildrenCard extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.refresh, size: isPlayful ? 20 : 18),
-                  const SizedBox(width: 8),
+                  SizedBox(width: AppSpacing.xs),
                   const Text('Refresh'),
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               'If the issue persists, contact your school administrator.',
               style: theme.textTheme.bodySmall?.copyWith(
@@ -597,14 +611,14 @@ class _LoadingCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 32 : 24),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xxl : AppSpacing.xl),
         child: const Center(child: CircularProgressIndicator()),
       ),
     );
@@ -628,22 +642,22 @@ class _ErrorCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 24 : 16),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.md),
         child: Column(
           children: [
             Icon(
               Icons.error_outline,
-              size: 48,
+              size: AppIconSize.xxl,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -671,7 +685,7 @@ class _QuickAccessRow extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
@@ -679,14 +693,14 @@ class _QuickAccessRow extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () => context.push('/parent/timetable'),
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         child: Padding(
-          padding: EdgeInsets.all(isPlayful ? 16 : 14),
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.md : 14),
           child: Row(
             children: [
               Container(
-                width: isPlayful ? 48 : 40,
-                height: isPlayful ? 48 : 40,
+                width: isPlayful ? AppIconSize.xxl : AppSpacing.xxxl,
+                height: isPlayful ? AppIconSize.xxl : AppSpacing.xxxl,
                 decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(isPlayful ? 14 : 10),
@@ -697,7 +711,7 @@ class _QuickAccessRow extends StatelessWidget {
                   color: Colors.orange,
                 ),
               ),
-              SizedBox(width: isPlayful ? 16 : 12),
+              SizedBox(width: isPlayful ? AppSpacing.md : AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

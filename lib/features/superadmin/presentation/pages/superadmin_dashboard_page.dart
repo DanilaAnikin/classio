@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/app_colors.dart';
+import 'package:classio/core/theme/app_radius.dart';
+import 'package:classio/core/theme/spacing.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
@@ -93,6 +97,7 @@ class _OverviewTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
     final statsAsync = ref.watch(platformStatsProvider);
 
     return RefreshIndicator(
@@ -102,20 +107,20 @@ class _OverviewTab extends ConsumerWidget {
       child: statsAsync.when(
         data: (stats) => ResponsiveCenterScrollView(
           maxWidth: 1000,
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.cardInsets,
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              PlatformStatsCard(stats: stats),
-              const SizedBox(height: 24),
+              PlatformStatsCard(stats: stats, isPlayful: isPlayful),
+              SizedBox(height: AppSpacing.xl),
 
               // Quick Actions Section
               _SectionTitle(
                 title: 'Quick Actions',
                 icon: Icons.flash_on_rounded,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
                   Expanded(
@@ -126,12 +131,12 @@ class _OverviewTab extends ConsumerWidget {
                       onTap: () => CreateSchoolDialog.show(context),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: _QuickActionCard(
                       icon: Icons.refresh_rounded,
                       label: 'Refresh Data',
-                      color: Colors.blue,
+                      color: AppSemanticColors.info(isPlayful: isPlayful),
                       onTap: () {
                         ref.invalidate(platformStatsProvider);
                         ref.invalidate(schoolsWithStatsProvider);
@@ -146,7 +151,7 @@ class _OverviewTab extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 80),
+              SizedBox(height: AppSpacing.xxxl * 2),
             ],
           ),
         ),
@@ -164,7 +169,7 @@ class _OverviewTab extends ConsumerWidget {
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -173,7 +178,7 @@ class _OverviewTab extends ConsumerWidget {
               size: 72,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             Text(
               'Failed to Load Statistics',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -182,7 +187,7 @@ class _OverviewTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               error.toString(),
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -190,7 +195,7 @@ class _OverviewTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
               onPressed: () => ref.invalidate(platformStatsProvider),
               icon: const Icon(Icons.refresh_rounded),
@@ -224,24 +229,24 @@ class _SchoolsTab extends ConsumerWidget {
 
           return ResponsiveCenterScrollView(
             maxWidth: 1000,
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.cardInsets,
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header with count
                 _SchoolsHeader(schoolCount: schools.length),
-                const SizedBox(height: 20),
+                SizedBox(height: AppSpacing.lg),
 
                 // Schools List
                 ...schools.map((school) => Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
+                      padding: EdgeInsets.only(bottom: AppSpacing.sm),
                       child: SchoolCard(
                         school: school,
                         onTap: () => _navigateToSchoolDetail(context, school),
                       ),
                     )),
-                const SizedBox(height: 80),
+                SizedBox(height: AppSpacing.xxxl * 2),
               ],
             ),
           );
@@ -259,7 +264,7 @@ class _SchoolsTab extends ConsumerWidget {
   Widget _buildEmptyState(BuildContext context, ThemeData theme) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -276,7 +281,7 @@ class _SchoolsTab extends ConsumerWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: AppSpacing.xxl - AppSpacing.xxs),
             Text(
               'No Schools Yet',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -285,7 +290,7 @@ class _SchoolsTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               'Create your first school to get started.',
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -293,7 +298,7 @@ class _SchoolsTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             FilledButton.icon(
               onPressed: () => CreateSchoolDialog.show(context),
               icon: const Icon(Icons.add_rounded),
@@ -313,7 +318,7 @@ class _SchoolsTab extends ConsumerWidget {
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -322,7 +327,7 @@ class _SchoolsTab extends ConsumerWidget {
               size: 72,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             Text(
               'Failed to Load Schools',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -331,7 +336,7 @@ class _SchoolsTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               error.toString(),
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -339,7 +344,7 @@ class _SchoolsTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
               onPressed: () => ref.invalidate(schoolsWithStatsProvider),
               icon: const Icon(Icons.refresh_rounded),
@@ -372,7 +377,8 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
   }
 
   Future<void> _createSchool() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) return;
 
     setState(() {
       _isCreating = true;
@@ -419,7 +425,7 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
 
     return ResponsiveCenterScrollView(
       maxWidth: 600,
-      padding: const EdgeInsets.all(24),
+      padding: AppSpacing.dialogInsets,
       child: Form(
         key: _formKey,
         child: Column(
@@ -440,7 +446,7 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
                 color: theme.colorScheme.primary,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
 
             // Title
             Text(
@@ -451,7 +457,7 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               'Enter the school name below. A principal invitation token will be generated automatically after creation.',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -459,20 +465,20 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: AppSpacing.xxl),
 
             // Form Card
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: AppSpacing.dialogInsets,
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: AppRadius.dialogBorderRadius,
                 border: Border.all(
                   color: theme.colorScheme.outline.withValues(alpha: 0.15),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: theme.colorScheme.shadow.withValues(alpha: 0.04),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -488,7 +494,7 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
                       hintText: 'Enter the school name',
                       prefixIcon: const Icon(Icons.school_outlined),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: AppRadius.cardBorderRadius,
                       ),
                     ),
                     validator: (value) {
@@ -506,7 +512,7 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
                       }
                     },
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: AppSpacing.xl),
                   FilledButton.icon(
                     onPressed: _isCreating ? null : _createSchool,
                     icon: _isCreating
@@ -521,59 +527,64 @@ class _CreateSchoolTabState extends ConsumerState<_CreateSchoolTab> {
                         : const Icon(Icons.add_rounded),
                     label: Text(_isCreating ? 'Creating...' : 'Create School'),
                     style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
 
             // Info Box
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.blue.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    size: 22,
-                    color: Colors.blue.shade700,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'What happens next?',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue.shade800,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'After creating the school, you will receive an invitation token to share with the school principal. They can use this token to register as the first administrator.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.blue.shade700,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
+            Builder(
+              builder: (context) {
+                final infoColor = AppSemanticColors.info(isPlayful: false);
+                return Container(
+                  padding: AppSpacing.cardInsets,
+                  decoration: BoxDecoration(
+                    color: infoColor.withValues(alpha: 0.08),
+                    borderRadius: AppRadius.cardBorderRadius,
+                    border: Border.all(
+                      color: infoColor.withValues(alpha: 0.2),
                     ),
                   ),
-                ],
-              ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 22,
+                        color: infoColor,
+                      ),
+                      SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'What happens next?',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: infoColor,
+                              ),
+                            ),
+                            SizedBox(height: AppSpacing.xxs),
+                            Text(
+                              'After creating the school, you will receive an invitation token to share with the school principal. They can use this token to register as the first administrator.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: infoColor.withValues(alpha: 0.8),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -603,7 +614,7 @@ class _SectionTitle extends StatelessWidget {
           size: 20,
           color: theme.colorScheme.primary,
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.xs),
         Text(
           title,
           style: TextStyle(
@@ -637,12 +648,12 @@ class _QuickActionCard extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: AppRadius.dialogBorderRadius,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.dialogBorderRadius,
           border: Border.all(
             color: theme.colorScheme.outline.withValues(alpha: 0.15),
           ),
@@ -661,7 +672,7 @@ class _QuickActionCard extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: color.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Icon(
                 icon,
@@ -669,7 +680,7 @@ class _QuickActionCard extends StatelessWidget {
                 color: color,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               label,
               style: TextStyle(
@@ -697,9 +708,9 @@ class _SchoolsHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.dialogBorderRadius,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -716,7 +727,7 @@ class _SchoolsHeader extends StatelessWidget {
             height: 52,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Icon(
               Icons.account_balance_rounded,
@@ -724,7 +735,7 @@ class _SchoolsHeader extends StatelessWidget {
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -737,7 +748,7 @@ class _SchoolsHeader extends StatelessWidget {
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: AppSpacing.xxs / 2),
                 Text(
                   schoolCount.toString(),
                   style: TextStyle(
@@ -783,23 +794,25 @@ class _SchoolCreatedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final successColor = AppSemanticColors.success(isPlayful: false);
+    final warningColor = AppSemanticColors.warning(isPlayful: false);
 
     return AlertDialog(
       title: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: AppSpacing.smallInsets,
             decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: successColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.check_circle_rounded,
-              color: Colors.green,
+              color: successColor,
               size: 24,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSpacing.sm),
           const Expanded(child: Text('School Created')),
         ],
       ),
@@ -810,12 +823,12 @@ class _SchoolCreatedDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.cardInsets,
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
+                color: successColor.withValues(alpha: 0.08),
+                borderRadius: AppRadius.cardBorderRadius,
                 border: Border.all(
-                  color: Colors.green.withValues(alpha: 0.2),
+                  color: successColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Text(
@@ -826,7 +839,7 @@ class _SchoolCreatedDialog extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: AppSpacing.lg),
             Text(
               'Principal Invitation Token',
               style: TextStyle(
@@ -835,7 +848,7 @@ class _SchoolCreatedDialog extends StatelessWidget {
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: AppSpacing.xxs),
             Text(
               'Share this token with the school principal to allow them to register.',
               style: TextStyle(
@@ -843,12 +856,12 @@ class _SchoolCreatedDialog extends StatelessWidget {
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.cardInsets,
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.cardBorderRadius,
                 border: Border.all(
                   color: theme.colorScheme.primary.withValues(alpha: 0.3),
                 ),
@@ -867,7 +880,7 @@ class _SchoolCreatedDialog extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: AppSpacing.sm),
                   IconButton.filledTonal(
                     onPressed: () => _copyToken(context),
                     icon: const Icon(Icons.copy_rounded),
@@ -876,14 +889,14 @@ class _SchoolCreatedDialog extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: warningColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
                 border: Border.all(
-                  color: Colors.amber.withValues(alpha: 0.3),
+                  color: warningColor.withValues(alpha: 0.3),
                 ),
               ),
               child: Row(
@@ -891,15 +904,15 @@ class _SchoolCreatedDialog extends StatelessWidget {
                   Icon(
                     Icons.info_outline_rounded,
                     size: 20,
-                    color: Colors.amber.shade700,
+                    color: warningColor,
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: AppSpacing.sm - 2),
                   Expanded(
                     child: Text(
                       'This token expires in 30 days.',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.amber.shade800,
+                        color: warningColor,
                       ),
                     ),
                   ),

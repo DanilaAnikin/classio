@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/theme.dart';
+import '../../../../shared/widgets/app_avatar.dart';
+
 /// An avatar widget for group conversations.
 ///
 /// Features:
-/// - Shows a group icon with initials or custom icon
+/// - Shows group initials with deterministic background color
 /// - Gradient background for playful theme
-/// - Consistent styling with user avatars
+/// - Consistent styling using AppAvatar design patterns
 class GroupAvatar extends StatelessWidget {
   /// Creates a [GroupAvatar] widget.
   const GroupAvatar({
     super.key,
     required this.name,
-    this.size = 48,
+    this.size = AvatarSize.lg,
     this.isPlayful = false,
   });
 
   /// The name of the group (used to generate initials).
   final String name;
 
-  /// The size of the avatar (diameter).
-  final double size;
+  /// The size of the avatar.
+  final AvatarSize size;
 
   /// Whether to use playful theme styling.
   final bool isPlayful;
@@ -35,32 +38,52 @@ class GroupAvatar extends StatelessWidget {
     return '${words[0][0]}${words[1][0]}'.toUpperCase();
   }
 
-  Color _getBackgroundColor(ThemeData theme) {
+  Color _getBackgroundColor() {
     // Generate consistent color based on name hash
-    final hash = name.hashCode.abs();
-    final colors = [
-      theme.colorScheme.primary,
-      theme.colorScheme.secondary,
-      theme.colorScheme.tertiary,
-      Colors.teal,
-      Colors.indigo,
-      Colors.orange,
-      Colors.pink,
-      Colors.cyan,
+    final hash = name.toLowerCase().codeUnits.fold(0, (sum, char) => sum + char);
+
+    final cleanPalette = [
+      CleanColors.statBlue,
+      CleanColors.statGreen,
+      CleanColors.statOrange,
+      CleanColors.statPurple,
+      CleanColors.statPink,
+      CleanColors.statTeal,
+      CleanColors.statIndigo,
+      CleanColors.statAmber,
     ];
 
-    return colors[hash % colors.length];
+    final playfulPalette = [
+      PlayfulColors.statBlue,
+      PlayfulColors.statGreen,
+      PlayfulColors.statOrange,
+      PlayfulColors.statPurple,
+      PlayfulColors.statPink,
+      PlayfulColors.statTeal,
+      PlayfulColors.accentCyan,
+      PlayfulColors.accentYellow,
+    ];
+
+    final palette = isPlayful ? playfulPalette : cleanPalette;
+    return palette[hash % palette.length];
+  }
+
+  Color _getContrastingTextColor(Color background) {
+    final luminance = background.computeLuminance();
+    return luminance > 0.5
+        ? const Color(0xFF1C1917)
+        : const Color(0xFFFAFAF9);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bgColor = _getBackgroundColor(theme);
+    final bgColor = _getBackgroundColor();
     final initials = _getInitials();
+    final textColor = _getContrastingTextColor(bgColor);
 
     return Container(
-      width: size,
-      height: size,
+      width: size.pixels,
+      height: size.pixels,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: isPlayful
@@ -69,29 +92,22 @@ class GroupAvatar extends StatelessWidget {
                 end: Alignment.bottomRight,
                 colors: [
                   bgColor,
-                  bgColor.withValues(alpha: 0.7),
+                  bgColor.withValues(alpha: AppOpacity.almostOpaque),
                 ],
               )
             : null,
-        color: isPlayful ? null : bgColor.withValues(alpha: 0.8),
-        boxShadow: isPlayful
-            ? [
-                BoxShadow(
-                  color: bgColor.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
+        color: isPlayful ? null : bgColor,
+        boxShadow: isPlayful ? AppShadows.avatar(isPlayful: true) : null,
       ),
       child: Center(
         child: Text(
           initials,
           style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.38,
+            color: textColor,
+            fontSize: size.initialsSize,
             fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
             letterSpacing: isPlayful ? 0.5 : 0,
+            height: 1.0,
           ),
         ),
       ),
@@ -108,7 +124,8 @@ class StackedGroupAvatar extends StatelessWidget {
   const StackedGroupAvatar({
     super.key,
     required this.memberNames,
-    this.size = 48,
+    this.memberAvatarUrls,
+    this.size = AvatarSize.lg,
     this.isPlayful = false,
     this.maxVisible = 3,
   });
@@ -116,8 +133,11 @@ class StackedGroupAvatar extends StatelessWidget {
   /// Names of group members.
   final List<String> memberNames;
 
+  /// Optional avatar URLs for members (parallel to memberNames).
+  final List<String?>? memberAvatarUrls;
+
   /// The overall size of the widget.
-  final double size;
+  final AvatarSize size;
 
   /// Whether to use playful theme styling.
   final bool isPlayful;
@@ -127,8 +147,6 @@ class StackedGroupAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (memberNames.isEmpty) {
       return GroupAvatar(
         name: 'Group',
@@ -138,10 +156,87 @@ class StackedGroupAvatar extends StatelessWidget {
     }
 
     if (memberNames.length == 1) {
-      return _MemberAvatar(
+      final avatarUrl = memberAvatarUrls?.isNotEmpty == true
+          ? memberAvatarUrls![0]
+          : null;
+
+      if (avatarUrl != null && avatarUrl.isNotEmpty) {
+        return AppAvatar(
+          imageUrl: avatarUrl,
+          fallbackName: memberNames[0],
+          size: size,
+        );
+      }
+
+      return AppAvatar.initials(
         name: memberNames[0],
         size: size,
+      );
+    }
+
+    // Build avatar data list for AppAvatar.group
+    final avatarDataList = <AvatarData>[];
+    for (var i = 0; i < memberNames.length && i < maxVisible; i++) {
+      final avatarUrl = memberAvatarUrls != null && i < memberAvatarUrls!.length
+          ? memberAvatarUrls![i]
+          : null;
+
+      avatarDataList.add(AvatarData(
+        imageUrl: avatarUrl,
+        name: memberNames[i],
+      ));
+    }
+
+    return AppAvatar.group(
+      avatars: avatarDataList,
+      maxDisplayed: maxVisible,
+      size: size,
+      overlapFactor: 0.35,
+      borderColor: isPlayful ? PlayfulColors.surface : CleanColors.surface,
+      showShadow: isPlayful,
+    );
+  }
+}
+
+/// Simple stacked avatar using custom implementation for more control.
+///
+/// An alternative to AppAvatar.group with more visual customization options.
+class CustomStackedGroupAvatar extends StatelessWidget {
+  /// Creates a [CustomStackedGroupAvatar] widget.
+  const CustomStackedGroupAvatar({
+    super.key,
+    required this.memberNames,
+    this.size = AvatarSize.lg,
+    this.isPlayful = false,
+    this.maxVisible = 3,
+  });
+
+  /// Names of group members.
+  final List<String> memberNames;
+
+  /// The overall size of the widget.
+  final AvatarSize size;
+
+  /// Whether to use playful theme styling.
+  final bool isPlayful;
+
+  /// Maximum number of avatars to show.
+  final int maxVisible;
+
+  @override
+  Widget build(BuildContext context) {
+    if (memberNames.isEmpty) {
+      return GroupAvatar(
+        name: 'Group',
+        size: size,
         isPlayful: isPlayful,
+      );
+    }
+
+    if (memberNames.length == 1) {
+      return AppAvatar.initials(
+        name: memberNames[0],
+        size: size,
       );
     }
 
@@ -149,11 +244,22 @@ class StackedGroupAvatar extends StatelessWidget {
         ? maxVisible - 1
         : memberNames.length;
     final extraCount = memberNames.length - visibleCount;
-    final smallSize = size * 0.6;
+    final smallSize = AvatarSize.values.firstWhere(
+      (s) => s.pixels <= size.pixels * 0.65,
+      orElse: () => AvatarSize.sm,
+    );
+
+    final borderColor = isPlayful ? PlayfulColors.surface : CleanColors.surface;
+    final badgeBackgroundColor = isPlayful
+        ? PlayfulColors.primarySubtle
+        : CleanColors.primarySubtle;
+    final badgeTextColor = isPlayful
+        ? PlayfulColors.primary
+        : CleanColors.primary;
 
     return SizedBox(
-      width: size,
-      height: size,
+      width: size.pixels,
+      height: size.pixels,
       child: Stack(
         children: [
           // First avatar (bottom right)
@@ -161,10 +267,10 @@ class StackedGroupAvatar extends StatelessWidget {
             Positioned(
               right: 0,
               bottom: 0,
-              child: _MemberAvatar(
-                name: memberNames[0],
-                size: smallSize,
-                isPlayful: isPlayful,
+              child: _buildMemberAvatar(
+                memberNames[0],
+                smallSize,
+                borderColor,
               ),
             ),
           // Second avatar (top left)
@@ -172,10 +278,10 @@ class StackedGroupAvatar extends StatelessWidget {
             Positioned(
               left: 0,
               top: 0,
-              child: _MemberAvatar(
-                name: memberNames[1],
-                size: smallSize,
-                isPlayful: isPlayful,
+              child: _buildMemberAvatar(
+                memberNames[1],
+                smallSize,
+                borderColor,
               ),
             ),
           // Extra count badge
@@ -184,22 +290,24 @@ class StackedGroupAvatar extends StatelessWidget {
               right: 0,
               top: 0,
               child: Container(
-                width: smallSize * 0.7,
-                height: smallSize * 0.7,
+                width: smallSize.pixels * 0.75,
+                height: smallSize.pixels * 0.75,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: theme.colorScheme.surface,
+                  color: badgeBackgroundColor,
                   border: Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                    color: borderColor,
+                    width: smallSize.borderWidth,
                   ),
                 ),
                 child: Center(
                   child: Text(
                     '+$extraCount',
                     style: TextStyle(
-                      fontSize: smallSize * 0.3,
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
+                      fontSize: smallSize.initialsSize * 0.7,
+                      fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
+                      color: badgeTextColor,
+                      height: 1.0,
                     ),
                   ),
                 ),
@@ -209,61 +317,20 @@ class StackedGroupAvatar extends StatelessWidget {
       ),
     );
   }
-}
 
-/// Internal widget for member avatar.
-class _MemberAvatar extends StatelessWidget {
-  const _MemberAvatar({
-    required this.name,
-    required this.size,
-    required this.isPlayful,
-  });
-
-  final String name;
-  final double size;
-  final bool isPlayful;
-
-  Color _getColor(ThemeData theme) {
-    final hash = name.hashCode.abs();
-    final colors = [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
-      Colors.pink,
-      Colors.indigo,
-      Colors.cyan,
-    ];
-    return colors[hash % colors.length];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = _getColor(theme);
-    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
-
+  Widget _buildMemberAvatar(String name, AvatarSize avatarSize, Color borderColor) {
     return Container(
-      width: size,
-      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color,
         border: Border.all(
-          color: theme.colorScheme.surface,
-          width: 2,
+          color: borderColor,
+          width: avatarSize.borderWidth,
         ),
+        boxShadow: isPlayful ? AppShadows.avatar(isPlayful: true) : null,
       ),
-      child: Center(
-        child: Text(
-          initial,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.45,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      child: AppAvatar.initials(
+        name: name,
+        size: avatarSize,
       ),
     );
   }

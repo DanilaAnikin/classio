@@ -2,8 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_card.dart';
 import '../../../admin_panel/domain/entities/invite_code.dart';
 import '../../../auth/domain/entities/app_user.dart';
+
+// =============================================================================
+// INVITE CODE CARD - Principal Dashboard Invite Management
+// =============================================================================
+// A premium card component for displaying invite codes with proper
+// visual hierarchy, status indicators, and interactive actions.
+//
+// Features:
+// - Uses AppCard for consistent card styling
+// - AppButton for actions
+// - AppTypography for all text styles
+// - AppSpacing for all margins/padding
+// - Status-based color coding
+// - Theme-aware styling (Clean vs Playful)
+// =============================================================================
 
 /// A card widget displaying an invite code.
 class InviteCodeCard extends StatelessWidget {
@@ -20,233 +41,157 @@ class InviteCodeCard extends StatelessWidget {
   /// Callback when deactivate is triggered.
   final VoidCallback? onDeactivate;
 
+  /// Detects if the current theme is playful.
+  bool _isPlayful(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.toARGB32() == PlayfulColors.primary.toARGB32() ||
+        (primaryColor.r * 255 > 100 && primaryColor.b * 255 > 200);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isPlayful = _isPlayful(context);
     final isActive = inviteCode.canBeUsed;
 
-    return Opacity(
-      opacity: isActive ? 1.0 : 0.6,
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: isActive ? CleanColors.border : CleanColors.disabled,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Role badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getRoleColor().withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _getRoleIcon(),
-                          size: 14,
-                          color: _getRoleColor(),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          _getRoleDisplayName(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: _getRoleColor(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  // Status badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? CleanColors.successLight
-                          : CleanColors.errorLight,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      isActive ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: isActive
-                            ? CleanColors.success
-                            : CleanColors.error,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Code
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: CleanColors.surfaceVariant,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: CleanColors.border),
-                      ),
-                      child: Text(
-                        inviteCode.code,
-                        style: const TextStyle(
-                          fontFamily: 'monospace',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
-                          color: CleanColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.copy),
-                    tooltip: 'Copy code',
-                    onPressed: isActive
-                        ? () {
-                            Clipboard.setData(
-                                ClipboardData(text: inviteCode.code));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Code copied to clipboard'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        : null,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Stats row
-              Row(
-                children: [
-                  _buildStatItem(
-                    icon: Icons.repeat,
-                    label: 'Uses',
-                    value: '${inviteCode.timesUsed}/${inviteCode.usageLimit}',
-                  ),
-                  const SizedBox(width: 16),
-                  if (inviteCode.expiresAt != null)
-                    _buildStatItem(
-                      icon: Icons.schedule,
-                      label: 'Expires',
-                      value: _formatDate(inviteCode.expiresAt!),
-                      isExpired: DateTime.now().isAfter(inviteCode.expiresAt!),
-                    ),
-                  const Spacer(),
-                  if (isActive)
-                    TextButton.icon(
-                      onPressed: onDeactivate,
-                      icon: const Icon(
-                        Icons.cancel_outlined,
-                        size: 18,
-                        color: CleanColors.error,
-                      ),
-                      label: const Text(
-                        'Deactivate',
-                        style: TextStyle(color: CleanColors.error),
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
+    return AnimatedOpacity(
+      duration: AppDuration.fast,
+      opacity: isActive ? 1.0 : AppOpacity.disabled,
+      child: AppCard(
+        padding: AppSpacing.cardInsets,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header row with role badge and status
+            _HeaderRow(
+              inviteCode: inviteCode,
+              isPlayful: isPlayful,
+              isActive: isActive,
+            ),
+            SizedBox(height: AppSpacing.md),
+            // Code display with copy button
+            _CodeDisplay(
+              code: inviteCode.code,
+              isActive: isActive,
+              isPlayful: isPlayful,
+            ),
+            SizedBox(height: AppSpacing.md),
+            // Stats row with usage and expiry
+            _StatsRow(
+              inviteCode: inviteCode,
+              isPlayful: isPlayful,
+              isActive: isActive,
+              onDeactivate: onDeactivate,
+            ),
+          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    bool isExpired = false,
-  }) {
+// =============================================================================
+// SUBCOMPONENTS
+// =============================================================================
+
+/// Header row with role badge and status indicator.
+class _HeaderRow extends StatelessWidget {
+  const _HeaderRow({
+    required this.inviteCode,
+    required this.isPlayful,
+    required this.isActive,
+  });
+
+  final InviteCode inviteCode;
+  final bool isPlayful;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: isExpired ? CleanColors.error : CleanColors.textSecondary,
+        // Role badge
+        _RoleBadge(
+          role: inviteCode.role,
+          isPlayful: isPlayful,
         ),
-        const SizedBox(width: 4),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: isExpired
-                    ? CleanColors.error
-                    : CleanColors.textPrimary,
-              ),
-            ),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                color: CleanColors.textTertiary,
-              ),
-            ),
-          ],
+        const Spacer(),
+        // Status badge
+        _StatusBadge(
+          isActive: isActive,
+          isPlayful: isPlayful,
         ),
       ],
     );
   }
+}
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+/// Role badge showing the target role for the invite.
+class _RoleBadge extends StatelessWidget {
+  const _RoleBadge({
+    required this.role,
+    required this.isPlayful,
+  });
+
+  final UserRole role;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final roleColor = _getRoleColor();
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: roleColor.withValues(alpha: AppOpacity.soft),
+        borderRadius: AppRadius.fullRadius,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getRoleIcon(),
+            size: AppIconSize.xs,
+            color: roleColor,
+          ),
+          SizedBox(width: AppSpacing.xxs),
+          Text(
+            _getRoleDisplayName(),
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+              fontWeight: FontWeight.w500,
+              color: roleColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Color _getRoleColor() {
-    switch (inviteCode.role) {
+    switch (role) {
       case UserRole.superadmin:
-        return CleanColors.error;
+        return isPlayful
+            ? PlayfulColors.superadminRole
+            : CleanColors.superadminRole;
       case UserRole.bigadmin:
-        return CleanColors.primary;
+        return isPlayful
+            ? PlayfulColors.principalRole
+            : CleanColors.principalRole;
       case UserRole.admin:
-        return CleanColors.secondary;
+        return isPlayful ? PlayfulColors.deputyRole : CleanColors.deputyRole;
       case UserRole.teacher:
-        return CleanColors.info;
+        return isPlayful ? PlayfulColors.teacherRole : CleanColors.teacherRole;
       case UserRole.student:
-        return CleanColors.success;
+        return isPlayful ? PlayfulColors.studentRole : CleanColors.studentRole;
       case UserRole.parent:
-        return CleanColors.warning;
+        return isPlayful ? PlayfulColors.parentRole : CleanColors.parentRole;
     }
   }
 
   IconData _getRoleIcon() {
-    switch (inviteCode.role) {
+    switch (role) {
       case UserRole.superadmin:
         return Icons.admin_panel_settings;
       case UserRole.bigadmin:
@@ -263,7 +208,7 @@ class InviteCodeCard extends StatelessWidget {
   }
 
   String _getRoleDisplayName() {
-    switch (inviteCode.role) {
+    switch (role) {
       case UserRole.superadmin:
         return 'Super Admin';
       case UserRole.bigadmin:
@@ -277,5 +222,231 @@ class InviteCodeCard extends StatelessWidget {
       case UserRole.parent:
         return 'Parent';
     }
+  }
+}
+
+/// Status badge showing active/inactive state.
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({
+    required this.isActive,
+    required this.isPlayful,
+  });
+
+  final bool isActive;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = isActive
+        ? (isPlayful ? PlayfulColors.success : CleanColors.success)
+        : (isPlayful ? PlayfulColors.error : CleanColors.error);
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: AppOpacity.soft),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+      ),
+      child: Text(
+        isActive ? 'Active' : 'Inactive',
+        style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+          fontWeight: FontWeight.w500,
+          color: statusColor,
+        ),
+      ),
+    );
+  }
+}
+
+/// Code display with copy functionality.
+class _CodeDisplay extends StatelessWidget {
+  const _CodeDisplay({
+    required this.code,
+    required this.isActive,
+    required this.isPlayful,
+  });
+
+  final String code;
+  final bool isActive;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final surfaceColor =
+        isPlayful ? PlayfulColors.surfaceSubtle : CleanColors.surfaceSubtle;
+    final borderColor = isPlayful ? PlayfulColors.border : CleanColors.border;
+
+    return Row(
+      children: [
+        // Code container
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: AppRadius.badge(isPlayful: isPlayful),
+              border: Border.all(color: borderColor),
+            ),
+            child: Text(
+              code,
+              style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: AppSpacing.xs),
+        // Copy button
+        AppButton.icon(
+          icon: Icons.copy,
+          tooltip: 'Copy code',
+          size: ButtonSize.medium,
+          onPressed: isActive
+              ? () {
+                  Clipboard.setData(ClipboardData(text: code));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Code copied to clipboard',
+                        style: AppTypography.secondaryText(isPlayful: isPlayful)
+                            .copyWith(color: Colors.white),
+                      ),
+                      duration: const Duration(seconds: 2),
+                      backgroundColor: isPlayful
+                          ? PlayfulColors.success
+                          : CleanColors.success,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+                      ),
+                    ),
+                  );
+                }
+              : null,
+        ),
+      ],
+    );
+  }
+}
+
+/// Stats row showing usage, expiry, and deactivate action.
+class _StatsRow extends StatelessWidget {
+  const _StatsRow({
+    required this.inviteCode,
+    required this.isPlayful,
+    required this.isActive,
+    this.onDeactivate,
+  });
+
+  final InviteCode inviteCode;
+  final bool isPlayful;
+  final bool isActive;
+  final VoidCallback? onDeactivate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Usage stat
+        _StatItem(
+          icon: Icons.repeat,
+          label: 'Uses',
+          value: '${inviteCode.timesUsed}/${inviteCode.usageLimit}',
+          isPlayful: isPlayful,
+        ),
+        SizedBox(width: AppSpacing.md),
+        // Expiry stat (if applicable)
+        if (inviteCode.expiresAt case final expiresAt?)
+          _StatItem(
+            icon: Icons.schedule,
+            label: 'Expires',
+            value: _formatDate(expiresAt),
+            isPlayful: isPlayful,
+            isWarning: DateTime.now().isAfter(expiresAt),
+          ),
+        const Spacer(),
+        // Deactivate button
+        if (isActive)
+          AppButton.tertiary(
+            label: 'Deactivate',
+            icon: Icons.cancel_outlined,
+            size: ButtonSize.small,
+            foregroundColor:
+                isPlayful ? PlayfulColors.error : CleanColors.error,
+            onPressed: onDeactivate,
+          ),
+      ],
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+/// Individual stat item showing icon, value, and label.
+class _StatItem extends StatelessWidget {
+  const _StatItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isPlayful,
+    this.isWarning = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isPlayful;
+  final bool isWarning;
+
+  @override
+  Widget build(BuildContext context) {
+    final warningColor = isPlayful ? PlayfulColors.error : CleanColors.error;
+    final normalColor =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+    final color = isWarning ? warningColor : normalColor;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: AppIconSize.xs,
+          color: color,
+        ),
+        SizedBox(width: AppSpacing.xxs),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: AppTypography.tertiaryText(isPlayful: isPlayful).copyWith(
+                fontWeight: FontWeight.w500,
+                color: isWarning
+                    ? warningColor
+                    : (isPlayful
+                        ? PlayfulColors.textPrimary
+                        : CleanColors.textPrimary),
+              ),
+            ),
+            Text(
+              label,
+              style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

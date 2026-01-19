@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/utils/subject_colors.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../dashboard/domain/entities/subject.dart';
@@ -9,10 +10,8 @@ import '../../domain/entities/entities.dart';
 import '../../domain/repositories/admin_repository.dart';
 
 /// Exception thrown when admin operations fail.
-class AdminException implements Exception {
-  const AdminException(this.message);
-
-  final String message;
+class AdminException extends RepositoryException {
+  const AdminException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'AdminException: $message';
@@ -59,7 +58,11 @@ class SupabaseAdminRepository implements AdminRepository {
           .from('schools')
           .insert({'name': name})
           .select('id, name, created_at')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const AdminException('Failed to create school: no data returned');
+      }
 
       return School.fromJson(response);
     } on PostgrestException catch (e) {
@@ -139,7 +142,11 @@ class SupabaseAdminRepository implements AdminRepository {
             'academic_year': academicYear,
           })
           .select('id, school_id, name, grade_level, academic_year, created_at')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const AdminException('Failed to create class: no data returned');
+      }
 
       return ClassInfo.fromJson(response);
     } on PostgrestException catch (e) {
@@ -188,7 +195,11 @@ class SupabaseAdminRepository implements AdminRepository {
             expires_at,
             created_at
           ''')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const AdminException('Failed to generate invite code: no data returned');
+      }
 
       // Map invite_tokens schema to InviteCode entity
       final timesUsed = response['times_used'] as int;
@@ -304,7 +315,11 @@ class SupabaseAdminRepository implements AdminRepository {
           .from('invite_tokens')
           .select('usage_limit')
           .eq('token', codeId)
-          .single();
+          .maybeSingle();
+
+      if (tokenData == null) {
+        throw AdminException('Invite code not found: $codeId');
+      }
       final usageLimit = tokenData['usage_limit'] as int;
 
       // Deactivate by setting times_used to usage_limit
@@ -322,7 +337,11 @@ class SupabaseAdminRepository implements AdminRepository {
             expires_at,
             created_at
           ''')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw AdminException('Failed to deactivate invite code: $codeId');
+      }
 
       // Map invite_tokens schema to InviteCode entity
       final timesUsed = response['times_used'] as int;
@@ -380,7 +399,11 @@ class SupabaseAdminRepository implements AdminRepository {
             avatar_url,
             created_at
           ''')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw AdminException('User not found: $userId');
+      }
 
       // Email may be null if not available - UI should handle this gracefully
       return AppUser.fromJson(response);

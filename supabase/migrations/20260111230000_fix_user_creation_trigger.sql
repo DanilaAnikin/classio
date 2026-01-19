@@ -1,9 +1,9 @@
 -- ============================================================================
--- MIGRATION: Fix User Creation Trigger for GENESIS-KEY and Bootstrap Cases
+-- MIGRATION: Fix User Creation Trigger for Bootstrap Cases
 -- Version: 20260111230000
 --
 -- Problem: "Database error saving new user" (status 500) when registering
--- with GENESIS-KEY token. The handle_new_user() trigger function was failing.
+-- with bootstrap token. The handle_new_user() trigger function was failing.
 --
 -- Root Causes Identified:
 -- 1. The trigger function is SECURITY DEFINER, but it still respects RLS
@@ -72,7 +72,7 @@ BEGIN
   END IF;
 
   -- Create profile
-  -- school_id can be NULL for superadmin users (GENESIS-KEY case)
+  -- school_id can be NULL for superadmin users (bootstrap token case)
   INSERT INTO profiles (
     id,
     email,
@@ -147,20 +147,26 @@ GRANT ALL ON class_students TO postgres;
 GRANT ALL ON class_students TO service_role;
 
 -- ============================================================================
--- Verify the GENESIS-KEY token exists and is valid
+-- BOOTSTRAP TOKEN NOTICE (SECURITY FIX)
 -- ============================================================================
-INSERT INTO invite_tokens (token, role, school_id, created_by_user_id, is_used, expires_at)
-VALUES ('GENESIS-KEY', 'superadmin', NULL, NULL, false, '2099-12-31'::timestamptz)
-ON CONFLICT (token) DO UPDATE SET
-  is_used = false,
-  expires_at = '2099-12-31'::timestamptz;
+-- IMPORTANT: Hardcoded tokens have been removed for security.
+--
+-- To create the first superadmin, use the secure bootstrap process:
+-- 1. Connect to the database via a secure channel (Supabase Dashboard SQL Editor, psql)
+-- 2. Run: SELECT generate_genesis_token();
+-- 3. This generates a cryptographically random token that expires in 24 hours
+-- 4. Use the returned token to register the first superadmin
+-- 5. The token can only be generated if NO superadmin exists yet
+--
+-- See migration: 20260118000001_secure_genesis_token.sql for the implementation
+-- ============================================================================
 
 -- ============================================================================
 -- Add comments
 -- ============================================================================
 COMMENT ON FUNCTION handle_new_user() IS
   'Trigger function that creates a profile for new users based on their invite token. '
-  'Handles the GENESIS-KEY case where school_id is NULL (for SuperAdmin bootstrap). '
+  'Handles bootstrap tokens where school_id is NULL (for SuperAdmin). '
   'Runs as SECURITY DEFINER to bypass RLS when updating invite_tokens and inserting profiles.';
 
 -- ============================================================================

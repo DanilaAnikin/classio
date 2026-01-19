@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../dashboard/domain/entities/entities.dart';
 import '../../../schedule/presentation/widgets/widgets.dart';
@@ -239,7 +240,7 @@ class _ScheduleLessonCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
               )
             : null,
-        padding: isModified ? const EdgeInsets.all(4) : EdgeInsets.zero,
+        padding: isModified ? EdgeInsets.all(AppSpacing.xxs) : EdgeInsets.zero,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -358,7 +359,7 @@ class _ScheduleLessonCard extends StatelessWidget {
                               size: isPlayful ? 16 : 14,
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: AppSpacing.xxs),
                             Text(
                               lesson.subject.teacherName!,
                               style: TextStyle(
@@ -369,7 +370,7 @@ class _ScheduleLessonCard extends StatelessWidget {
                           ],
                         ),
                       ],
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppSpacing.xxs),
                       Row(
                         children: [
                           Icon(
@@ -377,7 +378,7 @@ class _ScheduleLessonCard extends StatelessWidget {
                             size: isPlayful ? 16 : 14,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: AppSpacing.xxs),
                           Text(
                             lesson.room,
                             style: TextStyle(
@@ -439,7 +440,7 @@ class _EmptySchedule extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               'You have no classes scheduled for $dayName',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -481,7 +482,7 @@ class _ErrorState extends StatelessWidget {
               size: 64,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -489,7 +490,7 @@ class _ErrorState extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),

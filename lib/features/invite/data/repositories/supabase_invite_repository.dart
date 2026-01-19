@@ -3,15 +3,14 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:classio/core/exceptions/app_exception.dart';
 import 'package:classio/features/auth/domain/entities/app_user.dart';
 import '../../domain/entities/invite_token.dart';
 import '../../domain/repositories/invite_repository.dart';
 
 /// Exception thrown when invite token operations fail.
-class InviteException implements Exception {
-  const InviteException(this.message);
-
-  final String message;
+class InviteException extends RepositoryException {
+  const InviteException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'InviteException: $message';
@@ -92,7 +91,11 @@ class SupabaseInviteRepository implements InviteRepository {
           .from('profiles')
           .select('role')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (profileResponse == null) {
+        throw const InviteException('User profile not found');
+      }
 
       final roleString = profileResponse['role'] as String?;
       final role = UserRole.fromString(roleString);
@@ -209,7 +212,11 @@ class SupabaseInviteRepository implements InviteRepository {
           .from('profiles')
           .select('role, school_id')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (profileResponse == null) {
+        throw const InviteException('User profile not found');
+      }
 
       final roleString = profileResponse['role'] as String?;
       final userSchoolId = profileResponse['school_id'] as String?;
@@ -273,7 +280,11 @@ class SupabaseInviteRepository implements InviteRepository {
             .from('profiles')
             .select('role, school_id')
             .eq('id', userId)
-            .single();
+            .maybeSingle();
+
+        if (profileResponse == null) {
+          throw const InviteException('User profile not found');
+        }
 
         final roleString = profileResponse['role'] as String?;
         final userSchoolId = profileResponse['school_id'] as String?;
@@ -296,7 +307,11 @@ class SupabaseInviteRepository implements InviteRepository {
           .from('invite_tokens')
           .select('usage_limit')
           .eq('token', token)
-          .single();
+          .maybeSingle();
+
+      if (tokenData == null) {
+        throw const InviteException('Token not found');
+      }
       final usageLimit = tokenData['usage_limit'] as int;
 
       await _supabase
@@ -323,7 +338,11 @@ class SupabaseInviteRepository implements InviteRepository {
           .from('profiles')
           .select('role, school_id')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (profileResponse == null) {
+        throw const InviteException('User profile not found');
+      }
 
       final roleString = profileResponse['role'] as String?;
       final userSchoolId = profileResponse['school_id'] as String?;
@@ -377,7 +396,11 @@ class SupabaseInviteRepository implements InviteRepository {
           .from('invite_tokens')
           .select()
           .eq('token', token)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const InviteException('Invalid or used token');
+      }
 
       final inviteToken = InviteToken.fromJson(response);
 

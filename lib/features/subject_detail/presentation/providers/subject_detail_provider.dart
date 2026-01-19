@@ -7,6 +7,15 @@ import 'subject_detail_state.dart';
 
 part 'subject_detail_provider.g.dart';
 
+/// Provider for the SubjectDetailRepository instance.
+///
+/// Provides the Supabase implementation for production use.
+/// Can be overridden in tests to provide a mock implementation.
+@riverpod
+SubjectDetailRepository subjectDetailRepository(Ref ref) {
+  return SupabaseSubjectDetailRepository();
+}
+
 /// Riverpod notifier for managing subject detail state.
 ///
 /// Handles loading, refreshing, and managing subject detail data.
@@ -17,8 +26,8 @@ class SubjectDetailNotifier extends _$SubjectDetailNotifier {
 
   @override
   SubjectDetailState build(String subjectId) {
-    // Initialize repository - Supabase implementation for production
-    _repository = SupabaseSubjectDetailRepository();
+    // Initialize repository via provider for testability
+    _repository = ref.watch(subjectDetailRepositoryProvider);
 
     // Load data on build
     loadSubjectDetail(subjectId);

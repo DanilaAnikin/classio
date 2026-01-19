@@ -88,12 +88,12 @@ Map<int, List<ScheduleLesson>> scheduleLessonsByDay(Ref ref, String classId) {
       };
 
       for (final lesson in lessons) {
-        byDay[lesson.dayOfWeek]!.add(lesson);
+        byDay[lesson.dayOfWeek]?.add(lesson);
       }
 
       // Sort each day by start time
       for (final day in byDay.keys) {
-        byDay[day]!.sort((a, b) {
+        byDay[day]?.sort((a, b) {
           final aMinutes = a.startTime.hour * 60 + a.startTime.minute;
           final bMinutes = b.startTime.hour * 60 + b.startTime.minute;
           return aMinutes.compareTo(bMinutes);

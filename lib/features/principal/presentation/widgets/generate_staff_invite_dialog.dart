@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../providers/principal_providers.dart';
 
@@ -87,8 +87,9 @@ class _GenerateStaffInviteDialogState
   }
 
   void _copyToClipboard() {
-    if (_generatedCode != null) {
-      Clipboard.setData(ClipboardData(text: _generatedCode!));
+    final code = _generatedCode;
+    if (code != null) {
+      Clipboard.setData(ClipboardData(text: code));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Invite code copied to clipboard'),
@@ -134,12 +135,12 @@ class _GenerateStaffInviteDialogState
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 450),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.dialogInsets,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,24 +149,23 @@ class _GenerateStaffInviteDialogState
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: CleanColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      color: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.vpn_key_outlined,
-                      color: CleanColors.primary,
+                      color: theme.colorScheme.primary,
+                      size: AppIconSize.md,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Expanded(
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
                     child: Text(
                       'Generate Invite Code',
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: CleanColors.textPrimary,
                       ),
                     ),
                   ),
@@ -175,21 +175,20 @@ class _GenerateStaffInviteDialogState
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
 
-              if (_generatedCode == null) ...[
+              if (_generatedCode case null) ...[
                 // Role selection
-                const Text(
+                Text(
                   'Role',
-                  style: TextStyle(
+                  style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: CleanColors.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: AppSpacing.xs,
+                  runSpacing: AppSpacing.xs,
                   children: [UserRole.teacher, UserRole.admin, UserRole.student, UserRole.parent]
                       .map((role) => ChoiceChip(
                             label: Text(_getRoleDisplayName(role)),
@@ -200,11 +199,11 @@ class _GenerateStaffInviteDialogState
                               }
                             },
                             selectedColor:
-                                _getRoleColor(role).withValues(alpha: 0.2),
+                                _getRoleColor(role).withValues(alpha: AppOpacity.medium),
                             labelStyle: TextStyle(
                               color: _selectedRole == role
                                   ? _getRoleColor(role)
-                                  : CleanColors.textSecondary,
+                                  : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
                               fontWeight: _selectedRole == role
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -212,17 +211,16 @@ class _GenerateStaffInviteDialogState
                           ))
                       .toList(),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: AppSpacing.lg),
 
                 // Usage limit
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Usage Limit',
-                        style: TextStyle(
+                        style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: CleanColors.textPrimary,
                         ),
                       ),
                     ),
@@ -242,17 +240,16 @@ class _GenerateStaffInviteDialogState
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: AppSpacing.sm),
 
                 // Expiry days
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Expires In',
-                        style: TextStyle(
+                        style: theme.textTheme.labelLarge?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: CleanColors.textPrimary,
                         ),
                       ),
                     ),
@@ -272,7 +269,7 @@ class _GenerateStaffInviteDialogState
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: AppSpacing.xl),
 
                 // Generate button
                 SizedBox(
@@ -280,73 +277,70 @@ class _GenerateStaffInviteDialogState
                   child: FilledButton(
                     onPressed: _isGenerating ? null : _generateCode,
                     child: _isGenerating
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
+                        ? SizedBox(
+                            width: AppIconSize.sm,
+                            height: AppIconSize.sm,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: CleanColors.onPrimary,
+                              color: theme.colorScheme.onPrimary,
                             ),
                           )
                         : const Text('Generate Code'),
                   ),
                 ),
-              ] else ...[
+              ] else if (_generatedCode case final generatedCode?) ...[
                 // Generated code display
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(AppSpacing.lg),
                   decoration: BoxDecoration(
-                    color: CleanColors.success.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: CleanColors.success.withValues(alpha: AppOpacity.soft),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     border: Border.all(
-                      color: CleanColors.success.withValues(alpha: 0.3),
+                      color: CleanColors.success.withValues(alpha: AppOpacity.soft),
                     ),
                   ),
                   child: Column(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.check_circle_outline,
                         color: CleanColors.success,
-                        size: 48,
+                        size: AppIconSize.xxl,
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
+                      SizedBox(height: AppSpacing.sm),
+                      Text(
                         'Invite Code Generated!',
-                        style: TextStyle(
-                          fontSize: 16,
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: CleanColors.success,
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                          vertical: AppSpacing.sm,
                         ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: CleanColors.border),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                          border: Border.all(color: theme.colorScheme.outline.withValues(alpha: AppOpacity.medium)),
                         ),
                         child: SelectableText(
-                          _generatedCode!,
-                          style: const TextStyle(
-                            fontSize: 24,
+                          generatedCode,
+                          style: theme.textTheme.headlineSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             fontFamily: 'monospace',
                             letterSpacing: 2,
-                            color: CleanColors.textPrimary,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           OutlinedButton.icon(
                             onPressed: _copyToClipboard,
-                            icon: const Icon(Icons.copy, size: 18),
+                            icon: Icon(Icons.copy, size: AppIconSize.xs + 2),
                             label: const Text('Copy'),
                           ),
                         ],
@@ -354,14 +348,14 @@ class _GenerateStaffInviteDialogState
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
 
                 // Code details
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: CleanColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(8),
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   child: Column(
                     children: [
@@ -370,13 +364,13 @@ class _GenerateStaffInviteDialogState
                         value: _getRoleDisplayName(_selectedRole),
                         icon: Icons.badge_outlined,
                       ),
-                      const Divider(height: 16),
+                      Divider(height: AppSpacing.md),
                       _DetailRow(
                         label: 'Usage Limit',
                         value: '$_usageLimit uses',
                         icon: Icons.people_outline,
                       ),
-                      const Divider(height: 16),
+                      Divider(height: AppSpacing.md),
                       _DetailRow(
                         label: 'Expires In',
                         value: _expiryDays == 1 ? '1 day' : '$_expiryDays days',
@@ -385,7 +379,7 @@ class _GenerateStaffInviteDialogState
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: AppSpacing.lg),
 
                 // Done button
                 SizedBox(
@@ -418,29 +412,28 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Row(
       children: [
         Icon(
           icon,
-          size: 18,
-          color: CleanColors.textSecondary,
+          size: AppIconSize.xs + 2,
+          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.xs),
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              color: CleanColors.textSecondary,
-              fontSize: 14,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
             ),
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
+          style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: CleanColors.textPrimary,
-            fontSize: 14,
           ),
         ),
       ],

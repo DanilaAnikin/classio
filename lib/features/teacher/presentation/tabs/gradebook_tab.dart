@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/spacing.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../domain/entities/teacher_grade_entity.dart';
@@ -54,7 +57,7 @@ class _SubjectSelector extends ConsumerWidget {
     final selectedSubjectId = ref.watch(selectedSubjectProvider);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
@@ -78,7 +81,7 @@ class _SubjectSelector extends ConsumerWidget {
               children: subjects.map((subject) {
                 final isSelected = selectedSubjectId == subject.id;
                 return Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.only(right: AppSpacing.xs),
                   child: FilterChip(
                     label: Text(subject.name),
                     selected: isSelected,
@@ -137,7 +140,7 @@ class _EmptyGradebook extends StatelessWidget {
             size: isPlayful ? 72 : 64,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
           Text(
             'Select a subject to view gradebook',
             style: TextStyle(
@@ -146,7 +149,7 @@ class _EmptyGradebook extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           Text(
             'Choose a subject from the chips above',
             style: TextStyle(
@@ -213,12 +216,12 @@ class _GradebookContent extends ConsumerWidget {
           children: [
             Icon(Icons.error_outline_rounded,
                 size: 48, color: theme.colorScheme.error),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Text(
               'Failed to load grades',
               style: TextStyle(color: theme.colorScheme.error),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             OutlinedButton.icon(
               onPressed: () =>
                   ref.invalidate(subjectGradesProvider(subjectId)),
@@ -265,18 +268,29 @@ class _GradebookGrid extends ConsumerWidget {
         final gradesByStudent = <String, List<TeacherGradeEntity>>{};
         for (final grade in grades) {
           gradesByStudent.putIfAbsent(grade.studentId, () => []);
-          gradesByStudent[grade.studentId]!.add(grade);
+          gradesByStudent[grade.studentId]?.add(grade);
         }
 
         // Get unique grade types
         final gradeTypes = grades.map((g) => g.gradeType ?? 'Grade').toSet().toList();
         if (gradeTypes.isEmpty) gradeTypes.add('Grade');
 
+        // Calculate minimum required width for the grid
+        // 180 (student name) + 80 (average) + 80 per grade type + padding
+        const studentColumnWidth = 180.0;
+        const averageColumnWidth = 80.0;
+        const gradeColumnWidth = 80.0;
+        const horizontalPadding = 32.0; // AppSpacing.sm * 2 on each side
+        final minRequiredWidth = studentColumnWidth +
+            averageColumnWidth +
+            (gradeTypes.length * gradeColumnWidth) +
+            horizontalPadding;
+
         return Column(
           children: [
             // Add Grade Button
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(AppSpacing.sm),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -289,83 +303,107 @@ class _GradebookGrid extends ConsumerWidget {
               ),
             ),
 
-            // Grid Header
-            Container(
-              color: theme.colorScheme.surfaceContainerHighest,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 180,
-                    child: Text(
-                      'Student',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: isPlayful ? 14 : 13,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  ...gradeTypes.map((type) => Expanded(
-                        child: Center(
-                          child: Text(
-                            type,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: isPlayful ? 13 : 12,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      )),
-                  SizedBox(
-                    width: 80,
-                    child: Center(
-                      child: Text(
-                        'Average',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: isPlayful ? 14 : 13,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Student Rows
+            // Scrollable Grid (Header + Rows)
             Expanded(
-              child: ListView.builder(
-                itemCount: students.length,
-                itemBuilder: (context, index) {
-                  final student = students[index];
-                  final studentGrades = gradesByStudent[student.id] ?? [];
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final gridWidth = math.max(constraints.maxWidth, minRequiredWidth);
 
-                  // Calculate average
-                  double average = 0;
-                  if (studentGrades.isNotEmpty) {
-                    double totalWeight = 0;
-                    double weightedSum = 0;
-                    for (final g in studentGrades) {
-                      weightedSum += g.score * g.weight;
-                      totalWeight += g.weight;
-                    }
-                    if (totalWeight > 0) {
-                      average = weightedSum / totalWeight;
-                    }
-                  }
+                  return Scrollbar(
+                    thumbVisibility: gridWidth > constraints.maxWidth,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                        width: gridWidth,
+                        child: Column(
+                          children: [
+                            // Grid Header
+                            Container(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: studentColumnWidth,
+                                    child: Text(
+                                      'Student',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: isPlayful ? 14 : 13,
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  ...gradeTypes.map((type) => Expanded(
+                                        child: Center(
+                                          child: Text(
+                                            type,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: isPlayful ? 13 : 12,
+                                              color: theme.colorScheme.onSurface,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      )),
+                                  SizedBox(
+                                    width: averageColumnWidth,
+                                    child: Center(
+                                      child: Text(
+                                        'Average',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: isPlayful ? 14 : 13,
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
 
-                  return _StudentGradeRow(
-                    student: student,
-                    grades: studentGrades,
-                    gradeTypes: gradeTypes,
-                    average: average,
-                    subjectId: subjectId,
-                    isPlayful: isPlayful,
-                    isEven: index.isEven,
+                            // Student Rows
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: students.length,
+                                itemBuilder: (context, index) {
+                                  final student = students[index];
+                                  final studentGrades = gradesByStudent[student.id] ?? [];
+
+                                  // Calculate average
+                                  double average = 0;
+                                  if (studentGrades.isNotEmpty) {
+                                    double totalWeight = 0;
+                                    double weightedSum = 0;
+                                    for (final g in studentGrades) {
+                                      weightedSum += g.score * g.weight;
+                                      totalWeight += g.weight;
+                                    }
+                                    if (totalWeight > 0) {
+                                      average = weightedSum / totalWeight;
+                                    }
+                                  }
+
+                                  return _StudentGradeRow(
+                                    student: student,
+                                    grades: studentGrades,
+                                    gradeTypes: gradeTypes,
+                                    average: average,
+                                    subjectId: subjectId,
+                                    isPlayful: isPlayful,
+                                    isEven: index.isEven,
+                                    studentColumnWidth: studentColumnWidth,
+                                    averageColumnWidth: averageColumnWidth,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),
@@ -407,6 +445,8 @@ class _StudentGradeRow extends ConsumerWidget {
     required this.subjectId,
     required this.isPlayful,
     required this.isEven,
+    required this.studentColumnWidth,
+    required this.averageColumnWidth,
   });
 
   final AppUser student;
@@ -416,6 +456,8 @@ class _StudentGradeRow extends ConsumerWidget {
   final String subjectId;
   final bool isPlayful;
   final bool isEven;
+  final double studentColumnWidth;
+  final double averageColumnWidth;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -425,19 +467,19 @@ class _StudentGradeRow extends ConsumerWidget {
       color: isEven
           ? theme.colorScheme.surface
           : theme.colorScheme.surfaceContainerLow,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
       child: Row(
         children: [
           // Student Name
           SizedBox(
-            width: 180,
+            width: studentColumnWidth,
             child: Row(
               children: [
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: theme.colorScheme.primaryContainer,
                   backgroundImage: student.avatarUrl != null
-                      ? NetworkImage(student.avatarUrl!)
+                      ? NetworkImage(student.avatarUrl ?? '')
                       : null,
                   child: student.avatarUrl == null
                       ? Text(
@@ -452,7 +494,7 @@ class _StudentGradeRow extends ConsumerWidget {
                         )
                       : null,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     student.fullName,
@@ -487,7 +529,7 @@ class _StudentGradeRow extends ConsumerWidget {
 
           // Average
           SizedBox(
-            width: 80,
+            width: averageColumnWidth,
             child: Center(
               child: GradeCell(
                 score: average,

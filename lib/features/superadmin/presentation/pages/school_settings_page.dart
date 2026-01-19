@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
@@ -565,15 +566,15 @@ class _SchoolSettingsPageState extends ConsumerState<SchoolSettingsPage> {
   Color _getSubscriptionColor(SubscriptionStatus status) {
     switch (status) {
       case SubscriptionStatus.trial:
-        return Colors.orange;
+        return CleanColors.subscriptionTrial;
       case SubscriptionStatus.pro:
-        return Colors.blue;
+        return CleanColors.subscriptionBasic;
       case SubscriptionStatus.max:
-        return Colors.purple;
+        return CleanColors.subscriptionPro;
       case SubscriptionStatus.suspended:
-        return Colors.red;
+        return CleanColors.subscriptionExpired;
       case SubscriptionStatus.expired:
-        return Colors.grey;
+        return CleanColors.subscriptionInactive;
     }
   }
 }

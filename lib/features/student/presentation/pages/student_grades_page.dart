@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../grades/domain/entities/entities.dart';
 import '../providers/student_provider.dart';
@@ -38,7 +41,7 @@ class StudentGradesPage extends ConsumerWidget {
         },
         child: ResponsiveCenterScrollView(
           maxWidth: 800,
-          padding: EdgeInsets.all(isPlayful ? 16 : 12),
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -48,7 +51,7 @@ class StudentGradesPage extends ConsumerWidget {
                 average: overallAverage,
                 isPlayful: isPlayful,
               ),
-              SizedBox(height: isPlayful ? 24 : 20),
+              SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
               // Grades by Subject
               Text(
@@ -57,7 +60,7 @@ class StudentGradesPage extends ConsumerWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: isPlayful ? 12 : 8),
+              SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
               gradesAsync.when(
                 data: (gradesList) => gradesList.isEmpty
                     ? _EmptyCard(
@@ -98,12 +101,8 @@ class _OverallAverageCard extends StatelessWidget {
   final double average;
   final bool isPlayful;
 
-  Color _getGradeColor(double value) {
-    if (value >= 5) return Colors.green.shade600;
-    if (value >= 4) return Colors.lightGreen.shade600;
-    if (value >= 3) return Colors.orange.shade600;
-    if (value >= 2) return Colors.deepOrange.shade600;
-    return Colors.red.shade600;
+  Color _getGradeColor(double value, {required bool isPlayful}) {
+    return AppSemanticColors.getGradeColor(value, isPlayful: isPlayful);
   }
 
   String _getGradeDescription(double avg) {
@@ -117,12 +116,12 @@ class _OverallAverageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradeColor = average > 0 ? _getGradeColor(average) : Theme.of(context).colorScheme.outline;
+    final gradeColor = average > 0 ? _getGradeColor(average, isPlayful: isPlayful) : Theme.of(context).colorScheme.outline;
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 24 : 20),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.lg),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg + AppRadius.xs : AppRadius.lg),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -148,7 +147,7 @@ class _OverallAverageCard extends StatelessWidget {
             height: isPlayful ? 72 : 64,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
+              borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg + AppRadius.xs : AppRadius.lg),
             ),
             child: Center(
               child: Text(
@@ -161,7 +160,7 @@ class _OverallAverageCard extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: isPlayful ? 20 : 16),
+          SizedBox(width: isPlayful ? AppSpacing.lg : AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +173,7 @@ class _OverallAverageCard extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Text(
                   _getGradeDescription(average),
                   style: TextStyle(
@@ -210,24 +209,20 @@ class _SubjectGradeExpandableCardState
     extends State<_SubjectGradeExpandableCard> {
   bool _isExpanded = false;
 
-  Color _getGradeColor(double value) {
-    if (value >= 5) return Colors.green;
-    if (value >= 4) return Colors.lightGreen;
-    if (value >= 3) return Colors.orange;
-    if (value >= 2) return Colors.deepOrange;
-    return Colors.red;
+  Color _getGradeColor(double value, {required bool isPlayful}) {
+    return AppSemanticColors.getGradeColor(value, isPlayful: isPlayful);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final gradeColor = _getGradeColor(widget.stats.average);
+    final gradeColor = _getGradeColor(widget.stats.average, isPlayful: widget.isPlayful);
 
     return Card(
       elevation: widget.isPlayful ? 2 : 0,
-      margin: EdgeInsets.only(bottom: widget.isPlayful ? 12 : 8),
+      margin: EdgeInsets.only(bottom: widget.isPlayful ? AppSpacing.sm : AppSpacing.xs),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(widget.isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(widget.isPlayful ? AppRadius.lg : AppRadius.md),
         side: widget.isPlayful
             ? BorderSide.none
             : BorderSide(
@@ -237,9 +232,9 @@ class _SubjectGradeExpandableCardState
         children: [
           InkWell(
             onTap: () => setState(() => _isExpanded = !_isExpanded),
-            borderRadius: BorderRadius.circular(widget.isPlayful ? 16 : 12),
+            borderRadius: BorderRadius.circular(widget.isPlayful ? AppRadius.lg : AppRadius.md),
             child: Padding(
-              padding: EdgeInsets.all(widget.isPlayful ? 16 : 12),
+              padding: EdgeInsets.all(widget.isPlayful ? AppSpacing.md : AppSpacing.sm),
               child: Row(
                 children: [
                   Container(
@@ -248,7 +243,7 @@ class _SubjectGradeExpandableCardState
                     decoration: BoxDecoration(
                       color: gradeColor.withValues(alpha: 0.15),
                       borderRadius:
-                          BorderRadius.circular(widget.isPlayful ? 14 : 10),
+                          BorderRadius.circular(widget.isPlayful ? AppRadius.md + 2 : AppRadius.sm + 2),
                     ),
                     child: Center(
                       child: Text(
@@ -261,7 +256,7 @@ class _SubjectGradeExpandableCardState
                       ),
                     ),
                   ),
-                  SizedBox(width: widget.isPlayful ? 16 : 12),
+                  SizedBox(width: widget.isPlayful ? AppSpacing.md : AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,10 +269,10 @@ class _SubjectGradeExpandableCardState
                             color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: AppSpacing.xxs + 2),
                         ClipRRect(
                           borderRadius:
-                              BorderRadius.circular(widget.isPlayful ? 6 : 4),
+                              BorderRadius.circular(widget.isPlayful ? AppRadius.xs + 2 : AppRadius.xs),
                           child: LinearProgressIndicator(
                             value: widget.stats.average / 6,
                             minHeight: widget.isPlayful ? 8 : 6,
@@ -288,7 +283,7 @@ class _SubjectGradeExpandableCardState
                       ],
                     ),
                   ),
-                  SizedBox(width: widget.isPlayful ? 12 : 8),
+                  SizedBox(width: widget.isPlayful ? AppSpacing.sm : AppSpacing.xs),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -300,7 +295,7 @@ class _SubjectGradeExpandableCardState
                               theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppSpacing.xxs),
                       Icon(
                         _isExpanded
                             ? Icons.keyboard_arrow_up
@@ -320,7 +315,7 @@ class _SubjectGradeExpandableCardState
               color: theme.colorScheme.outline.withValues(alpha: 0.1),
             ),
             Padding(
-              padding: EdgeInsets.all(widget.isPlayful ? 16 : 12),
+              padding: EdgeInsets.all(widget.isPlayful ? AppSpacing.md : AppSpacing.sm),
               child: Column(
                 children: widget.stats.grades
                     .map((grade) => _GradeItem(
@@ -347,21 +342,17 @@ class _GradeItem extends StatelessWidget {
   final Grade grade;
   final bool isPlayful;
 
-  Color _getGradeColor(double value) {
-    if (value >= 5) return Colors.green;
-    if (value >= 4) return Colors.lightGreen;
-    if (value >= 3) return Colors.orange;
-    if (value >= 2) return Colors.deepOrange;
-    return Colors.red;
+  Color _getGradeColor(double value, {required bool isPlayful}) {
+    return AppSemanticColors.getGradeColor(value, isPlayful: isPlayful);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final gradeColor = _getGradeColor(grade.score);
+    final gradeColor = _getGradeColor(grade.score, isPlayful: isPlayful);
 
     return Padding(
-      padding: EdgeInsets.only(bottom: isPlayful ? 10 : 8),
+      padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.sm - 2 : AppSpacing.xs),
       child: Row(
         children: [
           Container(
@@ -369,7 +360,7 @@ class _GradeItem extends StatelessWidget {
             height: isPlayful ? 40 : 34,
             decoration: BoxDecoration(
               color: gradeColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
+              borderRadius: BorderRadius.circular(isPlayful ? AppRadius.sm + 2 : AppRadius.sm),
             ),
             child: Center(
               child: Text(
@@ -383,7 +374,7 @@ class _GradeItem extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: isPlayful ? 12 : 10),
+          SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.sm - 2),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -412,12 +403,12 @@ class _GradeItem extends StatelessWidget {
           if (grade.weight != 1.0)
             Container(
               padding: EdgeInsets.symmetric(
-                horizontal: isPlayful ? 8 : 6,
+                horizontal: isPlayful ? AppSpacing.xs : AppSpacing.xs - 2,
                 vertical: isPlayful ? 3 : 2,
               ),
               decoration: BoxDecoration(
                 color: theme.colorScheme.outline.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(isPlayful ? 6 : 4),
+                borderRadius: BorderRadius.circular(isPlayful ? AppRadius.xs + 2 : AppRadius.xs),
               ),
               child: Text(
                 'x${grade.weight.toStringAsFixed(1)}',
@@ -447,14 +438,14 @@ class _LoadingCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 32 : 24),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xxl : AppSpacing.xl),
         child: const Center(child: CircularProgressIndicator()),
       ),
     );
@@ -478,14 +469,14 @@ class _ErrorCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 24 : 16),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.md),
         child: Column(
           children: [
             Icon(
@@ -493,7 +484,7 @@ class _ErrorCard extends StatelessWidget {
               size: 48,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -527,14 +518,14 @@ class _EmptyCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 24 : 16),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.md),
         child: Column(
           children: [
             Icon(
@@ -542,7 +533,7 @@ class _EmptyCard extends StatelessWidget {
               size: 48,
               color: theme.colorScheme.primary.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(

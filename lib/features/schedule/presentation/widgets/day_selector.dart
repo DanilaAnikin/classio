@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:classio/core/localization/localization.dart';
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/theme.dart';
 import '../providers/schedule_provider.dart';
 
 /// A horizontal day picker widget for selecting weekdays.
@@ -45,23 +46,15 @@ class DaySelector extends ConsumerWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 12 : 8,
-        vertical: isPlayful ? 12 : 8,
+        horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+        vertical: isPlayful ? AppSpacing.sm : AppSpacing.xs,
       ),
       decoration: BoxDecoration(
         color: isPlayful
-            ? theme.colorScheme.surface.withValues(alpha: 0.8)
+            ? theme.colorScheme.surface.withValues(alpha: AppOpacity.almostOpaque)
             : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
-        boxShadow: [
-          BoxShadow(
-            color: isPlayful
-                ? theme.colorScheme.primary.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.04),
-            blurRadius: isPlayful ? 12 : 6,
-            offset: Offset(0, isPlayful ? 4 : 2),
-          ),
-        ],
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+        boxShadow: AppShadows.card(isPlayful: isPlayful),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -72,7 +65,7 @@ class DaySelector extends ConsumerWidget {
 
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
               child: _DayButton(
                 label: _getDayLabel(weekday, locale),
                 fullName: _getFullDayName(weekday, locale),
@@ -112,6 +105,7 @@ class _DayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final buttonRadius = AppRadius.button(isPlayful: isPlayful);
 
     return Semantics(
       label: '$fullName${isSelected ? ", selected" : ""}${isToday ? ", today" : ""}',
@@ -121,39 +115,33 @@ class _DayButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(isPlayful ? 14 : 10),
+          borderRadius: buttonRadius,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
+            duration: AppDuration.normal,
+            curve: AppCurves.standard,
             padding: EdgeInsets.symmetric(
-              horizontal: isPlayful ? 12 : 10,
-              vertical: isPlayful ? 14 : 12,
+              horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs + AppSpacing.space2,
+              vertical: isPlayful ? AppSpacing.sm + AppSpacing.space2 : AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(isPlayful ? 14 : 10),
+              borderRadius: buttonRadius,
               gradient: isSelected && isPlayful
                   ? LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
                         theme.colorScheme.primary,
-                        theme.colorScheme.primary.withValues(alpha: 0.8),
+                        theme.colorScheme.primary.withValues(alpha: AppOpacity.almostOpaque),
                       ],
                     )
                   : null,
               color: isSelected
                   ? (isPlayful ? null : theme.colorScheme.primary)
                   : (isToday
-                      ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                      ? theme.colorScheme.primary.withValues(alpha: AppOpacity.soft)
                       : Colors.transparent),
               boxShadow: isSelected && isPlayful
-                  ? [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ]
+                  ? AppShadows.button(isPlayful: isPlayful)
                   : null,
             ),
             child: Column(
@@ -161,8 +149,8 @@ class _DayButton extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: isPlayful ? 14 : 13,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontSize: isPlayful ? AppFontSize.labelLarge : AppFontSize.labelMedium + 1,
                     fontWeight: isSelected || isToday
                         ? FontWeight.w700
                         : FontWeight.w500,
@@ -170,15 +158,15 @@ class _DayButton extends StatelessWidget {
                         ? theme.colorScheme.onPrimary
                         : isToday
                             ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    letterSpacing: isPlayful ? 0.3 : 0,
+                            : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.iconOnColor),
+                    letterSpacing: isPlayful ? AppLetterSpacing.titleSmall : 0,
                   ),
                 ),
                 if (isToday && !isSelected) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppSpacing.xxs),
                   Container(
-                    width: 6,
-                    height: 6,
+                    width: AppSpacing.xs - AppSpacing.space2,
+                    height: AppSpacing.xs - AppSpacing.space2,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: theme.colorScheme.primary,

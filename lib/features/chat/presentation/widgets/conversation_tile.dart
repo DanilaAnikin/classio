@@ -1,20 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_avatar.dart';
 import '../../domain/entities/entities.dart';
 import 'unread_badge.dart';
+
+// =============================================================================
+// CONVERSATION TILE
+// =============================================================================
+// A premium list tile widget for displaying conversations in a chat list.
+//
+// Features:
+// - Theme-aware styling (Clean vs Playful)
+// - Proper hover/press states with smooth animations
+// - Clean typography hierarchy (name, last message, timestamp)
+// - Unread indicator badge
+// - Online status indicator support
+// - Handles direct messages and group chats
+// - Uses AppAvatar component for consistent avatar display
+// - No magic numbers - all values from design tokens
+//
+// Usage:
+// ```dart
+// ConversationTile(
+//   conversation: conversationEntity,
+//   onTap: () => navigateToChat(conversation),
+//   isOnline: true,
+// )
+// ```
+// =============================================================================
 
 /// A tile widget representing a conversation in the conversations list.
 ///
 /// Displays the conversation avatar, name, last message preview, time,
 /// and unread count badge. Supports both direct and group conversations.
-class ConversationTile extends StatelessWidget {
+class ConversationTile extends StatefulWidget {
   /// Creates a [ConversationTile] widget.
   const ConversationTile({
     super.key,
     required this.conversation,
     required this.onTap,
-    this.isPlayful = false,
+    this.onLongPress,
+    this.isOnline = false,
   });
 
   /// The conversation to display.
@@ -23,8 +55,66 @@ class ConversationTile extends StatelessWidget {
   /// Callback when the tile is tapped.
   final VoidCallback onTap;
 
-  /// Whether to use playful theme styling.
-  final bool isPlayful;
+  /// Callback when the tile is long-pressed.
+  final VoidCallback? onLongPress;
+
+  /// Whether the other participant is currently online (for direct messages).
+  final bool isOnline;
+
+  @override
+  State<ConversationTile> createState() => _ConversationTileState();
+}
+
+class _ConversationTileState extends State<ConversationTile>
+    with SingleTickerProviderStateMixin {
+  bool _isHovered = false;
+  bool _isPressed = false;
+
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: AppDuration.fast,
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: AppCurves.decelerate,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  /// Determines if the current theme is playful
+  bool get _isPlayfulTheme {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.toARGB32() == PlayfulColors.primary.toARGB32();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    setState(() => _isPressed = true);
+    _animationController.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    setState(() => _isPressed = false);
+    _animationController.reverse();
+  }
+
+  void _handleTapCancel() {
+    setState(() => _isPressed = false);
+    _animationController.reverse();
+  }
 
   /// Formats the timestamp for display.
   String _formatTime(DateTime? dateTime) {
@@ -51,143 +141,343 @@ class ConversationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final hasUnread = conversation.hasUnread;
+    final isPlayful = _isPlayfulTheme;
+    final hasUnread = widget.conversation.hasUnread;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isPlayful ? 16 : 12,
-          vertical: isPlayful ? 14 : 12,
-        ),
-        decoration: BoxDecoration(
-          color: hasUnread
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        ),
-        child: Row(
-          children: [
-            // Avatar
-            _buildAvatar(theme),
-            SizedBox(width: isPlayful ? 14 : 12),
-
-            // Content (name, last message)
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name and time row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          conversation.name,
-                          style: TextStyle(
-                            fontSize: isPlayful ? 17 : 16,
-                            fontWeight: hasUnread
-                                ? FontWeight.w700
-                                : (isPlayful ? FontWeight.w600 : FontWeight.w500),
-                            color: theme.colorScheme.onSurface,
-                            letterSpacing: isPlayful ? 0.2 : 0,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatTime(conversation.lastActivityTime),
-                        style: TextStyle(
-                          fontSize: isPlayful ? 13 : 12,
-                          fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
-                          color: hasUnread
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: isPlayful ? 6 : 4),
-
-                  // Last message preview and unread badge row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          conversation.lastMessagePreview.isNotEmpty
-                              ? conversation.lastMessagePreview
-                              : 'No messages yet',
-                          style: TextStyle(
-                            fontSize: isPlayful ? 15 : 14,
-                            fontWeight: hasUnread ? FontWeight.w500 : FontWeight.w400,
-                            color: hasUnread
-                                ? theme.colorScheme.onSurface.withValues(alpha: 0.8)
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                            fontStyle: conversation.lastMessagePreview.isEmpty
-                                ? FontStyle.italic
-                                : FontStyle.normal,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (hasUnread) ...[
-                        const SizedBox(width: 8),
-                        UnreadBadge(
-                          count: conversation.unreadCount,
-                          isPlayful: isPlayful,
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTapDown: _handleTapDown,
+        onTapUp: _handleTapUp,
+        onTapCancel: _handleTapCancel,
+        onTap: widget.onTap,
+        onLongPress: widget.onLongPress,
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: _buildTileContainer(isPlayful, hasUnread),
+            );
+          },
         ),
       ),
     );
   }
 
-  /// Builds the avatar for the conversation.
-  Widget _buildAvatar(ThemeData theme) {
-    final size = isPlayful ? 56.0 : 52.0;
-    final iconSize = isPlayful ? 28.0 : 24.0;
+  Widget _buildTileContainer(bool isPlayful, bool hasUnread) {
+    final backgroundColor = _getBackgroundColor(isPlayful, hasUnread);
+    final borderRadius = AppRadius.button(isPlayful: isPlayful);
 
-    if (conversation.avatarUrl != null && conversation.avatarUrl!.isNotEmpty) {
-      return CircleAvatar(
-        radius: size / 2,
-        backgroundImage: NetworkImage(conversation.avatarUrl!),
-        onBackgroundImageError: (_, _) {},
-        child: null,
+    return AnimatedContainer(
+      duration: AppDuration.fast,
+      curve: AppCurves.standard,
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: borderRadius,
+        boxShadow: hasUnread && _isHovered
+            ? AppShadows.cardHover(isPlayful: isPlayful)
+            : null,
+      ),
+      child: Row(
+        children: [
+          // Avatar with optional online indicator
+          _buildAvatar(isPlayful),
+          SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+
+          // Content (name, last message)
+          Expanded(
+            child: _buildContent(isPlayful, hasUnread),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getBackgroundColor(bool isPlayful, bool hasUnread) {
+    final unreadColor = isPlayful
+        ? PlayfulColors.primarySubtle.withValues(alpha: 0.6)
+        : CleanColors.primarySubtle.withValues(alpha: 0.5);
+    final hoverColor =
+        isPlayful ? PlayfulColors.surfaceHover : CleanColors.surfaceHover;
+    final pressedColor =
+        isPlayful ? PlayfulColors.surfacePressed : CleanColors.surfacePressed;
+    final defaultColor = Colors.transparent;
+
+    if (_isPressed) {
+      if (hasUnread) {
+        return Color.lerp(unreadColor, pressedColor, 0.3)!;
+      }
+      return pressedColor;
+    }
+
+    if (_isHovered) {
+      if (hasUnread) {
+        return Color.lerp(unreadColor, hoverColor, 0.3)!;
+      }
+      return hoverColor;
+    }
+
+    if (hasUnread) {
+      return unreadColor;
+    }
+
+    return defaultColor;
+  }
+
+  /// Builds the avatar for the conversation.
+  Widget _buildAvatar(bool isPlayful) {
+    final avatarSize = isPlayful ? AvatarSize.lg : AvatarSize.md;
+
+    // Build online indicator badge if applicable
+    Widget? badge;
+    if (!widget.conversation.isGroup && widget.isOnline) {
+      badge = OnlineIndicator(
+        isOnline: widget.isOnline,
+        size: isPlayful ? AppSpacing.sm : AppSpacing.xs + 2,
       );
     }
 
-    // Default avatar based on conversation type
-    return CircleAvatar(
-      radius: size / 2,
-      backgroundColor: conversation.isGroup
-          ? theme.colorScheme.secondaryContainer
-          : theme.colorScheme.primaryContainer,
-      child: conversation.isGroup
-          ? Icon(
-              Icons.group_rounded,
-              size: iconSize,
-              color: theme.colorScheme.onSecondaryContainer,
-            )
-          : Text(
-              conversation.name.isNotEmpty
-                  ? conversation.name[0].toUpperCase()
-                  : '?',
-              style: TextStyle(
-                fontSize: isPlayful ? 22 : 20,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onPrimaryContainer,
-              ),
-            ),
+    final avatarUrl = widget.conversation.avatarUrl;
+
+    if (widget.conversation.isGroup) {
+      // Group conversation - use group icon
+      return AppAvatar.icon(
+        icon: Icons.group_rounded,
+        size: avatarSize,
+        backgroundColor:
+            isPlayful ? PlayfulColors.secondarySubtle : CleanColors.secondarySubtle,
+        foregroundColor:
+            isPlayful ? PlayfulColors.secondary : CleanColors.secondary,
+        badge: badge,
+        badgePosition: BadgePosition.bottomRight,
+      );
+    }
+
+    // Direct message - use image or initials
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
+      return AppAvatar(
+        imageUrl: avatarUrl,
+        fallbackName: widget.conversation.name,
+        size: avatarSize,
+        badge: badge,
+        badgePosition: BadgePosition.bottomRight,
+      );
+    }
+
+    // Fallback to initials
+    return AppAvatar.initials(
+      name: widget.conversation.name.isNotEmpty
+          ? widget.conversation.name
+          : '?',
+      size: avatarSize,
+      badge: badge,
+      badgePosition: BadgePosition.bottomRight,
     );
+  }
+
+  /// Builds the content section (name, last message, timestamp, unread badge).
+  Widget _buildContent(bool isPlayful, bool hasUnread) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Name and time row
+        Row(
+          children: [
+            Expanded(
+              child: _buildNameText(isPlayful, hasUnread),
+            ),
+            SizedBox(width: AppSpacing.xs),
+            _buildTimestamp(isPlayful, hasUnread),
+          ],
+        ),
+        SizedBox(height: isPlayful ? AppSpacing.xxs + 2 : AppSpacing.xxs),
+
+        // Last message preview and unread badge row
+        Row(
+          children: [
+            Expanded(
+              child: _buildMessagePreview(isPlayful, hasUnread),
+            ),
+            if (hasUnread) ...[
+              SizedBox(width: AppSpacing.xs),
+              UnreadBadge(
+                count: widget.conversation.unreadCount,
+                size: isPlayful ? BadgeSize.medium : BadgeSize.small,
+                isPlayful: isPlayful,
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNameText(bool isPlayful, bool hasUnread) {
+    final baseStyle = AppTypography.listTileTitle(isPlayful: isPlayful);
+
+    final nameColor = hasUnread
+        ? (isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary)
+        : (isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary);
+
+    final nameWeight = hasUnread
+        ? FontWeight.w700
+        : (isPlayful ? FontWeight.w600 : FontWeight.w500);
+
+    return Text(
+      widget.conversation.name,
+      style: baseStyle.copyWith(
+        color: nameColor,
+        fontWeight: nameWeight,
+        letterSpacing: isPlayful ? AppLetterSpacing.titleSmall : 0,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildTimestamp(bool isPlayful, bool hasUnread) {
+    final timestampStyle = AppTypography.caption(isPlayful: isPlayful);
+
+    final timestampColor = hasUnread
+        ? (isPlayful ? PlayfulColors.primary : CleanColors.primary)
+        : (isPlayful ? PlayfulColors.textTertiary : CleanColors.textTertiary);
+
+    final timestampWeight = hasUnread ? FontWeight.w600 : FontWeight.w400;
+
+    return Text(
+      _formatTime(widget.conversation.lastActivityTime),
+      style: timestampStyle.copyWith(
+        color: timestampColor,
+        fontWeight: timestampWeight,
+      ),
+    );
+  }
+
+  Widget _buildMessagePreview(bool isPlayful, bool hasUnread) {
+    final previewStyle = AppTypography.secondaryText(isPlayful: isPlayful);
+
+    final hasMessage = widget.conversation.lastMessagePreview.isNotEmpty;
+
+    final previewColor = hasUnread
+        ? (isPlayful
+            ? PlayfulColors.textSecondary
+            : CleanColors.textSecondary)
+        : (isPlayful
+            ? PlayfulColors.textTertiary
+            : CleanColors.textTertiary);
+
+    final previewWeight = hasUnread ? FontWeight.w500 : FontWeight.w400;
+
+    return Text(
+      hasMessage ? widget.conversation.lastMessagePreview : 'No messages yet',
+      style: previewStyle.copyWith(
+        color: previewColor,
+        fontWeight: previewWeight,
+        fontStyle: hasMessage ? FontStyle.normal : FontStyle.italic,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+// =============================================================================
+// CONVERSATION TILE SKELETON
+// =============================================================================
+// A loading placeholder for conversation tiles.
+// =============================================================================
+
+/// A skeleton/shimmer loading placeholder for [ConversationTile].
+class ConversationTileSkeleton extends StatelessWidget {
+  /// Creates a [ConversationTileSkeleton] widget.
+  const ConversationTileSkeleton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isPlayful = _isPlayfulTheme(context);
+    final shimmerBase =
+        isPlayful ? PlayfulColors.surfaceSubtle : CleanColors.surfaceSubtle;
+    final shimmerHighlight =
+        isPlayful ? PlayfulColors.surfaceMuted : CleanColors.surfaceMuted;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+      ),
+      child: Row(
+        children: [
+          // Avatar placeholder
+          Container(
+            width: isPlayful ? AvatarSize.lg.pixels : AvatarSize.md.pixels,
+            height: isPlayful ? AvatarSize.lg.pixels : AvatarSize.md.pixels,
+            decoration: BoxDecoration(
+              color: shimmerBase,
+              shape: BoxShape.circle,
+            ),
+          ),
+          SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+
+          // Content placeholders
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name and time row
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        height: AppSpacing.md,
+                        decoration: BoxDecoration(
+                          color: shimmerBase,
+                          borderRadius: AppRadius.xsRadius,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.xl),
+                    Container(
+                      width: AppSpacing.xxxl,
+                      height: AppSpacing.sm,
+                      decoration: BoxDecoration(
+                        color: shimmerHighlight,
+                        borderRadius: AppRadius.xsRadius,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: AppSpacing.xs),
+
+                // Message preview placeholder
+                Container(
+                  height: AppSpacing.sm,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: shimmerHighlight,
+                    borderRadius: AppRadius.xsRadius,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _isPlayfulTheme(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.toARGB32() == PlayfulColors.primary.toARGB32();
   }
 }

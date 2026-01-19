@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'package:classio/core/theme/spacing.dart';
+import 'package:classio/core/theme/app_radius.dart';
 import '../../../../core/router/routes.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
@@ -41,18 +43,18 @@ class SuperAdminPage extends ConsumerWidget {
 
             return ResponsiveCenterScrollView(
               maxWidth: 1000,
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.cardInsets,
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Header Card
                   _HeaderCard(schoolCount: schools.length),
-                  const SizedBox(height: 20),
+                  SizedBox(height: AppSpacing.lg),
 
                   // Schools List
                   ...schools.map((school) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: EdgeInsets.only(bottom: AppSpacing.sm),
                         child: _SchoolCard(school: school),
                       )),
                   const SizedBox(height: 80), // Space for FAB
@@ -77,7 +79,7 @@ class SuperAdminPage extends ConsumerWidget {
   Widget _buildEmptyState(BuildContext context, ThemeData theme) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -94,7 +96,7 @@ class SuperAdminPage extends ConsumerWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: AppSpacing.xl),
             Text(
               'No Schools Yet',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -103,7 +105,7 @@ class SuperAdminPage extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               'Add your first school by tapping the button below.',
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -125,7 +127,7 @@ class SuperAdminPage extends ConsumerWidget {
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -134,7 +136,7 @@ class SuperAdminPage extends ConsumerWidget {
               size: 72,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             Text(
               'Failed to Load Schools',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -143,7 +145,7 @@ class SuperAdminPage extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               error.toString(),
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -151,7 +153,7 @@ class SuperAdminPage extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
               onPressed: () {
                 ref.invalidate(schoolsProvider);
@@ -246,9 +248,9 @@ class _HeaderCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: AppSpacing.dialogInsets,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.dialogBorderRadius,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -272,7 +274,7 @@ class _HeaderCard extends StatelessWidget {
             height: 56,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: AppRadius.dialogBorderRadius,
             ),
             child: Icon(
               Icons.account_balance_rounded,
@@ -280,7 +282,7 @@ class _HeaderCard extends StatelessWidget {
               color: theme.colorScheme.primary,
             ),
           ),
-          const SizedBox(width: 20),
+          SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -327,11 +329,11 @@ class _SchoolCard extends StatelessWidget {
 
     return InkWell(
       onTap: () => context.push(AppRoutes.getSuperadminSchoolDetail(school.id)),
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: AppRadius.dialogBorderRadius,
       child: Container(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.dialogBorderRadius,
           color: theme.colorScheme.surface,
           border: Border.all(
             color: theme.colorScheme.outline.withValues(alpha: 0.15),
@@ -353,7 +355,7 @@ class _SchoolCard extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.cardBorderRadius,
               ),
               child: Icon(
                 Icons.school_rounded,
@@ -361,7 +363,7 @@ class _SchoolCard extends StatelessWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: AppSpacing.md),
 
             // School Info
             Expanded(
@@ -377,7 +379,7 @@ class _SchoolCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  if (school.createdAt != null)
+                  if (school.createdAt case final createdAt?)
                     Row(
                       children: [
                         Icon(
@@ -385,9 +387,9 @@ class _SchoolCard extends StatelessWidget {
                           size: 14,
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: AppSpacing.xxs),
                         Text(
-                          'Created ${_formatDate(school.createdAt!)}',
+                          'Created ${_formatDate(createdAt)}',
                           style: TextStyle(
                             fontSize: 13,
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.6),

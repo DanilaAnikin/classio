@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -276,10 +277,10 @@ class _NewConversationPageState extends ConsumerState<NewConversationPage> {
           for (final role in sortedRoles) ...[
             RecipientSectionHeader(
               title: _getRolePluralLabel(role),
-              count: groupedRecipients[role]!.length,
+              count: groupedRecipients[role]?.length ?? 0,
               isPlayful: isPlayful,
             ),
-            ...groupedRecipients[role]!.map(
+            ...(groupedRecipients[role] ?? []).map(
               (user) => Padding(
                 padding: EdgeInsets.symmetric(
                   vertical: isPlayful ? 4 : 2,
@@ -301,47 +302,12 @@ class _NewConversationPageState extends ConsumerState<NewConversationPage> {
   }
 
   Widget _buildEmptyState(ThemeData theme, bool isPlayful) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(isPlayful ? 24 : 20),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              ),
-              child: Icon(
-                Icons.person_search_rounded,
-                size: isPlayful ? 56 : 48,
-                color: theme.colorScheme.primary.withValues(alpha: 0.6),
-              ),
-            ),
-            SizedBox(height: isPlayful ? 24 : 20),
-            Text(
-              'No recipients found',
-              style: TextStyle(
-                fontSize: isPlayful ? 20 : 18,
-                fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _searchQuery.isNotEmpty
-                  ? 'Try a different search term'
-                  : 'No users available to message',
-              style: TextStyle(
-                fontSize: isPlayful ? 15 : 14,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+    return EmptyState(
+      icon: Icons.people_outline,
+      title: 'No Users Found',
+      message: _searchQuery.isNotEmpty
+          ? 'Try a different search term'
+          : 'No users available to message',
     );
   }
 

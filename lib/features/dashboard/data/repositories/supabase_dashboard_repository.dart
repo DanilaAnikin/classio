@@ -2,35 +2,13 @@ import 'package:classio/core/utils/subject_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../domain/domain.dart';
-
-/// Safely parses a time string (HH:MM or HH:MM:SS) into a DateTime.
-/// Returns null if parsing fails.
-DateTime? _parseTimeString(String? timeStr, DateTime date) {
-  if (timeStr == null || timeStr.isEmpty) return null;
-
-  try {
-    final parts = timeStr.split(':');
-    if (parts.length < 2) return null;
-
-    final hour = int.tryParse(parts[0]);
-    final minute = int.tryParse(parts[1]);
-
-    if (hour == null || minute == null) return null;
-    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
-
-    return DateTime(date.year, date.month, date.day, hour, minute);
-  } catch (e) {
-    debugPrint('Failed to parse time string "$timeStr": $e');
-    return null;
-  }
-}
+import '../dtos/lesson_dto.dart';
 
 /// Exception thrown when dashboard operations fail.
-class DashboardException implements Exception {
-  const DashboardException(this.message);
-
-  final String message;
+class DashboardException extends RepositoryException {
+  const DashboardException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'DashboardException: $message';
@@ -100,53 +78,60 @@ class SupabaseDashboardRepository implements DashboardRepository {
     return dartWeekday == 7 ? 0 : dartWeekday;
   }
 
-  /// Converts a database lesson row to a [Lesson] entity.
+  /// Converts a database lesson row to a [Lesson] entity using DTO.
+  ///
+  /// Uses [LessonDTO] for type-safe parsing with validation.
+  /// Falls back to default times if parsing fails.
   Lesson _rowToLesson(Map<String, dynamic> row, DateTime date) {
-    final subjectData = row['subjects'] as Map<String, dynamic>?;
-    final teacherData = subjectData?['teacher'] as Map<String, dynamic>?;
+    final dto = LessonDTO.fromJson(row, date: date);
 
-    // Parse start and end times from the database using safe parsing
-    final startTimeStr = row['start_time'] as String?;
-    final endTimeStr = row['end_time'] as String?;
+    // Use fallback conversion which handles missing times gracefully
+    if (!dto.isValid) {
+      debugPrint('Warning: Invalid lesson data received:');
+      for (final error in dto.validationErrors) {
+        debugPrint('  - $error');
+      }
+      debugPrint('  Raw data: $row');
 
-    // Default times if parsing fails
-    final defaultStart = DateTime(date.year, date.month, date.day, 8, 0);
-    final defaultEnd = DateTime(date.year, date.month, date.day, 8, 45);
-
-    final startTime = _parseTimeString(startTimeStr, date) ?? defaultStart;
-    final endTime = _parseTimeString(endTimeStr, date) ?? defaultEnd;
-
-    // Build teacher name from profile data
-    String? teacherName;
-    if (teacherData != null) {
-      final firstName = teacherData['first_name'] as String?;
-      final lastName = teacherData['last_name'] as String?;
-      if (firstName != null || lastName != null) {
-        teacherName = [firstName, lastName]
-            .where((s) => s != null && s.isNotEmpty)
-            .join(' ');
+      // Still try to create a lesson with fallbacks for dashboard display
+      try {
+        final defaultStart = DateTime(date.year, date.month, date.day, 8, 0);
+        final defaultEnd = DateTime(date.year, date.month, date.day, 8, 45);
+        return dto.toEntityWithFallback(
+          fallbackStartTime: defaultStart,
+          fallbackEndTime: defaultEnd,
+        );
+      } catch (e) {
+        // If even fallback fails (e.g., missing subject), create a minimal lesson
+        debugPrint('Warning: Could not create lesson even with fallbacks: $e');
+        rethrow;
       }
     }
 
-    final subjectId =
-        (subjectData?['id'] ?? row['subject_id'] ?? '') as String;
-    final subjectName = (subjectData?['name'] ?? 'Unknown Subject') as String;
+    return dto.toEntity();
+  }
 
-    final subject = Subject(
-      id: subjectId,
-      name: subjectName,
-      color: SubjectColors.getColorForId(subjectId),
-      teacherName: teacherName,
-    );
+  /// Converts a list of database rows to [Lesson] entities, filtering invalid ones.
+  List<Lesson> _rowsToLessons(List<Map<String, dynamic>> rows, DateTime date) {
+    final lessons = <Lesson>[];
+    var invalidCount = 0;
 
-    return Lesson(
-      id: row['id'] as String,
-      subject: subject,
-      startTime: startTime,
-      endTime: endTime,
-      room: (row['room'] as String?) ?? '',
-      status: LessonStatus.normal,
-    );
+    for (final row in rows) {
+      try {
+        lessons.add(_rowToLesson(row, date));
+      } catch (e) {
+        invalidCount++;
+        debugPrint('Warning: Skipping invalid lesson: $e');
+      }
+    }
+
+    if (invalidCount > 0) {
+      debugPrint(
+        'Warning: $invalidCount invalid lesson(s) were skipped during parsing',
+      );
+    }
+
+    return lessons;
   }
 
   /// Converts a database assignment row to an [Assignment] entity.
@@ -266,12 +251,8 @@ class SupabaseDashboardRepository implements DashboardRepository {
           .eq('day_of_week', dbDayOfWeek)
           .order('start_time', ascending: true);
 
-      final lessons = <Lesson>[];
-      for (final row in response) {
-        lessons.add(_rowToLesson(row, today));
-      }
-
-      return lessons;
+      // Use DTO-based conversion with validation logging
+      return _rowsToLessons(List<Map<String, dynamic>>.from(response), today);
     } on PostgrestException catch (e) {
       throw DashboardException('Failed to fetch today lessons: ${e.message}');
     }

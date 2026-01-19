@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/theme.dart';
 import 'package:classio/features/dashboard/domain/entities/lesson.dart';
 
 /// A card widget displaying a single lesson in the schedule.
@@ -14,6 +15,7 @@ import 'package:classio/features/dashboard/domain/entities/lesson.dart';
 /// - Status badges (cancelled, substitution, modified)
 /// - Teacher name if available
 ///
+/// Uses design system tokens for consistent styling across themes.
 /// When [showModifiedIndicator] is true and the lesson is modified from stable,
 /// displays a light red background to highlight the change.
 class ScheduleLessonCard extends ConsumerWidget {
@@ -45,46 +47,54 @@ class ScheduleLessonCard extends ConsumerWidget {
     final isCancelled = lesson.status == LessonStatus.cancelled;
     final isSubstitution = lesson.status == LessonStatus.substitution;
     final isModified = showModifiedIndicator && lesson.modifiedFromStable;
+    final cardRadius = AppRadius.card(isPlayful: isPlayful);
 
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.sm),
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           decoration: isModified
               ? BoxDecoration(
-                  color: theme.colorScheme.error.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(isPlayful ? 18 : 12),
+                  color: theme.colorScheme.error.withValues(alpha: AppOpacity.light),
+                  borderRadius: cardRadius,
                 )
               : null,
-          padding: isModified ? const EdgeInsets.all(4) : EdgeInsets.zero,
+          padding: isModified
+              ? EdgeInsets.all(AppSpacing.xxs)
+              : EdgeInsets.zero,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Time column
               SizedBox(
-                width: 56,
+                width: AppSpacing.xxxxl,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
                       _formatTime(lesson.startTime),
-                      style: TextStyle(
-                        fontSize: isPlayful ? 15 : 14,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontSize: isPlayful
+                            ? AppFontSize.bodyMedium + 1
+                            : AppFontSize.bodyMedium,
                         fontWeight: FontWeight.w600,
                         color: isCancelled
-                            ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                            ? theme.colorScheme.onSurface.withValues(alpha: AppOpacity.disabled)
+                            : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.almostOpaque),
                         decoration: isCancelled ? TextDecoration.lineThrough : null,
+                        letterSpacing: isPlayful ? AppLetterSpacing.bodyMedium : 0,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: AppSpacing.xxs),
                     Text(
                       _formatTime(lesson.endTime),
-                      style: TextStyle(
-                        fontSize: isPlayful ? 12 : 11,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: isPlayful
+                            ? AppFontSize.labelSmall + 1
+                            : AppFontSize.labelSmall,
                         fontWeight: FontWeight.w400,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                         decoration: isCancelled ? TextDecoration.lineThrough : null,
                       ),
                     ),
@@ -92,58 +102,63 @@ class ScheduleLessonCard extends ConsumerWidget {
                 ),
               ),
 
-              const SizedBox(width: 12),
+              SizedBox(width: AppSpacing.sm),
 
               // Color indicator
               Container(
-                width: 4,
-                height: 64,
+                width: isPlayful ? AppSpacing.xs : AppSpacing.xxs + AppSpacing.space2,
+                height: AppSpacing.xxxxl + AppSpacing.sm,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: AppRadius.fullRadius,
+                  gradient: isPlayful && !isCancelled
+                      ? LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(lesson.subject.color),
+                            Color(lesson.subject.color).withValues(alpha: AppOpacity.almostOpaque),
+                          ],
+                        )
+                      : null,
                   color: isCancelled
-                      ? theme.colorScheme.onSurface.withValues(alpha: 0.2)
-                      : Color(lesson.subject.color),
+                      ? theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium)
+                      : (isPlayful ? null : Color(lesson.subject.color)),
                 ),
               ),
 
-              const SizedBox(width: 12),
+              SizedBox(width: AppSpacing.sm),
 
               // Lesson content
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.all(isPlayful ? 14 : 12),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isPlayful ? AppSpacing.md : AppSpacing.sm,
+                    vertical: isPlayful ? AppSpacing.sm : AppSpacing.sm - AppSpacing.space2,
+                  ),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(isPlayful ? 16 : 10),
+                    borderRadius: AppRadius.button(isPlayful: isPlayful),
                     gradient: isPlayful && !isCancelled
                         ? LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              Color(lesson.subject.color).withValues(alpha: 0.12),
-                              Color(lesson.subject.color).withValues(alpha: 0.04),
+                              Color(lesson.subject.color).withValues(alpha: AppOpacity.soft),
+                              Color(lesson.subject.color).withValues(alpha: AppOpacity.subtle),
                             ],
                           )
                         : null,
                     color: isPlayful
                         ? null
                         : isCancelled
-                            ? theme.colorScheme.surface.withValues(alpha: 0.5)
+                            ? theme.colorScheme.surface.withValues(alpha: AppOpacity.heavy)
                             : theme.colorScheme.surface,
                     border: isPlayful
                         ? null
                         : Border.all(
-                            color: theme.colorScheme.outline.withValues(alpha: 0.12),
+                            color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
                             width: 1,
                           ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: isPlayful
-                            ? Color(lesson.subject.color).withValues(alpha: isCancelled ? 0.03 : 0.1)
-                            : Colors.black.withValues(alpha: 0.03),
-                        blurRadius: isPlayful ? 10 : 4,
-                        offset: Offset(0, isPlayful ? 4 : 2),
-                      ),
-                    ],
+                    boxShadow: AppShadows.card(isPlayful: isPlayful),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,18 +169,21 @@ class ScheduleLessonCard extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               lesson.subject.name,
-                              style: TextStyle(
-                                fontSize: isPlayful ? 16 : 15,
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontSize: isPlayful
+                                    ? AppFontSize.titleSmall + 1
+                                    : AppFontSize.titleSmall,
                                 fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
                                 color: isCancelled
-                                    ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
+                                    ? theme.colorScheme.onSurface.withValues(alpha: AppOpacity.disabled)
                                     : theme.colorScheme.onSurface,
                                 decoration: isCancelled ? TextDecoration.lineThrough : null,
+                                letterSpacing: isPlayful ? AppLetterSpacing.titleSmall : 0,
                               ),
                             ),
                           ),
                           if (isSubstitution) ...[
-                            const SizedBox(width: 8),
+                            SizedBox(width: AppSpacing.xs),
                             _StatusBadge(
                               label: 'SUB',
                               color: theme.colorScheme.tertiary,
@@ -173,7 +191,7 @@ class ScheduleLessonCard extends ConsumerWidget {
                             ),
                           ],
                           if (isCancelled) ...[
-                            const SizedBox(width: 8),
+                            SizedBox(width: AppSpacing.xs),
                             _StatusBadge(
                               label: 'CANCELLED',
                               color: theme.colorScheme.error,
@@ -181,17 +199,17 @@ class ScheduleLessonCard extends ConsumerWidget {
                             ),
                           ],
                           if (isModified && !isCancelled && !isSubstitution) ...[
-                            const SizedBox(width: 8),
+                            SizedBox(width: AppSpacing.xs),
                             _StatusBadge(
                               label: 'MODIFIED',
-                              color: theme.colorScheme.error.withValues(alpha: 0.8),
+                              color: theme.colorScheme.error.withValues(alpha: AppOpacity.almostOpaque),
                               isPlayful: isPlayful,
                             ),
                           ],
                         ],
                       ),
 
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppSpacing.xs),
 
                       // Room and teacher info
                       Row(
@@ -209,7 +227,7 @@ class ScheduleLessonCard extends ConsumerWidget {
                           // Teacher
                           if (lesson.subject.teacherName != null ||
                               lesson.substituteTeacher != null) ...[
-                            const SizedBox(width: 12),
+                            SizedBox(width: AppSpacing.sm),
                             Flexible(
                               child: _InfoPill(
                                 icon: Icons.person_outline_rounded,
@@ -226,38 +244,50 @@ class ScheduleLessonCard extends ConsumerWidget {
                       ),
 
                       // Note (if any)
-                      if (lesson.note != null && lesson.note!.isNotEmpty) ...[
-                        const SizedBox(height: 8),
+                      if (lesson.note?.isNotEmpty ?? false) ...[
+                        SizedBox(height: AppSpacing.xs),
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: isPlayful ? 10 : 8,
-                            vertical: isPlayful ? 6 : 4,
+                            horizontal: isPlayful ? AppSpacing.sm : AppSpacing.sm - AppSpacing.space2,
+                            vertical: isPlayful ? AppSpacing.xs : AppSpacing.xxs,
                           ),
                           decoration: BoxDecoration(
                             color: isCancelled
-                                ? theme.colorScheme.error.withValues(alpha: 0.08)
-                                : theme.colorScheme.primary.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(isPlayful ? 8 : 6),
+                                ? theme.colorScheme.error.withValues(alpha: AppOpacity.light)
+                                : theme.colorScheme.primary.withValues(alpha: AppOpacity.light),
+                            borderRadius: AppRadius.button(isPlayful: isPlayful),
+                            border: isPlayful
+                                ? Border.all(
+                                    color: isCancelled
+                                        ? theme.colorScheme.error.withValues(alpha: AppOpacity.soft)
+                                        : theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+                                    width: 1,
+                                  )
+                                : null,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.info_outline_rounded,
-                                size: 14,
+                                size: isPlayful
+                                    ? AppIconSize.xs + AppSpacing.space2
+                                    : AppIconSize.xs,
                                 color: isCancelled
-                                    ? theme.colorScheme.error.withValues(alpha: 0.7)
-                                    : theme.colorScheme.primary.withValues(alpha: 0.7),
+                                    ? theme.colorScheme.error.withValues(alpha: AppOpacity.iconOnColor)
+                                    : theme.colorScheme.primary.withValues(alpha: AppOpacity.iconOnColor),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: AppSpacing.xs),
                               Flexible(
                                 child: Text(
-                                  lesson.note!,
-                                  style: TextStyle(
-                                    fontSize: isPlayful ? 12 : 11,
+                                  lesson.note ?? '',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    fontSize: isPlayful
+                                        ? AppFontSize.labelSmall + 1
+                                        : AppFontSize.labelSmall,
                                     color: isCancelled
-                                        ? theme.colorScheme.error.withValues(alpha: 0.8)
-                                        : theme.colorScheme.primary.withValues(alpha: 0.8),
+                                        ? theme.colorScheme.error.withValues(alpha: AppOpacity.almostOpaque)
+                                        : theme.colorScheme.primary.withValues(alpha: AppOpacity.almostOpaque),
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
@@ -292,22 +322,36 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final badgeRadius = AppRadius.badge(isPlayful: isPlayful);
+
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 8 : 6,
-        vertical: isPlayful ? 4 : 2,
+        horizontal: isPlayful ? AppSpacing.xs + AppSpacing.space2 : AppSpacing.xs,
+        vertical: isPlayful ? AppSpacing.xxs + AppSpacing.space2 : AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(isPlayful ? 8 : 4),
+        color: color.withValues(alpha: AppOpacity.medium),
+        borderRadius: badgeRadius,
+        boxShadow: isPlayful
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: AppOpacity.light),
+                  blurRadius: AppSpacing.xs,
+                  offset: Offset(0, AppSpacing.space2),
+                ),
+              ]
+            : null,
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: isPlayful ? 10 : 9,
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontSize: isPlayful
+              ? AppFontSize.overline + 1
+              : AppFontSize.overline - 1,
           fontWeight: FontWeight.w700,
           color: color,
-          letterSpacing: 0.5,
+          letterSpacing: AppLetterSpacing.labelSmall,
         ),
       ),
     );
@@ -339,17 +383,25 @@ class _InfoPill extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: isPlayful ? 15 : 14,
-          color: theme.colorScheme.onSurface.withValues(alpha: isCancelled ? 0.3 : 0.5),
+          size: isPlayful
+              ? AppIconSize.xs + AppSpacing.space2
+              : AppIconSize.xs,
+          color: theme.colorScheme.onSurface.withValues(
+            alpha: isCancelled ? AppOpacity.semi : AppOpacity.heavy,
+          ),
         ),
-        const SizedBox(width: 4),
+        SizedBox(width: AppSpacing.xxs),
         Flexible(
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: isPlayful
+                  ? AppFontSize.bodySmall + 1
+                  : AppFontSize.bodySmall,
               fontWeight: isPlayful ? FontWeight.w500 : FontWeight.w400,
-              color: theme.colorScheme.onSurface.withValues(alpha: isCancelled ? 0.4 : 0.7),
+              color: theme.colorScheme.onSurface.withValues(
+                alpha: isCancelled ? AppOpacity.disabled : AppOpacity.iconOnColor,
+              ),
               fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
             ),
             maxLines: 1,

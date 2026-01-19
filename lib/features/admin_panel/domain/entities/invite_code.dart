@@ -56,7 +56,8 @@ class InviteCode {
   bool get canBeUsed {
     if (!isActive) return false;
     if (timesUsed >= usageLimit) return false;
-    if (expiresAt != null && DateTime.now().isAfter(expiresAt!)) return false;
+    final expiry = expiresAt;
+    if (expiry != null && DateTime.now().isAfter(expiry)) return false;
     return true;
   }
 

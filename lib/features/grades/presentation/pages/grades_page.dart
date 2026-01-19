@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/router/routes.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/grades_provider.dart';
@@ -200,18 +201,19 @@ class _OverallAverageCard extends StatelessWidget {
   final double average;
   final bool isPlayful;
 
-  Color _getAverageColor(double avg) {
-    if (avg >= 1.0 && avg <= 1.5) return Colors.green;
-    if (avg >= 1.6 && avg <= 2.5) return Colors.amber;
-    if (avg >= 2.6 && avg <= 3.5) return Colors.orange;
-    return Colors.red;
+  Color _getAverageColor(double avg, {required bool isPlayful}) {
+    // Using a 1-5 scale where 1 is best (German grading system)
+    if (avg >= 1.0 && avg <= 1.5) return AppSemanticColors.getGradeColor(5, isPlayful: isPlayful);
+    if (avg >= 1.6 && avg <= 2.5) return AppSemanticColors.getGradeColor(4, isPlayful: isPlayful);
+    if (avg >= 2.6 && avg <= 3.5) return AppSemanticColors.getGradeColor(3, isPlayful: isPlayful);
+    return AppSemanticColors.getGradeColor(1, isPlayful: isPlayful);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final avgColor = _getAverageColor(average);
+    final avgColor = _getAverageColor(average, isPlayful: isPlayful);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -239,7 +241,7 @@ class _OverallAverageCard extends StatelessWidget {
           BoxShadow(
             color: isPlayful
                 ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                : Colors.black.withValues(alpha: 0.05),
+                : theme.shadowColor.withValues(alpha: 0.05),
             blurRadius: isPlayful ? 16 : 8,
             offset: Offset(0, isPlayful ? 6 : 3),
           ),
@@ -340,17 +342,18 @@ class _SubjectGradeCard extends StatelessWidget {
   final VoidCallback onTap;
   final bool isPlayful;
 
-  Color _getAverageColor(double avg) {
-    if (avg >= 1.0 && avg <= 1.5) return Colors.green;
-    if (avg >= 1.6 && avg <= 2.5) return Colors.amber;
-    if (avg >= 2.6 && avg <= 3.5) return Colors.orange;
-    return Colors.red;
+  Color _getAverageColor(double avg, {required bool isPlayful}) {
+    // Using a 1-5 scale where 1 is best (German grading system)
+    if (avg >= 1.0 && avg <= 1.5) return AppSemanticColors.getGradeColor(5, isPlayful: isPlayful);
+    if (avg >= 1.6 && avg <= 2.5) return AppSemanticColors.getGradeColor(4, isPlayful: isPlayful);
+    if (avg >= 2.6 && avg <= 3.5) return AppSemanticColors.getGradeColor(3, isPlayful: isPlayful);
+    return AppSemanticColors.getGradeColor(1, isPlayful: isPlayful);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final avgColor = _getAverageColor(subject.average);
+    final avgColor = _getAverageColor(subject.average, isPlayful: isPlayful);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -377,7 +380,7 @@ class _SubjectGradeCard extends StatelessWidget {
           BoxShadow(
             color: isPlayful
                 ? Color(subject.subjectColor).withValues(alpha: 0.2)
-                : Colors.black.withValues(alpha: 0.03),
+                : theme.shadowColor.withValues(alpha: 0.03),
             blurRadius: isPlayful ? 12 : 6,
             offset: Offset(0, isPlayful ? 4 : 2),
           ),
@@ -552,17 +555,18 @@ class _GradeItem extends StatelessWidget {
     return DateFormat('MMM d, yyyy').format(date);
   }
 
-  Color _getScoreColor(double score) {
-    if (score >= 1.0 && score <= 1.5) return Colors.green;
-    if (score >= 1.6 && score <= 2.5) return Colors.amber;
-    if (score >= 2.6 && score <= 3.5) return Colors.orange;
-    return Colors.red;
+  Color _getScoreColor(double score, {required bool isPlayful}) {
+    // Using a 1-5 scale where 1 is best (German grading system)
+    if (score >= 1.0 && score <= 1.5) return AppSemanticColors.getGradeColor(5, isPlayful: isPlayful);
+    if (score >= 1.6 && score <= 2.5) return AppSemanticColors.getGradeColor(4, isPlayful: isPlayful);
+    if (score >= 2.6 && score <= 3.5) return AppSemanticColors.getGradeColor(3, isPlayful: isPlayful);
+    return AppSemanticColors.getGradeColor(1, isPlayful: isPlayful);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scoreColor = _getScoreColor(grade.score);
+    final scoreColor = _getScoreColor(grade.score, isPlayful: isPlayful);
 
     return Padding(
       padding: EdgeInsets.only(bottom: isPlayful ? 10 : 8),

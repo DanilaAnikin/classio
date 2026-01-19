@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import 'package:classio/core/localization/localization.dart';
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/theme.dart';
 
 /// The type of week view being displayed.
 enum WeekViewType {
@@ -156,23 +157,15 @@ class WeekSelector extends ConsumerWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 12 : 8,
-        vertical: isPlayful ? 10 : 8,
+        horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+        vertical: isPlayful ? AppSpacing.xs + AppSpacing.space2 : AppSpacing.xs,
       ),
       decoration: BoxDecoration(
         color: isPlayful
-            ? theme.colorScheme.surface.withValues(alpha: 0.8)
+            ? theme.colorScheme.surface.withValues(alpha: AppOpacity.almostOpaque)
             : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
-        boxShadow: [
-          BoxShadow(
-            color: isPlayful
-                ? theme.colorScheme.primary.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.04),
-            blurRadius: isPlayful ? 12 : 6,
-            offset: Offset(0, isPlayful ? 4 : 2),
-          ),
-        ],
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+        boxShadow: AppShadows.card(isPlayful: isPlayful),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -197,22 +190,22 @@ class WeekSelector extends ConsumerWidget {
                   children: [
                     Text(
                       _getWeekLabel(context, weekView),
-                      style: TextStyle(
-                        fontSize: isPlayful ? 15 : 14,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontSize: isPlayful ? AppFontSize.titleSmall + 1 : AppFontSize.titleSmall,
                         fontWeight: FontWeight.w600,
                         color: weekView == WeekViewType.stable
                             ? theme.colorScheme.secondary
                             : theme.colorScheme.primary,
-                        letterSpacing: isPlayful ? 0.3 : 0,
+                        letterSpacing: isPlayful ? AppLetterSpacing.titleSmall : 0,
                       ),
                     ),
                     if (weekStartDate != null) ...[
-                      const SizedBox(height: 2),
+                      SizedBox(height: AppSpacing.space2),
                       Text(
                         _getWeekRangeString(weekStartDate, locale),
-                        style: TextStyle(
-                          fontSize: isPlayful ? 12 : 11,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: isPlayful ? AppFontSize.labelMedium : AppFontSize.labelSmall,
+                          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                         ),
                       ),
                     ],
@@ -233,7 +226,7 @@ class WeekSelector extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
 
           // Quick action buttons row
           Row(
@@ -283,6 +276,7 @@ class _WeekNavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final buttonRadius = AppRadius.button(isPlayful: isPlayful);
 
     return Tooltip(
       message: tooltip,
@@ -290,15 +284,15 @@ class _WeekNavButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: enabled ? onTap : null,
-          borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+          borderRadius: buttonRadius,
           child: Container(
-            padding: EdgeInsets.all(isPlayful ? 10 : 8),
+            padding: EdgeInsets.all(isPlayful ? AppSpacing.xs + AppSpacing.space2 : AppSpacing.xs),
             child: Icon(
               icon,
-              size: isPlayful ? 26 : 24,
+              size: isPlayful ? AppIconSize.lg : AppIconSize.md,
               color: enabled
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.semi),
             ),
           ),
         ),
@@ -326,32 +320,31 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final buttonRadius = AppRadius.button(isPlayful: isPlayful);
+    final accentColor = isStable ? theme.colorScheme.secondary : theme.colorScheme.primary;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+        borderRadius: buttonRadius,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: AppDuration.normal,
+          curve: AppCurves.standard,
           padding: EdgeInsets.symmetric(
-            horizontal: isPlayful ? 16 : 12,
-            vertical: isPlayful ? 8 : 6,
+            horizontal: isPlayful ? AppSpacing.md : AppSpacing.sm,
+            vertical: isPlayful ? AppSpacing.xs : AppSpacing.xs - AppSpacing.space2,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            borderRadius: buttonRadius,
             color: isSelected
-                ? (isStable
-                    ? theme.colorScheme.secondary.withValues(alpha: 0.2)
-                    : theme.colorScheme.primary.withValues(alpha: 0.2))
+                ? accentColor.withValues(alpha: AppOpacity.medium)
                 : Colors.transparent,
             border: Border.all(
               color: isSelected
-                  ? (isStable
-                      ? theme.colorScheme.secondary
-                      : theme.colorScheme.primary)
-                  : theme.colorScheme.outline.withValues(alpha: 0.3),
-              width: isSelected ? 2 : 1,
+                  ? accentColor
+                  : theme.colorScheme.outline.withValues(alpha: AppOpacity.semi),
+              width: isSelected ? AppSpacing.space2 : 1,
             ),
           ),
           child: Row(
@@ -360,23 +353,21 @@ class _QuickActionButton extends StatelessWidget {
               if (isStable) ...[
                 Icon(
                   Icons.schedule,
-                  size: isPlayful ? 16 : 14,
+                  size: isPlayful ? AppIconSize.xs : AppIconSize.xs - AppSpacing.space2,
                   color: isSelected
-                      ? theme.colorScheme.secondary
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ? accentColor
+                      : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: AppSpacing.xxs),
               ],
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: isPlayful ? 13 : 12,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: isPlayful ? AppFontSize.labelMedium + 1 : AppFontSize.labelMedium,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: isSelected
-                      ? (isStable
-                          ? theme.colorScheme.secondary
-                          : theme.colorScheme.primary)
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.iconOnColor),
                 ),
               ),
             ],

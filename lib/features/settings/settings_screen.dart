@@ -3,23 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/providers/providers.dart';
-import '../../shared/widgets/language_selector.dart';
-import '../../shared/widgets/theme_toggle.dart';
-import '../../shared/widgets/responsive_center.dart';
+import '../../core/theme/theme.dart';
+import '../../shared/widgets/widgets.dart';
 
 /// Settings screen that allows users to customize app preferences.
 ///
 /// Features:
 /// - Language selection with flag icons
 /// - Theme selection (Clean/Playful)
-/// - Beautiful, themed UI following the app's design system
+/// - Premium design using the new design system
+/// - Fully theme-aware (Clean vs Playful)
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
+
+  /// Detects if the current theme is Playful
+  bool _isPlayfulTheme(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.toARGB32() == PlayfulColors.primary.toARGB32();
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final currentTheme = ref.watch(themeNotifierProvider);
+    final isPlayful = _isPlayfulTheme(context);
 
     return Scaffold(
       body: CustomScrollView(
@@ -39,7 +46,10 @@ class SettingsScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: ResponsiveCenter(
               maxWidth: 800,
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.pageHorizontal(context),
+                vertical: AppSpacing.md,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -47,43 +57,50 @@ class SettingsScreen extends ConsumerWidget {
                   _SectionHeader(
                     title: 'Appearance',
                     icon: Icons.palette_outlined,
+                    isPlayful: isPlayful,
                   ),
-                  const SizedBox(height: 8),
-                  _SettingsCard(
-                    children: [
-                      const ThemeSelector(),
-                    ],
+                  AppSpacing.gapXs,
+                  AppCard.outlined(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
+                    ),
+                    child: const ThemeToggle(
+                      mode: ThemeToggleDisplayMode.dropdown,
+                    ),
                   ),
-                  const SizedBox(height: 24),
+                  AppSpacing.gapXl,
 
                   // Language Section
                   _SectionHeader(
                     title: l10n.language,
                     icon: Icons.translate_rounded,
+                    isPlayful: isPlayful,
                   ),
-                  const SizedBox(height: 8),
-                  _SettingsCard(
-                    children: [
-                      const LanguageSelector(),
-                    ],
+                  AppSpacing.gapXs,
+                  AppCard.outlined(
+                    padding: AppSpacing.insetsNone,
+                    child: const LanguageSelector(),
                   ),
-                  const SizedBox(height: 24),
+                  AppSpacing.gapXl,
 
                   // Current Settings Info Card
                   _CurrentSettingsCard(
                     currentTheme: currentTheme,
                     l10n: l10n,
+                    isPlayful: isPlayful,
                   ),
-                  const SizedBox(height: 24),
+                  AppSpacing.gapXl,
 
                   // Theme Preview Section
                   _SectionHeader(
                     title: 'Theme Preview',
                     icon: Icons.preview_outlined,
+                    isPlayful: isPlayful,
                   ),
-                  const SizedBox(height: 8),
-                  _ThemePreviewCard(),
-                  const SizedBox(height: 32),
+                  AppSpacing.gapXs,
+                  _ThemePreviewCard(isPlayful: isPlayful),
+                  AppSpacing.gapXxl,
                 ],
               ),
             ),
@@ -98,72 +115,41 @@ class SettingsScreen extends ConsumerWidget {
 class _SectionHeader extends StatelessWidget {
   final String title;
   final IconData icon;
+  final bool isPlayful;
 
   const _SectionHeader({
     required this.title,
     required this.icon,
+    required this.isPlayful,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final primaryColor =
+        isPlayful ? PlayfulColors.primary : CleanColors.primary;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.xxs,
+        vertical: AppSpacing.xs,
+      ),
       child: Row(
         children: [
           Icon(
             icon,
-            size: 20,
-            color: theme.colorScheme.primary,
+            size: AppIconSize.sm,
+            color: primaryColor,
           ),
-          const SizedBox(width: 8),
+          AppSpacing.gapH8,
           Text(
             title,
-            style: theme.textTheme.titleSmall?.copyWith(
+            style: AppTypography.overline(isPlayful: isPlayful).copyWith(
+              color: primaryColor,
               fontWeight: FontWeight.w600,
-              color: theme.colorScheme.primary,
-              letterSpacing: 0.5,
+              letterSpacing: AppLetterSpacing.labelMedium,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Card wrapper for settings items.
-class _SettingsCard extends StatelessWidget {
-  final List<Widget> children;
-
-  const _SettingsCard({
-    required this.children,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          children: children,
-        ),
       ),
     );
   }
@@ -173,30 +159,35 @@ class _SettingsCard extends StatelessWidget {
 class _CurrentSettingsCard extends StatelessWidget {
   final ThemeType currentTheme;
   final AppLocalizations l10n;
+  final bool isPlayful;
 
   const _CurrentSettingsCard({
     required this.currentTheme,
     required this.l10n,
+    required this.isPlayful,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final primaryColor =
+        isPlayful ? PlayfulColors.primary : CleanColors.primary;
+    final primaryContainer =
+        isPlayful ? PlayfulColors.primarySubtle : CleanColors.primarySubtle;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: AppSpacing.cardInsets,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-            theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
+            primaryContainer.withValues(alpha: AppOpacity.heavy),
+            primaryContainer.withValues(alpha: AppOpacity.soft),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
         border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+          color: primaryColor.withValues(alpha: AppOpacity.soft),
         ),
       ),
       child: Column(
@@ -205,46 +196,50 @@ class _CurrentSettingsCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: AppSpacing.insets8,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: primaryColor.withValues(alpha: AppOpacity.soft),
+                  borderRadius: AppRadius.button(isPlayful: isPlayful),
                 ),
                 child: Icon(
                   Icons.info_outline_rounded,
-                  color: theme.colorScheme.primary,
-                  size: 24,
+                  color: primaryColor,
+                  size: AppIconSize.md,
                 ),
               ),
-              const SizedBox(width: 12),
+              AppSpacing.gapH12,
               Expanded(
                 child: Text(
                   'Current Configuration',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
+                  style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+                    color: primaryColor,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          AppSpacing.gapMd,
           _InfoRow(
             label: l10n.theme,
-            value: currentTheme == ThemeType.clean ? l10n.cleanTheme : l10n.playfulTheme,
+            value: currentTheme == ThemeType.clean
+                ? l10n.cleanTheme
+                : l10n.playfulTheme,
             icon: currentTheme == ThemeType.clean
                 ? Icons.auto_awesome_outlined
                 : Icons.palette_outlined,
+            isPlayful: isPlayful,
           ),
-          const SizedBox(height: 8),
+          AppSpacing.gapXs,
           Consumer(
             builder: (context, ref, _) {
               final currentLocale = ref.watch(localeNotifierProvider);
-              final currentLanguage = getLanguageOption(currentLocale.languageCode);
+              final currentLanguage =
+                  getLanguageOption(currentLocale.languageCode);
               return _InfoRow(
                 label: l10n.language,
                 value: '${currentLanguage.flag} ${currentLanguage.nativeName}',
                 icon: Icons.translate_rounded,
+                isPlayful: isPlayful,
               );
             },
           ),
@@ -259,37 +254,42 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
   final IconData icon;
+  final bool isPlayful;
 
   const _InfoRow({
     required this.label,
     required this.value,
     required this.icon,
+    required this.isPlayful,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final textSecondary =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+    final textPrimary =
+        isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
 
     return Row(
       children: [
         Icon(
           icon,
-          size: 18,
-          color: theme.colorScheme.onSurfaceVariant,
+          size: AppIconSize.sm,
+          color: textSecondary,
         ),
-        const SizedBox(width: 8),
+        AppSpacing.gapH8,
         Text(
           '$label: ',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+          style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+            color: textSecondary,
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: theme.textTheme.bodyMedium?.copyWith(
+            style: AppTypography.primaryText(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
+              color: textPrimary,
             ),
           ),
         ),
@@ -300,40 +300,28 @@ class _InfoRow extends StatelessWidget {
 
 /// Card showing a preview of theme elements.
 class _ThemePreviewCard extends StatelessWidget {
+  final bool isPlayful;
+
+  const _ThemePreviewCard({required this.isPlayful});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'UI Elements',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTypography.cardTitle(isPlayful: isPlayful),
           ),
-          const SizedBox(height: 16),
+          AppSpacing.gapMd,
+
           // Buttons row
           Wrap(
-            spacing: 12,
-            runSpacing: 12,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               ElevatedButton(
                 onPressed: () {},
@@ -349,52 +337,54 @@ class _ThemePreviewCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Color chips
+          AppSpacing.gapLg,
+
+          // Color chips section
           Text(
             'Colors',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.listTileTitle(isPlayful: isPlayful),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gapSm,
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               _ColorChip(
                 color: theme.colorScheme.primary,
                 label: 'Primary',
+                isPlayful: isPlayful,
               ),
               _ColorChip(
                 color: theme.colorScheme.secondary,
                 label: 'Secondary',
+                isPlayful: isPlayful,
               ),
               _ColorChip(
                 color: theme.colorScheme.tertiary,
                 label: 'Tertiary',
+                isPlayful: isPlayful,
               ),
               _ColorChip(
                 color: theme.colorScheme.error,
                 label: 'Error',
+                isPlayful: isPlayful,
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Sample chips
+          AppSpacing.gapLg,
+
+          // Sample chips section
           Text(
             'Chips',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.listTileTitle(isPlayful: isPlayful),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gapSm,
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
             children: [
               Chip(
-                avatar: const Icon(Icons.star_rounded, size: 18),
+                avatar: Icon(Icons.star_rounded, size: AppIconSize.sm),
                 label: const Text('Featured'),
               ),
               InputChip(
@@ -403,35 +393,34 @@ class _ThemePreviewCard extends StatelessWidget {
                 onSelected: (_) {},
               ),
               ActionChip(
-                avatar: const Icon(Icons.add, size: 18),
+                avatar: Icon(Icons.add, size: AppIconSize.sm),
                 label: const Text('Action'),
                 onPressed: () {},
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          // Progress indicators
+          AppSpacing.gapLg,
+
+          // Progress indicators section
           Text(
             'Progress',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: AppTypography.listTileTitle(isPlayful: isPlayful),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gapSm,
           LinearProgressIndicator(
             value: 0.7,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: AppRadius.xsRadius,
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gapSm,
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
-                width: 32,
-                height: 32,
+                width: AppIconSize.xl,
+                height: AppIconSize.xl,
                 child: CircularProgressIndicator(
                   value: 0.7,
-                  strokeWidth: 3,
+                  strokeWidth: AppSpacing.space2 + 1, // 3px stroke
                 ),
               ),
             ],
@@ -446,40 +435,49 @@ class _ThemePreviewCard extends StatelessWidget {
 class _ColorChip extends StatelessWidget {
   final Color color;
   final String label;
+  final bool isPlayful;
 
   const _ColorChip({
     required this.color,
     required this.label,
+    required this.isPlayful,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final surfaceColor = isPlayful
+        ? PlayfulColors.surfaceSubtle
+        : CleanColors.surfaceSubtle;
+    final borderColor =
+        isPlayful ? PlayfulColors.border : CleanColors.border;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(20),
+        color: surfaceColor.withValues(alpha: AppOpacity.heavy),
+        borderRadius: AppRadius.fullRadius,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 16,
-            height: 16,
+            width: AppIconSize.xs,
+            height: AppIconSize.xs,
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
               border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                color: borderColor.withValues(alpha: AppOpacity.medium),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          AppSpacing.gapH8,
           Text(
             label,
-            style: theme.textTheme.labelMedium?.copyWith(
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w500,
             ),
           ),

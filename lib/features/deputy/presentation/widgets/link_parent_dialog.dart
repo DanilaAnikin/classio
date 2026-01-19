@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:classio/core/providers/theme_provider.dart';
+import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/deputy_provider.dart';
 
@@ -31,6 +32,7 @@ class LinkParentDialog extends ConsumerStatefulWidget {
 }
 
 class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
+  final _formKey = GlobalKey<FormState>();
   StudentWithoutParent? _selectedStudent;
   DateTime? _expiresAt;
   bool _isLoading = false;
@@ -47,6 +49,7 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
+    final successColor = isPlayful ? PlayfulColors.success : CleanColors.success;
 
     return AlertDialog(
       title: Row(
@@ -56,11 +59,11 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
                 ? Icons.check_circle_rounded
                 : Icons.person_add_alt_rounded,
             color: _generatedInvite != null
-                ? Colors.green
+                ? successColor
                 : theme.colorScheme.primary,
-            size: 24,
+            size: AppIconSize.md,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSpacing.sm),
           Text(_generatedInvite != null ? 'Invite Created' : 'Link Parent'),
         ],
       ),
@@ -87,10 +90,10 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
                     ? null
                     : _generateInvite,
                 child: _isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                    ? SizedBox(
+                        width: AppIconSize.sm,
+                        height: AppIconSize.sm,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Text('Generate Invite'),
               ),
@@ -100,71 +103,74 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
 
   Widget _buildFormContent(ThemeData theme, bool isPlayful) {
     final studentsAsync = ref.watch(studentsWithoutParentsProvider(widget.schoolId));
+    final successColor = isPlayful ? PlayfulColors.success : CleanColors.success;
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
         // Instructions
         Container(
-          padding: EdgeInsets.all(isPlayful ? 14 : 12),
+          padding: EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            color: theme.colorScheme.primary.withValues(alpha: AppOpacity.subtle),
+            borderRadius: cardRadius,
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              color: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
             ),
           ),
           child: Row(
             children: [
               Icon(
                 Icons.info_outline_rounded,
-                size: 20,
+                size: AppIconSize.sm,
                 color: theme.colorScheme.primary,
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   'Generate an invite code for a parent to link with their child\'s account.',
-                  style: TextStyle(
-                    fontSize: isPlayful ? 13 : 12,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: AppSpacing.lg),
 
         // Student Selector
         _buildLabel('Student', theme),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         studentsAsync.when(
           data: (students) {
             if (students.isEmpty) {
               return Container(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.cardInsets,
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                  color: successColor.withValues(alpha: AppOpacity.subtle),
+                  borderRadius: cardRadius,
                   border: Border.all(
-                    color: Colors.green.withValues(alpha: 0.2),
+                    color: successColor.withValues(alpha: AppOpacity.medium),
                   ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.check_circle_outline_rounded,
-                      color: Colors.green,
-                      size: 24,
+                      color: successColor,
+                      size: AppIconSize.md,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         'All students already have parents linked!',
-                        style: TextStyle(
-                          color: Colors.green.shade700,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: successColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -190,50 +196,60 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
                   ),
                 );
               }).toList(),
-              onChanged: (student) {
-                setState(() {
-                  _selectedStudent = student;
-                  _errorMessage = null;
-                });
+              onChanged: _isLoading
+                  ? null
+                  : (student) {
+                      setState(() {
+                        _selectedStudent = student;
+                        _errorMessage = null;
+                      });
+                    },
+              validator: (value) {
+                if (value == null) {
+                  return 'Please select a student';
+                }
+                return null;
               },
             );
           },
           loading: () => Container(
             height: 56,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+              borderRadius: cardRadius,
               border: Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
               ),
             ),
-            child: const Center(
+            child: Center(
               child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                width: AppIconSize.sm,
+                height: AppIconSize.sm,
+                child: const CircularProgressIndicator(strokeWidth: 2),
               ),
             ),
           ),
           error: (error, stack) => Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: theme.colorScheme.error.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+              color: theme.colorScheme.error.withValues(alpha: AppOpacity.subtle),
+              borderRadius: cardRadius,
               border: Border.all(
-                color: theme.colorScheme.error.withValues(alpha: 0.3),
+                color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft),
               ),
             ),
             child: Text(
               'Failed to load students: $error',
-              style: TextStyle(color: theme.colorScheme.error),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: AppSpacing.lg),
 
         // Expiration Date (Optional)
         _buildLabel('Expiration Date (optional)', theme),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         _ExpirationDatePicker(
           expiresAt: _expiresAt,
           isPlayful: isPlayful,
@@ -246,30 +262,29 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
 
         // Error Message
         if (_errorMessage != null) ...[
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: theme.colorScheme.error.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(8),
+              color: theme.colorScheme.error.withValues(alpha: AppOpacity.subtle),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
               border: Border.all(
-                color: theme.colorScheme.error.withValues(alpha: 0.3),
+                color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft),
               ),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.error_outline_rounded,
-                  size: 20,
+                  size: AppIconSize.sm,
                   color: theme.colorScheme.error,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     _errorMessage!,
-                    style: TextStyle(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.error,
-                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -277,101 +292,104 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
             ),
           ),
         ],
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildSuccessContent(ThemeData theme, bool isPlayful) {
+    final successColor = isPlayful ? PlayfulColors.success : CleanColors.success;
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Success Message
         Container(
-          padding: EdgeInsets.all(isPlayful ? 20 : 16),
+          padding: EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+            color: successColor.withValues(alpha: AppOpacity.subtle),
+            borderRadius: cardRadius,
             border: Border.all(
-              color: Colors.green.withValues(alpha: 0.2),
+              color: successColor.withValues(alpha: AppOpacity.medium),
             ),
           ),
           child: Column(
             children: [
               Icon(
                 Icons.celebration_rounded,
-                size: 48,
-                color: Colors.green,
+                size: AppIconSize.xxl,
+                color: successColor,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               Text(
                 'Invite Generated Successfully!',
-                style: TextStyle(
-                  fontSize: isPlayful ? 18 : 16,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: Colors.green.shade700,
+                  color: successColor,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Share this code with the parent to link their account.',
-                style: TextStyle(
-                  fontSize: isPlayful ? 14 : 13,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
                 ),
                 textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: AppSpacing.lg),
 
         // Student Info
         _buildLabel('For Student', theme),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            borderRadius: cardRadius,
             border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+              color: theme.colorScheme.outline.withValues(alpha: AppOpacity.medium),
             ),
           ),
           child: Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: AppSpacing.xxxl,
+                height: AppSpacing.xxxl,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
                     _selectedStudent?.initials ?? '?',
-                    style: TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: theme.colorScheme.primary,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       _selectedStudent?.fullName ?? 'Unknown',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    if (_selectedStudent?.className != null)
+                    if (_selectedStudent?.className case final className?)
                       Text(
-                        'Class ${_selectedStudent!.className}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        'Class $className',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                         ),
                       ),
                   ],
@@ -380,27 +398,26 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: AppSpacing.lg),
 
         // Invite Code
         _buildLabel('Invite Code', theme),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: AppSpacing.cardInsets,
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            color: theme.colorScheme.primary.withValues(alpha: AppOpacity.subtle),
+            borderRadius: cardRadius,
             border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.2),
+              color: theme.colorScheme.primary.withValues(alpha: AppOpacity.medium),
             ),
           ),
           child: Row(
             children: [
               Expanded(
                 child: SelectableText(
-                  _generatedInvite!.code,
-                  style: TextStyle(
-                    fontSize: 20,
+                  _generatedInvite?.code ?? '',
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                     fontFamily: 'monospace',
                     letterSpacing: 2,
@@ -419,21 +436,20 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
         ),
 
         // Expiration info
-        if (_generatedInvite!.expiresAt != null) ...[
-          const SizedBox(height: 12),
+        if (_generatedInvite?.expiresAt case final expiresAt?) ...[
+          SizedBox(height: AppSpacing.sm),
           Row(
             children: [
               Icon(
                 Icons.timer_outlined,
-                size: 16,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                size: AppIconSize.xs,
+                color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: AppSpacing.xxs),
               Text(
-                'Expires: ${_formatDate(_generatedInvite!.expiresAt!)}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                'Expires: ${_formatDate(expiresAt)}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                 ),
               ),
             ],
@@ -446,22 +462,22 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
   Widget _buildLabel(String text, ThemeData theme) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 14,
+      style: theme.textTheme.labelLarge?.copyWith(
         fontWeight: FontWeight.w600,
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+        color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
       ),
     );
   }
 
   InputDecoration _inputDecoration(bool isPlayful) {
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
     return InputDecoration(
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+        borderRadius: cardRadius,
       ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 12,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
     );
   }
@@ -471,6 +487,9 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
   }
 
   Future<void> _generateInvite() async {
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) return;
+
     if (_selectedStudent == null) {
       setState(() {
         _errorMessage = 'Please select a student';
@@ -484,9 +503,12 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
     });
 
     try {
+      final selectedStudent = _selectedStudent;
+      if (selectedStudent == null) return;
+
       final notifier = ref.read(deputyNotifierProvider.notifier);
       final invite = await notifier.generateParentInvite(
-        studentId: _selectedStudent!.id,
+        studentId: selectedStudent.id,
         schoolId: widget.schoolId,
         expiresAt: _expiresAt,
       );
@@ -511,9 +533,10 @@ class _LinkParentDialogState extends ConsumerState<LinkParentDialog> {
   }
 
   void _copyInviteCode() {
-    if (_generatedInvite == null) return;
+    final inviteCode = _generatedInvite?.code;
+    if (inviteCode == null) return;
 
-    Clipboard.setData(ClipboardData(text: _generatedInvite!.code));
+    Clipboard.setData(ClipboardData(text: inviteCode));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Invite code copied to clipboard'),
@@ -538,6 +561,7 @@ class _ExpirationDatePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
 
     return Row(
       children: [
@@ -546,16 +570,16 @@ class _ExpirationDatePicker extends StatelessWidget {
             color: Colors.transparent,
             child: InkWell(
               onTap: () => _pickDate(context),
-              borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+              borderRadius: cardRadius,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
                 ),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                  borderRadius: cardRadius,
                   border: Border.all(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                    color: theme.colorScheme.outline.withValues(alpha: AppOpacity.heavy),
                     width: 1,
                   ),
                 ),
@@ -563,27 +587,26 @@ class _ExpirationDatePicker extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.calendar_today_outlined,
-                      size: 20,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      size: AppIconSize.sm,
+                      color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         expiresAt != null
                             ? '${expiresAt!.day}/${expiresAt!.month}/${expiresAt!.year}'
                             : 'No expiration (never expires)',
-                        style: TextStyle(
-                          fontSize: 15,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: expiresAt != null
                               ? theme.colorScheme.onSurface
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                              : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                         ),
                       ),
                     ),
                     if (expiresAt != null)
                       IconButton(
                         onPressed: () => onDateChanged(null),
-                        icon: const Icon(Icons.close_rounded, size: 18),
+                        icon: Icon(Icons.close_rounded, size: AppIconSize.xs + 2),
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),

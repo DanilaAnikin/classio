@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../dashboard/domain/entities/entities.dart';
 import '../../../grades/domain/entities/entities.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/student_repository.dart';
 
 /// Exception thrown when student operations fail.
-class StudentException implements Exception {
-  const StudentException(this.message);
-
-  final String message;
+class StudentException extends RepositoryException {
+  const StudentException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'StudentException: $message';
@@ -236,7 +235,7 @@ class SupabaseStudentRepository implements StudentRepository {
 
         if (status != null) {
           dateStatuses.putIfAbsent(normalizedDate, () => []);
-          dateStatuses[normalizedDate]!.add(status);
+          dateStatuses[normalizedDate]?.add(status);
         }
       }
 
@@ -402,7 +401,7 @@ class SupabaseStudentRepository implements StudentRepository {
         final subjectName = subjects['name'] as String;
 
         gradesBySubject.putIfAbsent(subjectId, () => []);
-        gradesBySubject[subjectId]!.add(gradeData);
+        gradesBySubject[subjectId]?.add(gradeData);
         subjectNames[subjectId] = subjectName;
       }
 
@@ -611,7 +610,7 @@ class SupabaseStudentRepository implements StudentRepository {
         // Convert DB day (0=Sun, 1=Mon...) to Dart weekday (1=Mon...7=Sun)
         final dartWeekday = dbDayOfWeek == 0 ? 7 : dbDayOfWeek;
         final date = monday.add(Duration(days: dartWeekday - 1));
-        weekLessons[dartWeekday]!.add(_mapToLesson(row, date));
+        weekLessons[dartWeekday]?.add(_mapToLesson(row, date));
       }
 
       return weekLessons;

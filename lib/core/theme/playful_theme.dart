@@ -2,487 +2,676 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app_colors.dart';
-import 'app_text_styles.dart';
+import 'app_radius.dart';
+import 'app_shadows.dart';
+import 'app_typography.dart';
+import 'spacing.dart';
 
 /// Playful theme - A fun, engaging theme for younger students.
 ///
+/// Refined and polished while maintaining a friendly, approachable feel.
+/// Inspired by modern educational apps like Duolingo and Khan Academy.
+///
 /// Features:
-/// - Vibrant purple primary color (#7C3AED)
-/// - Coral/Orange secondary (#F97316)
-/// - Soft cream background (#FFFBF5)
-/// - Colorful gradients and engaging visuals
-/// - 16-24px border radius (very rounded)
-/// - Nunito font
-/// - Fun, playful aesthetic
+/// - Refined violet primary (#7C3AED) with warm coral secondary (#EA580C)
+/// - Warm stone neutrals for a friendly, inviting feel
+/// - Violet-tinted shadows for subtle warmth
+/// - More rounded corners (12-20px) for approachability
+/// - Nunito font (friendly, rounded) with heavier weights
+/// - Premium playful aesthetic - sophisticated, not childish
+///
+/// Design System Integration:
+/// - Colors: PlayfulColors from app_colors.dart
+/// - Typography: AppTypography with isPlayful: true
+/// - Shadows: AppShadows with isPlayful: true
+/// - Radius: AppRadius with isPlayful: true
+/// - Spacing: AppSpacing tokens
 class PlayfulTheme {
   PlayfulTheme._();
 
-  /// Border radius values for the Playful theme
-  static const double borderRadiusSmall = 12.0;
-  static const double borderRadiusMedium = 16.0;
-  static const double borderRadiusLarge = 24.0;
-  static const double borderRadiusExtraLarge = 32.0;
-
-  /// Elevation values
-  static const double elevationNone = 0.0;
-  static const double elevationSmall = 2.0;
-  static const double elevationMedium = 4.0;
-  static const double elevationLarge = 8.0;
+  // ===========================================================================
+  // THEME DATA
+  // ===========================================================================
 
   /// The complete ThemeData for the Playful theme
   static ThemeData get themeData {
+    final textTheme = AppTypography.getTextTheme(isPlayful: true);
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
 
-      // Color scheme
+      // =========================================================================
+      // COLOR SCHEME
+      // =========================================================================
       colorScheme: const ColorScheme.light(
+        // Primary - Refined violet
         primary: PlayfulColors.primary,
         onPrimary: PlayfulColors.onPrimary,
-        primaryContainer: PlayfulColors.primaryLight,
+        primaryContainer: PlayfulColors.primarySubtle,
         onPrimaryContainer: PlayfulColors.primaryDark,
+
+        // Secondary - Warm coral
         secondary: PlayfulColors.secondary,
         onSecondary: PlayfulColors.onSecondary,
-        secondaryContainer: PlayfulColors.secondaryLight,
+        secondaryContainer: PlayfulColors.secondarySubtle,
         onSecondaryContainer: PlayfulColors.secondaryDark,
+
+        // Tertiary - Cyan accent
         tertiary: PlayfulColors.accentCyan,
         onTertiary: PlayfulColors.onInfo,
+
+        // Error - Soft coral red (friendlier)
         error: PlayfulColors.error,
         onError: PlayfulColors.onError,
-        errorContainer: PlayfulColors.errorLight,
-        onErrorContainer: PlayfulColors.error,
+        errorContainer: PlayfulColors.errorMuted,
+        onErrorContainer: PlayfulColors.errorPressed,
+
+        // Surface - Warm cream tones
         surface: PlayfulColors.surface,
         onSurface: PlayfulColors.onSurface,
-        surfaceContainerHighest: PlayfulColors.surfaceVariant,
+        surfaceContainerHighest: PlayfulColors.surfaceSubtle,
         onSurfaceVariant: PlayfulColors.onSurfaceVariant,
+
+        // Outline - Stone scale borders
         outline: PlayfulColors.border,
         outlineVariant: PlayfulColors.divider,
+
+        // Shadow
         shadow: PlayfulColors.shadow,
+
+        // Scrim
+        scrim: PlayfulColors.surfaceOverlay,
       ),
 
-      // Scaffold
+      // Scaffold background - Warm cream
       scaffoldBackgroundColor: PlayfulColors.background,
 
-      // Text theme
-      textTheme: PlayfulTextStyles.textTheme,
+      // =========================================================================
+      // TEXT THEME
+      // =========================================================================
+      textTheme: textTheme,
 
-      // AppBar theme
+      // =========================================================================
+      // APPBAR THEME
+      // =========================================================================
+      // Warm, friendly but still professional
       appBarTheme: AppBarTheme(
         backgroundColor: PlayfulColors.appBar,
         foregroundColor: PlayfulColors.appBarForeground,
-        elevation: elevationNone,
-        scrolledUnderElevation: elevationSmall,
+        elevation: AppElevation.none,
+        scrolledUnderElevation: AppElevation.xs,
         centerTitle: true,
-        titleTextStyle: PlayfulTextStyles.appBarTitle,
+        titleTextStyle: AppTypography.appBarTitle(isPlayful: true),
         iconTheme: const IconThemeData(
           color: PlayfulColors.appBarForeground,
-          size: 24,
+          size: AppIconSize.md,
         ),
         actionsIconTheme: const IconThemeData(
           color: PlayfulColors.primary,
-          size: 24,
+          size: AppIconSize.md,
         ),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(borderRadiusMedium),
+            bottom: AppRadius.lgCircular,
           ),
         ),
       ),
 
-      // Card theme
-      cardTheme: const CardThemeData(
+      // =========================================================================
+      // CARD THEME
+      // =========================================================================
+      // Slightly more rounded, warmer shadows
+      cardTheme: CardThemeData(
         color: PlayfulColors.card,
-        elevation: elevationSmall,
+        elevation: AppElevation.none, // Using custom shadows instead
         shadowColor: PlayfulColors.shadow,
         surfaceTintColor: Colors.transparent,
-        margin: EdgeInsets.all(8),
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.card(isPlayful: true), // 16px
+          side: const BorderSide(
+            color: PlayfulColors.cardBorder,
+            width: 1,
+          ),
+        ),
       ),
 
-      // Elevated button theme
+      // =========================================================================
+      // ELEVATED BUTTON THEME
+      // =========================================================================
+      // More rounded with subtle gradient feel
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: PlayfulColors.primary,
           foregroundColor: PlayfulColors.onPrimary,
-          disabledBackgroundColor: PlayfulColors.disabled,
+          disabledBackgroundColor: PlayfulColors.disabledBackground,
           disabledForegroundColor: PlayfulColors.textDisabled,
-          elevation: elevationSmall,
+          elevation: AppElevation.none,
           shadowColor: PlayfulColors.shadow,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-          minimumSize: const Size(88, 52),
+          padding: AppSpacing.buttonInsetsMd,
+          minimumSize: const Size(88, AppSpacing.buttonHeight),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusLarge),
+            borderRadius: AppRadius.button(isPlayful: true), // 12px
           ),
-          textStyle: PlayfulTextStyles.buttonText,
+          textStyle: AppTypography.buttonTextMedium(isPlayful: true),
+        ).copyWith(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return PlayfulColors.disabledBackground;
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return PlayfulColors.primaryPressed;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return PlayfulColors.primaryHover;
+            }
+            return PlayfulColors.primary;
+          }),
         ),
       ),
 
-      // Outlined button theme
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: PlayfulColors.primary,
-          disabledForegroundColor: PlayfulColors.disabled,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-          minimumSize: const Size(88, 52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusLarge),
-          ),
-          side: const BorderSide(
-            color: PlayfulColors.primary,
-            width: 2,
-          ),
-          textStyle: PlayfulTextStyles.buttonText,
-        ),
-      ),
-
-      // Text button theme
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: PlayfulColors.primary,
-          disabledForegroundColor: PlayfulColors.disabled,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          minimumSize: const Size(64, 44),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusMedium),
-          ),
-          textStyle: PlayfulTextStyles.buttonText,
-        ),
-      ),
-
-      // Filled button theme
+      // =========================================================================
+      // FILLED BUTTON THEME
+      // =========================================================================
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: PlayfulColors.primary,
           foregroundColor: PlayfulColors.onPrimary,
-          disabledBackgroundColor: PlayfulColors.disabled,
+          disabledBackgroundColor: PlayfulColors.disabledBackground,
           disabledForegroundColor: PlayfulColors.textDisabled,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-          minimumSize: const Size(88, 52),
+          padding: AppSpacing.buttonInsetsMd,
+          minimumSize: const Size(88, AppSpacing.buttonHeight),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusLarge),
+            borderRadius: AppRadius.button(isPlayful: true),
           ),
-          textStyle: PlayfulTextStyles.buttonText,
+          textStyle: AppTypography.buttonTextMedium(isPlayful: true),
+        ).copyWith(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return PlayfulColors.disabledBackground;
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return PlayfulColors.primaryPressed;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return PlayfulColors.primaryHover;
+            }
+            return PlayfulColors.primary;
+          }),
         ),
       ),
 
-      // Icon button theme
+      // =========================================================================
+      // OUTLINED BUTTON THEME
+      // =========================================================================
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: PlayfulColors.primary,
+          disabledForegroundColor: PlayfulColors.disabled,
+          padding: AppSpacing.buttonInsetsMd,
+          minimumSize: const Size(88, AppSpacing.buttonHeight),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.button(isPlayful: true),
+          ),
+          side: const BorderSide(
+            color: PlayfulColors.primary,
+            width: 1.5,
+          ),
+          textStyle: AppTypography.buttonTextMedium(isPlayful: true),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return const BorderSide(color: PlayfulColors.disabled, width: 1.5);
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return const BorderSide(
+                  color: PlayfulColors.primaryPressed, width: 1.5);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return const BorderSide(
+                  color: PlayfulColors.primaryHover, width: 1.5);
+            }
+            return const BorderSide(color: PlayfulColors.primary, width: 1.5);
+          }),
+        ),
+      ),
+
+      // =========================================================================
+      // TEXT BUTTON THEME
+      // =========================================================================
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: PlayfulColors.primary,
+          disabledForegroundColor: PlayfulColors.disabled,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
+          minimumSize: const Size(64, AppSpacing.buttonHeightCompact),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppRadius.buttonSmall(isPlayful: true),
+          ),
+          textStyle: AppTypography.buttonTextMedium(isPlayful: true),
+        ).copyWith(
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return PlayfulColors.disabled;
+            }
+            if (states.contains(WidgetState.pressed)) {
+              return PlayfulColors.primaryPressed;
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return PlayfulColors.primaryHover;
+            }
+            return PlayfulColors.primary;
+          }),
+        ),
+      ),
+
+      // =========================================================================
+      // ICON BUTTON THEME
+      // =========================================================================
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           foregroundColor: PlayfulColors.primary,
           disabledForegroundColor: PlayfulColors.disabled,
-          minimumSize: const Size(52, 52),
+          minimumSize:
+              const Size(AppSpacing.minTouchTarget, AppSpacing.minTouchTarget),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusMedium),
+            borderRadius: AppRadius.button(isPlayful: true),
           ),
-          backgroundColor: PlayfulColors.primary.withValues(alpha: 0.1),
+        ).copyWith(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return PlayfulColors.primary
+                  .withValues(alpha: AppOpacity.soft);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return PlayfulColors.primary
+                  .withValues(alpha: AppOpacity.light);
+            }
+            return Colors.transparent;
+          }),
         ),
       ),
 
-      // Floating action button theme
+      // =========================================================================
+      // FLOATING ACTION BUTTON THEME
+      // =========================================================================
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: PlayfulColors.secondary,
         foregroundColor: PlayfulColors.onSecondary,
-        elevation: elevationMedium,
-        focusElevation: elevationLarge,
-        hoverElevation: elevationLarge,
-        highlightElevation: elevationLarge,
+        elevation: AppElevation.sm,
+        focusElevation: AppElevation.md,
+        hoverElevation: AppElevation.md,
+        highlightElevation: AppElevation.md,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusLarge),
+          borderRadius: AppRadius.card(isPlayful: true), // 16px
         ),
-        extendedPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        extendedPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.sm,
+        ),
+        extendedIconLabelSpacing: AppSpacing.xs,
       ),
 
-      // Input decoration theme
+      // =========================================================================
+      // INPUT DECORATION THEME
+      // =========================================================================
+      // Softer, more rounded inputs
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: PlayfulColors.inputBackground,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        contentPadding: AppSpacing.inputInsets,
+        isDense: false,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: PlayfulColors.inputBorder, width: 2),
+          borderRadius: AppRadius.input(isPlayful: true), // 12px
+          borderSide: const BorderSide(
+            color: PlayfulColors.inputBorder,
+            width: 1.5,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: PlayfulColors.inputBorder, width: 2),
+          borderRadius: AppRadius.input(isPlayful: true),
+          borderSide: const BorderSide(
+            color: PlayfulColors.inputBorder,
+            width: 1.5,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.input(isPlayful: true),
           borderSide: const BorderSide(
-            color: PlayfulColors.inputFocusBorder,
-            width: 3,
+            color: PlayfulColors.inputBorderFocus,
+            width: 2,
           ),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: PlayfulColors.error, width: 2),
+          borderRadius: AppRadius.input(isPlayful: true),
+          borderSide: const BorderSide(
+            color: PlayfulColors.inputBorderError,
+            width: 1.5,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.input(isPlayful: true),
           borderSide: const BorderSide(
-            color: PlayfulColors.error,
-            width: 3,
+            color: PlayfulColors.inputBorderError,
+            width: 2,
           ),
         ),
         disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: PlayfulColors.divider, width: 2),
+          borderRadius: AppRadius.input(isPlayful: true),
+          borderSide: const BorderSide(
+            color: PlayfulColors.divider,
+            width: 1.5,
+          ),
         ),
-        labelStyle: PlayfulTextStyles.inputLabel,
-        hintStyle: PlayfulTextStyles.inputHint,
-        errorStyle: PlayfulTextStyles.inputError,
+        labelStyle: AppTypography.inputLabel(isPlayful: true),
+        hintStyle: AppTypography.inputHint(isPlayful: true),
+        errorStyle: AppTypography.inputError(isPlayful: true),
         prefixIconColor: PlayfulColors.primary,
-        suffixIconColor: PlayfulColors.primary,
-        floatingLabelStyle: PlayfulTextStyles.inputLabel.copyWith(
+        suffixIconColor: PlayfulColors.textSecondary,
+        floatingLabelStyle: AppTypography.inputLabel(isPlayful: true).copyWith(
           color: PlayfulColors.primary,
         ),
       ),
 
-      // Bottom navigation bar theme
+      // =========================================================================
+      // BOTTOM NAVIGATION BAR THEME
+      // =========================================================================
+      // Friendly indicators
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: PlayfulColors.bottomNavBackground,
+        backgroundColor: PlayfulColors.bottomNav,
         selectedItemColor: PlayfulColors.bottomNavSelected,
         unselectedItemColor: PlayfulColors.bottomNavUnselected,
         selectedIconTheme: const IconThemeData(
-          size: 28,
+          size: AppIconSize.lg,
           color: PlayfulColors.bottomNavSelected,
         ),
         unselectedIconTheme: const IconThemeData(
-          size: 24,
+          size: AppIconSize.md,
           color: PlayfulColors.bottomNavUnselected,
         ),
-        selectedLabelStyle: PlayfulTextStyles.bottomNavLabel.copyWith(
+        selectedLabelStyle:
+            AppTypography.bottomNavLabel(isPlayful: true).copyWith(
           fontWeight: FontWeight.w700,
         ),
-        unselectedLabelStyle: PlayfulTextStyles.bottomNavLabel,
+        unselectedLabelStyle: AppTypography.bottomNavLabel(isPlayful: true),
         showSelectedLabels: true,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
-        elevation: elevationMedium,
+        elevation: AppElevation.sm,
       ),
 
-      // Navigation bar theme (Material 3)
+      // =========================================================================
+      // NAVIGATION BAR THEME (Material 3)
+      // =========================================================================
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: PlayfulColors.bottomNavBackground,
-        indicatorColor: PlayfulColors.primary.withValues(alpha: 0.15),
+        backgroundColor: PlayfulColors.bottomNav,
+        indicatorColor: PlayfulColors.primarySubtle,
         indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.button(isPlayful: true),
         ),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(
-              size: 28,
+              size: AppIconSize.lg,
               color: PlayfulColors.primary,
             );
           }
           return const IconThemeData(
-            size: 24,
+            size: AppIconSize.md,
             color: PlayfulColors.bottomNavUnselected,
           );
         }),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final baseStyle = AppTypography.bottomNavLabel(isPlayful: true);
           if (states.contains(WidgetState.selected)) {
-            return PlayfulTextStyles.bottomNavLabel.copyWith(
+            return baseStyle.copyWith(
               color: PlayfulColors.primary,
               fontWeight: FontWeight.w700,
             );
           }
-          return PlayfulTextStyles.bottomNavLabel.copyWith(
+          return baseStyle.copyWith(
             color: PlayfulColors.bottomNavUnselected,
           );
         }),
-        elevation: elevationSmall,
-        height: 88,
+        elevation: AppElevation.none,
+        height: 80,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         surfaceTintColor: Colors.transparent,
       ),
 
-      // Navigation rail theme
+      // =========================================================================
+      // NAVIGATION RAIL THEME
+      // =========================================================================
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: PlayfulColors.surface,
         selectedIconTheme: const IconThemeData(
-          size: 28,
+          size: AppIconSize.lg,
           color: PlayfulColors.primary,
         ),
         unselectedIconTheme: const IconThemeData(
-          size: 24,
+          size: AppIconSize.md,
           color: PlayfulColors.bottomNavUnselected,
         ),
-        selectedLabelTextStyle: PlayfulTextStyles.bottomNavLabel.copyWith(
+        selectedLabelTextStyle:
+            AppTypography.bottomNavLabel(isPlayful: true).copyWith(
           color: PlayfulColors.primary,
           fontWeight: FontWeight.w700,
         ),
-        unselectedLabelTextStyle: PlayfulTextStyles.bottomNavLabel.copyWith(
+        unselectedLabelTextStyle:
+            AppTypography.bottomNavLabel(isPlayful: true).copyWith(
           color: PlayfulColors.bottomNavUnselected,
         ),
-        indicatorColor: PlayfulColors.primary.withValues(alpha: 0.15),
+        indicatorColor: PlayfulColors.primarySubtle,
         indicatorShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.button(isPlayful: true),
         ),
         useIndicator: true,
-        elevation: elevationNone,
+        elevation: AppElevation.none,
         minWidth: 80,
         groupAlignment: 0,
       ),
 
-      // Icon theme
+      // =========================================================================
+      // ICON THEMES
+      // =========================================================================
       iconTheme: const IconThemeData(
         color: PlayfulColors.textPrimary,
-        size: 24,
+        size: AppIconSize.md,
       ),
-
-      // Primary icon theme
       primaryIconTheme: const IconThemeData(
         color: PlayfulColors.onPrimary,
-        size: 24,
+        size: AppIconSize.md,
       ),
 
-      // List tile theme
+      // =========================================================================
+      // LIST TILE THEME
+      // =========================================================================
       listTileTheme: ListTileThemeData(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        contentPadding: AppSpacing.listItemInsets,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.card(isPlayful: true),
         ),
         tileColor: Colors.transparent,
-        selectedTileColor: PlayfulColors.primary.withValues(alpha: 0.1),
+        selectedTileColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.light),
         iconColor: PlayfulColors.primary,
         textColor: PlayfulColors.textPrimary,
-        titleTextStyle: PlayfulTextStyles.listTileTitle,
-        subtitleTextStyle: PlayfulTextStyles.listTileSubtitle,
-        leadingAndTrailingTextStyle: PlayfulTextStyles.listTileSubtitle,
-        minLeadingWidth: 28,
-        horizontalTitleGap: 16,
-        minVerticalPadding: 12,
+        titleTextStyle: AppTypography.listTileTitle(isPlayful: true),
+        subtitleTextStyle: AppTypography.listTileSubtitle(isPlayful: true),
+        leadingAndTrailingTextStyle:
+            AppTypography.listTileSubtitle(isPlayful: true),
+        minLeadingWidth: AppIconSize.lg,
+        horizontalTitleGap: AppSpacing.sm,
+        minVerticalPadding: AppSpacing.xs,
         dense: false,
         visualDensity: VisualDensity.comfortable,
       ),
 
-      // Divider theme
+      // =========================================================================
+      // DIVIDER THEME
+      // =========================================================================
       dividerTheme: const DividerThemeData(
         color: PlayfulColors.divider,
-        thickness: 2,
-        space: 2,
-        indent: 16,
-        endIndent: 16,
+        thickness: 1,
+        space: 1,
+        indent: AppSpacing.md,
+        endIndent: AppSpacing.md,
       ),
 
-      // Chip theme
+      // =========================================================================
+      // CHIP THEME
+      // =========================================================================
+      // Pill-shaped for playful aesthetic
       chipTheme: ChipThemeData(
         backgroundColor: PlayfulColors.surface,
-        disabledColor: PlayfulColors.surfaceVariant,
-        selectedColor: PlayfulColors.primary.withValues(alpha: 0.15),
-        secondarySelectedColor: PlayfulColors.secondary.withValues(alpha: 0.15),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        labelPadding: const EdgeInsets.symmetric(horizontal: 6),
+        disabledColor: PlayfulColors.surfaceSubtle,
+        selectedColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.soft),
+        secondarySelectedColor:
+            PlayfulColors.secondary.withValues(alpha: AppOpacity.soft),
+        padding: AppSpacing.chipInsets,
+        labelPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxs),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusLarge),
-          side: const BorderSide(color: PlayfulColors.border, width: 2),
+          borderRadius: AppRadius.chip(isPlayful: true), // Pill shape
+          side: const BorderSide(color: PlayfulColors.border, width: 1),
         ),
-        labelStyle: PlayfulTextStyles.textTheme.labelMedium?.copyWith(
+        labelStyle: textTheme.labelMedium?.copyWith(
           fontWeight: FontWeight.w600,
         ),
-        secondaryLabelStyle: PlayfulTextStyles.textTheme.labelMedium?.copyWith(
+        secondaryLabelStyle: textTheme.labelMedium?.copyWith(
           fontWeight: FontWeight.w600,
         ),
         brightness: Brightness.light,
-        elevation: elevationNone,
-        pressElevation: elevationSmall,
-        iconTheme: const IconThemeData(size: 18),
+        elevation: AppElevation.none,
+        pressElevation: AppElevation.xs,
+        iconTheme: const IconThemeData(size: AppIconSize.xs),
       ),
 
-      // Dialog theme
+      // =========================================================================
+      // DIALOG THEME
+      // =========================================================================
       dialogTheme: DialogThemeData(
         backgroundColor: PlayfulColors.surface,
-        elevation: elevationLarge,
+        elevation: AppElevation.lg,
         shadowColor: PlayfulColors.shadow,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusExtraLarge),
+          borderRadius: AppRadius.dialog(isPlayful: true), // 20px
         ),
-        titleTextStyle: PlayfulTextStyles.textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w800,
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w700,
         ),
-        contentTextStyle: PlayfulTextStyles.textTheme.bodyMedium,
-        actionsPadding: const EdgeInsets.all(20),
+        contentTextStyle: textTheme.bodyMedium,
+        actionsPadding: AppSpacing.dialogInsets,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.xl,
+        ),
       ),
 
-      // Bottom sheet theme
+      // =========================================================================
+      // BOTTOM SHEET THEME
+      // =========================================================================
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: PlayfulColors.surface,
-        elevation: elevationLarge,
+        elevation: AppElevation.lg,
         shadowColor: PlayfulColors.shadow,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(borderRadiusExtraLarge),
-          ),
+          borderRadius: AppRadius.bottomSheetRadius,
         ),
         showDragHandle: true,
-        dragHandleColor: PlayfulColors.primary.withValues(alpha: 0.3),
-        dragHandleSize: const Size(48, 6),
+        dragHandleColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.medium),
+        dragHandleSize: const Size(40, 4),
       ),
 
-      // Snackbar theme
+      // =========================================================================
+      // SNACKBAR THEME
+      // =========================================================================
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: PlayfulColors.primary,
-        contentTextStyle: PlayfulTextStyles.textTheme.bodyMedium?.copyWith(
-          color: PlayfulColors.onPrimary,
-          fontWeight: FontWeight.w600,
+        backgroundColor: PlayfulColors.stone800,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: PlayfulColors.stone50,
+          fontWeight: FontWeight.w500,
         ),
         actionTextColor: PlayfulColors.secondaryLight,
-        elevation: elevationMedium,
+        elevation: AppElevation.md,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.snackbar(isPlayful: true), // 12px
         ),
         behavior: SnackBarBehavior.floating,
-        insetPadding: const EdgeInsets.all(16),
+        insetPadding: AppSpacing.pageInsets,
+        width: AppSpacing.maxContentWidth,
       ),
 
-      // Tab bar theme
+      // =========================================================================
+      // TAB BAR THEME
+      // =========================================================================
       tabBarTheme: TabBarThemeData(
         indicatorColor: PlayfulColors.primary,
         labelColor: PlayfulColors.primary,
         unselectedLabelColor: PlayfulColors.textSecondary,
-        labelStyle: PlayfulTextStyles.textTheme.labelLarge?.copyWith(
+        labelStyle: textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w700,
         ),
-        unselectedLabelStyle: PlayfulTextStyles.textTheme.labelLarge,
+        unselectedLabelStyle: textTheme.labelLarge,
         indicatorSize: TabBarIndicatorSize.label,
         indicator: UnderlineTabIndicator(
           borderSide: const BorderSide(
-            width: 4,
+            width: 3,
             color: PlayfulColors.primary,
           ),
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: AppRadius.fullRadius,
         ),
         dividerColor: Colors.transparent,
+        overlayColor: WidgetStateProperty.all(
+          PlayfulColors.primary.withValues(alpha: AppOpacity.light),
+        ),
       ),
 
-      // Tooltip theme
+      // =========================================================================
+      // TOOLTIP THEME
+      // =========================================================================
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: PlayfulColors.primary,
-          borderRadius: BorderRadius.circular(borderRadiusSmall),
+          color: PlayfulColors.stone800,
+          borderRadius: AppRadius.tooltip(),
         ),
-        textStyle: PlayfulTextStyles.textTheme.bodySmall?.copyWith(
-          color: PlayfulColors.onPrimary,
-          fontWeight: FontWeight.w600,
+        textStyle: textTheme.bodySmall?.copyWith(
+          color: PlayfulColors.stone50,
+          fontWeight: FontWeight.w500,
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        waitDuration: const Duration(milliseconds: 400),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        waitDuration: AppDuration.medium,
         showDuration: const Duration(seconds: 2),
       ),
 
-      // Progress indicator theme
+      // =========================================================================
+      // PROGRESS INDICATOR THEME
+      // =========================================================================
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: PlayfulColors.primary,
-        linearTrackColor: PlayfulColors.primary.withValues(alpha: 0.2),
-        circularTrackColor: PlayfulColors.primary.withValues(alpha: 0.2),
-        linearMinHeight: 8,
-        refreshBackgroundColor: PlayfulColors.surfaceVariant,
+        linearTrackColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.soft),
+        circularTrackColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.soft),
+        linearMinHeight: 6,
+        refreshBackgroundColor: PlayfulColors.surfaceSubtle,
       ),
 
-      // Switch theme
+      // =========================================================================
+      // SWITCH THEME
+      // =========================================================================
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -494,28 +683,26 @@ class PlayfulTheme {
           if (states.contains(WidgetState.selected)) {
             return PlayfulColors.primary;
           }
-          return PlayfulColors.border;
+          return PlayfulColors.stone300;
         }),
-        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return Colors.transparent;
-          }
-          return PlayfulColors.border;
-        }),
-        trackOutlineWidth: WidgetStateProperty.all(2),
+        trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+        trackOutlineWidth: WidgetStateProperty.all(0),
         thumbIcon: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const Icon(
               Icons.check_rounded,
-              size: 14,
+              size: AppIconSize.xs,
               color: PlayfulColors.primary,
             );
           }
           return null;
         }),
+        splashRadius: AppSpacing.xl,
       ),
 
-      // Checkbox theme
+      // =========================================================================
+      // CHECKBOX THEME
+      // =========================================================================
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -524,95 +711,118 @@ class PlayfulTheme {
           return Colors.transparent;
         }),
         checkColor: WidgetStateProperty.all(PlayfulColors.onPrimary),
-        side: const BorderSide(color: PlayfulColors.border, width: 2.5),
+        side: const BorderSide(color: PlayfulColors.stone400, width: 2),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: AppRadius.badge(isPlayful: true), // 6px
         ),
-        splashRadius: 24,
+        splashRadius: AppSpacing.xl,
       ),
 
-      // Radio theme
+      // =========================================================================
+      // RADIO THEME
+      // =========================================================================
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return PlayfulColors.primary;
           }
-          return PlayfulColors.border;
+          return PlayfulColors.stone400;
         }),
-        splashRadius: 24,
+        splashRadius: AppSpacing.xl,
       ),
 
-      // Slider theme
+      // =========================================================================
+      // SLIDER THEME
+      // =========================================================================
       sliderTheme: SliderThemeData(
         activeTrackColor: PlayfulColors.primary,
-        inactiveTrackColor: PlayfulColors.primary.withValues(alpha: 0.2),
+        inactiveTrackColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.soft),
         thumbColor: PlayfulColors.primary,
-        overlayColor: PlayfulColors.primary.withValues(alpha: 0.15),
-        valueIndicatorColor: PlayfulColors.primary,
-        valueIndicatorTextStyle: PlayfulTextStyles.textTheme.labelMedium?.copyWith(
-          color: PlayfulColors.onPrimary,
-          fontWeight: FontWeight.w700,
+        overlayColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.soft),
+        valueIndicatorColor: PlayfulColors.stone800,
+        valueIndicatorTextStyle: textTheme.labelMedium?.copyWith(
+          color: PlayfulColors.stone50,
+          fontWeight: FontWeight.w600,
         ),
-        trackHeight: 8,
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
-        overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+        trackHeight: 6,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
         valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
       ),
 
-      // Drawer theme
+      // =========================================================================
+      // DRAWER THEME
+      // =========================================================================
       drawerTheme: DrawerThemeData(
         backgroundColor: PlayfulColors.surface,
-        elevation: elevationMedium,
+        elevation: AppElevation.md,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.horizontal(
-            right: Radius.circular(borderRadiusExtraLarge),
+            right: AppRadius.xlCircular,
           ),
         ),
       ),
 
-      // Popup menu theme
+      // =========================================================================
+      // POPUP MENU THEME
+      // =========================================================================
       popupMenuTheme: PopupMenuThemeData(
         color: PlayfulColors.surface,
-        elevation: elevationMedium,
+        elevation: AppElevation.md,
         shadowColor: PlayfulColors.shadow,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.popupMenu(isPlayful: true), // 12px
+          side: const BorderSide(color: PlayfulColors.cardBorder, width: 1),
         ),
-        textStyle: PlayfulTextStyles.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
+        textStyle: textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
         ),
       ),
 
-      // Badge theme
+      // =========================================================================
+      // BADGE THEME
+      // =========================================================================
       badgeTheme: BadgeThemeData(
         backgroundColor: PlayfulColors.secondary,
         textColor: PlayfulColors.onSecondary,
-        smallSize: 10,
-        largeSize: 20,
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        textStyle: PlayfulTextStyles.badge,
+        smallSize: 8,
+        largeSize: AppSpacing.lg,
+        padding: AppSpacing.badgeInsets,
+        textStyle: AppTypography.badge(isPlayful: true),
       ),
 
-      // Search bar theme
+      // =========================================================================
+      // SEARCH BAR THEME
+      // =========================================================================
       searchBarTheme: SearchBarThemeData(
         backgroundColor: WidgetStateProperty.all(PlayfulColors.inputBackground),
-        elevation: WidgetStateProperty.all(elevationNone),
+        elevation: WidgetStateProperty.all(AppElevation.none),
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusLarge),
-            side: const BorderSide(color: PlayfulColors.inputBorder, width: 2),
+            borderRadius: AppRadius.searchBar(isPlayful: true), // Pill shape
+            side: const BorderSide(color: PlayfulColors.inputBorder, width: 1),
           ),
         ),
-        textStyle: WidgetStateProperty.all(PlayfulTextStyles.inputText),
-        hintStyle: WidgetStateProperty.all(PlayfulTextStyles.inputHint),
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(horizontal: 20),
+        textStyle: WidgetStateProperty.all(
+          AppTypography.inputText(isPlayful: true),
+        ),
+        hintStyle: WidgetStateProperty.all(
+          AppTypography.inputHint(isPlayful: true),
+        ),
+        padding: WidgetStateProperty.all(AppSpacing.horizontalInsets),
+        constraints: const BoxConstraints(
+          minHeight: AppSpacing.inputHeight,
+          maxWidth: AppSpacing.maxContentWidth,
         ),
       ),
 
-      // Segmented button theme
+      // =========================================================================
+      // SEGMENTED BUTTON THEME
+      // =========================================================================
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
@@ -628,42 +838,50 @@ class PlayfulTheme {
             return PlayfulColors.textPrimary;
           }),
           side: WidgetStateProperty.all(
-            const BorderSide(color: PlayfulColors.border, width: 2),
+            const BorderSide(color: PlayfulColors.border, width: 1),
           ),
           shape: WidgetStateProperty.all(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(borderRadiusLarge),
+              borderRadius: AppRadius.buttonSmall(isPlayful: true),
             ),
           ),
           padding: WidgetStateProperty.all(
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
           ),
           textStyle: WidgetStateProperty.all(
-            PlayfulTextStyles.buttonText,
+            AppTypography.buttonTextMedium(isPlayful: true),
+          ),
+          minimumSize: WidgetStateProperty.all(
+            const Size(0, AppSpacing.buttonHeightCompact),
           ),
         ),
       ),
 
-      // Date picker theme
+      // =========================================================================
+      // DATE PICKER THEME
+      // =========================================================================
       datePickerTheme: DatePickerThemeData(
         backgroundColor: PlayfulColors.surface,
         headerBackgroundColor: PlayfulColors.primary,
         headerForegroundColor: PlayfulColors.onPrimary,
-        headerHeadlineStyle: PlayfulTextStyles.textTheme.headlineSmall?.copyWith(
+        headerHeadlineStyle: textTheme.headlineSmall?.copyWith(
           color: PlayfulColors.onPrimary,
         ),
-        dayStyle: PlayfulTextStyles.textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w600,
+        dayStyle: textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
         ),
-        weekdayStyle: PlayfulTextStyles.textTheme.labelMedium?.copyWith(
+        weekdayStyle: textTheme.labelMedium?.copyWith(
           color: PlayfulColors.primary,
-          fontWeight: FontWeight.w700,
-        ),
-        yearStyle: PlayfulTextStyles.textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w600,
+        ),
+        yearStyle: textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w500,
         ),
         todayBackgroundColor: WidgetStateProperty.all(
-          PlayfulColors.secondary.withValues(alpha: 0.2),
+          PlayfulColors.secondary.withValues(alpha: AppOpacity.soft),
         ),
         todayForegroundColor: WidgetStateProperty.all(PlayfulColors.secondary),
         dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
@@ -679,61 +897,200 @@ class PlayfulTheme {
           return PlayfulColors.textPrimary;
         }),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusExtraLarge),
+          borderRadius: AppRadius.dialog(isPlayful: true),
         ),
         dayShape: WidgetStateProperty.all(
           RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusSmall),
+            borderRadius: AppRadius.buttonSmall(isPlayful: true),
           ),
         ),
       ),
 
-      // Time picker theme
+      // =========================================================================
+      // TIME PICKER THEME
+      // =========================================================================
       timePickerTheme: TimePickerThemeData(
         backgroundColor: PlayfulColors.surface,
-        hourMinuteColor: PlayfulColors.primary.withValues(alpha: 0.1),
+        hourMinuteColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.light),
         hourMinuteTextColor: PlayfulColors.primary,
-        hourMinuteTextStyle: PlayfulTextStyles.textTheme.displaySmall?.copyWith(
+        hourMinuteTextStyle: textTheme.displaySmall?.copyWith(
           fontWeight: FontWeight.w700,
         ),
-        dayPeriodColor: PlayfulColors.primary.withValues(alpha: 0.1),
+        dayPeriodColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.light),
         dayPeriodTextColor: PlayfulColors.primary,
-        dayPeriodTextStyle: PlayfulTextStyles.textTheme.titleMedium,
-        dialBackgroundColor: PlayfulColors.primary.withValues(alpha: 0.1),
+        dayPeriodTextStyle: textTheme.titleMedium,
+        dialBackgroundColor:
+            PlayfulColors.primary.withValues(alpha: AppOpacity.light),
         dialHandColor: PlayfulColors.primary,
         dialTextColor: PlayfulColors.textPrimary,
-        dialTextStyle: PlayfulTextStyles.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.w600,
+        dialTextStyle: textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.w500,
         ),
         entryModeIconColor: PlayfulColors.primary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusExtraLarge),
+          borderRadius: AppRadius.dialog(isPlayful: true),
         ),
         hourMinuteShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.button(isPlayful: true),
         ),
         dayPeriodShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.button(isPlayful: true),
         ),
       ),
 
-      // Expansion tile theme
+      // =========================================================================
+      // EXPANSION TILE THEME
+      // =========================================================================
       expansionTileTheme: ExpansionTileThemeData(
         backgroundColor: Colors.transparent,
         collapsedBackgroundColor: Colors.transparent,
-        tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        tilePadding: AppSpacing.listItemInsets,
+        childrenPadding: const EdgeInsets.fromLTRB(
+          AppSpacing.md,
+          0,
+          AppSpacing.md,
+          AppSpacing.md,
+        ),
         iconColor: PlayfulColors.primary,
         collapsedIconColor: PlayfulColors.textSecondary,
         textColor: PlayfulColors.textPrimary,
         collapsedTextColor: PlayfulColors.textPrimary,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.card(isPlayful: true),
         ),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: AppRadius.card(isPlayful: true),
         ),
       ),
+    );
+  }
+
+  // ===========================================================================
+  // HELPER METHODS FOR CUSTOM WIDGETS
+  // ===========================================================================
+
+  /// Get card decoration with playful shadows
+  static BoxDecoration cardDecoration({
+    bool isHovered = false,
+    bool isPressed = false,
+  }) {
+    List<BoxShadow> shadows;
+    if (isPressed) {
+      shadows = AppShadows.cardPressed(isPlayful: true);
+    } else if (isHovered) {
+      shadows = AppShadows.cardHover(isPlayful: true);
+    } else {
+      shadows = AppShadows.card(isPlayful: true);
+    }
+
+    return BoxDecoration(
+      color: PlayfulColors.card,
+      borderRadius: AppRadius.card(isPlayful: true),
+      border: Border.all(
+        color: isHovered
+            ? PlayfulColors.cardBorderHover
+            : PlayfulColors.cardBorder,
+        width: 1,
+      ),
+      boxShadow: shadows,
+    );
+  }
+
+  /// Get button decoration with playful shadows and gradient
+  static BoxDecoration buttonDecoration({
+    bool isHovered = false,
+    bool isPressed = false,
+    bool useGradient = false,
+  }) {
+    List<BoxShadow> shadows;
+    if (isPressed) {
+      shadows = AppShadows.buttonPressed(isPlayful: true);
+    } else if (isHovered) {
+      shadows = AppShadows.buttonHover(isPlayful: true);
+    } else {
+      shadows = AppShadows.button(isPlayful: true);
+    }
+
+    return BoxDecoration(
+      gradient: useGradient ? PlayfulGradients.button : null,
+      color: useGradient
+          ? null
+          : (isPressed
+              ? PlayfulColors.primaryPressed
+              : isHovered
+                  ? PlayfulColors.primaryHover
+                  : PlayfulColors.primary),
+      borderRadius: AppRadius.button(isPlayful: true),
+      boxShadow: shadows,
+    );
+  }
+
+  /// Get input decoration with focus ring shadow
+  static BoxDecoration inputDecoration({
+    bool isFocused = false,
+    bool hasError = false,
+  }) {
+    List<BoxShadow> shadows = [];
+    if (isFocused) {
+      shadows = hasError
+          ? AppShadows.inputFocusError(isPlayful: true)
+          : AppShadows.inputFocus(isPlayful: true);
+    }
+
+    return BoxDecoration(
+      color: PlayfulColors.inputBackground,
+      borderRadius: AppRadius.input(isPlayful: true),
+      border: Border.all(
+        color: hasError
+            ? PlayfulColors.inputBorderError
+            : isFocused
+                ? PlayfulColors.inputBorderFocus
+                : PlayfulColors.inputBorder,
+        width: isFocused ? 2 : 1.5,
+      ),
+      boxShadow: shadows,
+    );
+  }
+
+  /// Get dialog/modal decoration with playful shadows
+  static BoxDecoration modalDecoration() {
+    return BoxDecoration(
+      color: PlayfulColors.surface,
+      borderRadius: AppRadius.dialog(isPlayful: true),
+      boxShadow: AppShadows.modal(isPlayful: true),
+    );
+  }
+
+  /// Get dropdown/popup decoration with playful shadows
+  static BoxDecoration dropdownDecoration() {
+    return BoxDecoration(
+      color: PlayfulColors.surface,
+      borderRadius: AppRadius.popupMenu(isPlayful: true),
+      border: Border.all(
+        color: PlayfulColors.cardBorder,
+        width: 1,
+      ),
+      boxShadow: AppShadows.dropdown(isPlayful: true),
+    );
+  }
+
+  /// Get toast/snackbar decoration with playful shadows
+  static BoxDecoration toastDecoration() {
+    return BoxDecoration(
+      color: PlayfulColors.stone800,
+      borderRadius: AppRadius.snackbar(isPlayful: true),
+      boxShadow: AppShadows.toast(isPlayful: true),
+    );
+  }
+
+  /// Get avatar decoration with playful shadows
+  static BoxDecoration avatarDecoration({double? size}) {
+    return BoxDecoration(
+      shape: BoxShape.circle,
+      color: PlayfulColors.primarySubtle,
+      boxShadow: AppShadows.avatar(isPlayful: true),
     );
   }
 }

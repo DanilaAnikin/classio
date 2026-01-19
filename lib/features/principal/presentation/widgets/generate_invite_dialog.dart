@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../providers/principal_providers.dart';
 
@@ -31,6 +31,7 @@ class GenerateInviteDialog extends ConsumerStatefulWidget {
 }
 
 class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
+  final _formKey = GlobalKey<FormState>();
   UserRole _selectedRole = UserRole.teacher;
   int _usageLimit = 1;
   bool _hasExpiration = false;
@@ -47,6 +48,9 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
   ];
 
   Future<void> _generateCode() async {
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) return;
+
     setState(() => _isLoading = true);
 
     try {
@@ -112,12 +116,12 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 450),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.dialogInsets,
           child: _generatedCode != null
               ? _buildSuccessContent()
               : _buildFormContent(),
@@ -127,32 +131,35 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
   }
 
   Widget _buildFormContent() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    final theme = Theme.of(context);
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
         // Header
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: CleanColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.person_add_outlined,
-                color: CleanColors.primary,
+                color: theme.colorScheme.primary,
+                size: AppIconSize.md,
               ),
             ),
-            const SizedBox(width: 12),
-            const Expanded(
+            SizedBox(width: AppSpacing.sm),
+            Expanded(
               child: Text(
                 'Generate Invite Code',
-                style: TextStyle(
-                  fontSize: 20,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: CleanColors.textPrimary,
                 ),
               ),
             ),
@@ -162,23 +169,22 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: AppSpacing.xl),
 
         // Role selection
-        const Text(
+        Text(
           'Select Role',
-          style: TextStyle(
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
-            color: CleanColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         DropdownButtonFormField<UserRole>(
           initialValue: _selectedRole,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.badge_outlined),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
           ),
           isExpanded: true,
@@ -187,8 +193,8 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
               value: role,
               child: Row(
                 children: [
-                  Icon(_getRoleIcon(role), size: 20, color: _getRoleColor(role)),
-                  const SizedBox(width: 8),
+                  Icon(_getRoleIcon(role), size: AppIconSize.sm, color: _getRoleColor(role)),
+                  SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(_getRoleDisplayName(role)),
                   ),
@@ -196,52 +202,57 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
               ),
             );
           }).toList(),
-          onChanged: (value) {
-            if (value != null) {
-              setState(() {
-                _selectedRole = value;
-                // Reset class selection when role changes
-                if (value != UserRole.student) {
-                  _selectedClassId = null;
-                }
-              });
+          onChanged: _isLoading
+              ? null
+              : (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedRole = value;
+                      // Reset class selection when role changes
+                      if (value != UserRole.student) {
+                        _selectedClassId = null;
+                      }
+                    });
+                  }
+                },
+          validator: (value) {
+            if (value == null) {
+              return 'Please select a role';
             }
+            return null;
           },
         ),
 
         // Class selection (only for students)
         if (_selectedRole == UserRole.student) ...[
-          const SizedBox(height: 16),
-          const Text(
+          SizedBox(height: AppSpacing.md),
+          Text(
             'Assign to Class',
-            style: TextStyle(
+            style: theme.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w600,
-              color: CleanColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: AppSpacing.xxs),
           Text(
             'Student will be automatically enrolled in this class',
-            style: TextStyle(
-              fontSize: 12,
-              color: CleanColors.textSecondary,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           _buildClassSelector(),
         ],
 
-        const SizedBox(height: 16),
+        SizedBox(height: AppSpacing.md),
 
         // Usage limit
-        const Text(
+        Text(
           'Usage Limit',
-          style: TextStyle(
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
-            color: CleanColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         Row(
           children: [
             Expanded(
@@ -251,73 +262,82 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
                 max: 50,
                 divisions: 49,
                 label: _usageLimit.toString(),
-                onChanged: (value) {
-                  setState(() => _usageLimit = value.round());
-                },
+                onChanged: _isLoading
+                    ? null
+                    : (value) {
+                        setState(() => _usageLimit = value.round());
+                      },
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
               decoration: BoxDecoration(
-                color: CleanColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(8),
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Text(
                 '$_usageLimit',
-                style: const TextStyle(
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: AppSpacing.md),
 
         // Expiration toggle
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: const Text('Set Expiration'),
-          subtitle: const Text(
+          subtitle: Text(
             'Code will become invalid after this date',
-            style: TextStyle(fontSize: 12),
+            style: theme.textTheme.labelSmall,
           ),
           value: _hasExpiration,
-          onChanged: (value) {
-            setState(() {
-              _hasExpiration = value;
-              if (value && _expiresAt == null) {
-                _expiresAt = DateTime.now().add(const Duration(days: 7));
-              }
-            });
-          },
+          onChanged: _isLoading
+              ? null
+              : (value) {
+                  setState(() {
+                    _hasExpiration = value;
+                    if (value && _expiresAt == null) {
+                      _expiresAt = DateTime.now().add(const Duration(days: 7));
+                    }
+                  });
+                },
         ),
 
         // Expiration date picker
         if (_hasExpiration) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           InkWell(
             onTap: _selectExpirationDate,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                border: Border.all(color: CleanColors.border),
-                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: theme.colorScheme.outline.withValues(alpha: AppOpacity.medium)),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 20),
-                  const SizedBox(width: 12),
+                  Icon(Icons.calendar_today, size: AppIconSize.sm),
+                  SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(
-                      _expiresAt != null
-                          ? _formatDateTime(_expiresAt!)
-                          : 'Select date and time',
-                      style: TextStyle(
-                        color: _expiresAt != null
-                            ? CleanColors.textPrimary
-                            : CleanColors.hint,
-                      ),
+                    child: Builder(
+                      builder: (context) {
+                        final expiresAt = _expiresAt;
+                        return Text(
+                          expiresAt != null
+                              ? _formatDateTime(expiresAt)
+                              : 'Select date and time',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: expiresAt != null
+                                ? theme.colorScheme.onSurface
+                                : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   const Icon(Icons.arrow_drop_down),
@@ -326,7 +346,7 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
             ),
           ),
         ],
-        const SizedBox(height: 24),
+        SizedBox(height: AppSpacing.xl),
 
         // Actions
         Row(
@@ -336,16 +356,16 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
               onPressed: _isLoading ? null : () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppSpacing.sm),
             FilledButton.icon(
               onPressed: _isLoading ? null : _generateCode,
               icon: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
+                  ? SizedBox(
+                      width: AppIconSize.sm,
+                      height: AppIconSize.sm,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: CleanColors.onPrimary,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     )
                   : const Icon(Icons.add),
@@ -353,51 +373,55 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
             ),
           ],
         ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildSuccessContent() {
+    final theme = Theme.of(context);
+    final generatedCode = _generatedCode ?? '';
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         // Success icon
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: CleanColors.successLight,
+            color: CleanColors.success.withValues(alpha: AppOpacity.soft),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.check_circle,
             color: CleanColors.success,
-            size: 48,
+            size: AppIconSize.xxl,
           ),
         ),
-        const SizedBox(height: 24),
-        const Text(
+        SizedBox(height: AppSpacing.xl),
+        Text(
           'Invite Code Generated!',
-          style: TextStyle(
-            fontSize: 20,
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: CleanColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
+        SizedBox(height: AppSpacing.xs),
+        Text(
           'Share this code with the person you want to invite:',
-          style: TextStyle(color: CleanColors.textSecondary),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+          ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: AppSpacing.xl),
 
         // Code display
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: CleanColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: CleanColors.border),
+            color: theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: AppOpacity.medium)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -406,23 +430,21 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    _generatedCode!,
-                    style: const TextStyle(
+                    generatedCode,
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontFamily: 'monospace',
-                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 4,
-                      color: CleanColors.textPrimary,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppSpacing.sm),
               IconButton(
-                icon: const Icon(Icons.copy, color: CleanColors.primary),
+                icon: Icon(Icons.copy, color: theme.colorScheme.primary),
                 tooltip: 'Copy to clipboard',
                 onPressed: () {
-                  Clipboard.setData(ClipboardData(text: _generatedCode!));
+                  Clipboard.setData(ClipboardData(text: generatedCode));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Code copied to clipboard'),
@@ -434,27 +456,27 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: AppSpacing.md),
 
         // Role info
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
           decoration: BoxDecoration(
-            color: _getRoleColor(_selectedRole).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
+            color: _getRoleColor(_selectedRole).withValues(alpha: AppOpacity.soft),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 _getRoleIcon(_selectedRole),
-                size: 16,
+                size: AppIconSize.xs,
                 color: _getRoleColor(_selectedRole),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: AppSpacing.xs),
               Text(
                 'For: ${_getRoleDisplayName(_selectedRole)}',
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: _getRoleColor(_selectedRole),
                   fontWeight: FontWeight.w500,
                 ),
@@ -462,7 +484,7 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: AppSpacing.xl),
 
         // Done button
         SizedBox(
@@ -478,28 +500,28 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
 
   /// Builds the class selector dropdown for student invites.
   Widget _buildClassSelector() {
+    final theme = Theme.of(context);
     final classesAsync = ref.watch(principalSchoolClassesProvider(widget.schoolId));
 
     return classesAsync.when(
       data: (classes) {
         if (classes.isEmpty) {
           return Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: CleanColors.warningLight,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: CleanColors.warning.withValues(alpha: 0.3)),
+              color: CleanColors.warning.withValues(alpha: AppOpacity.soft),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+              border: Border.all(color: CleanColors.warning.withValues(alpha: AppOpacity.soft)),
             ),
             child: Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: CleanColors.warning, size: 20),
-                const SizedBox(width: 8),
+                Icon(Icons.warning_amber_rounded, color: CleanColors.warning, size: AppIconSize.sm),
+                SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     'No classes available. Create a class first.',
-                    style: TextStyle(
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: CleanColors.warning,
-                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -512,83 +534,85 @@ class _GenerateInviteDialogState extends ConsumerState<GenerateInviteDialog> {
           initialValue: _selectedClassId,
           decoration: InputDecoration(
             prefixIcon: const Icon(Icons.class_outlined),
-            hintText: 'Select a class (optional)',
+            hintText: 'Select a class',
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
           ),
           isExpanded: true,
-          items: [
-            const DropdownMenuItem<String>(
-              value: null,
-              child: Text('No class (assign later)'),
-            ),
-            ...classes.map((classInfo) {
-              return DropdownMenuItem<String>(
-                value: classInfo.id,
-                child: Row(
-                  children: [
-                    if (classInfo.gradeLevel != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: CleanColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'Grade ${classInfo.gradeLevel}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: CleanColors.primary,
-                          ),
-                        ),
+          items: classes.map((classInfo) {
+            return DropdownMenuItem<String>(
+              value: classInfo.id,
+              child: Row(
+                children: [
+                  if (classInfo.gradeLevel != null)
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
-                    if (classInfo.gradeLevel != null)
-                      const SizedBox(width: 8),
-                    Expanded(
                       child: Text(
-                        classInfo.name,
-                        overflow: TextOverflow.ellipsis,
+                        'Grade ${classInfo.gradeLevel}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.primary,
+                        ),
                       ),
                     ),
-                    Text(
-                      '${classInfo.studentCount} students',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: CleanColors.textSecondary,
-                      ),
+                  if (classInfo.gradeLevel != null)
+                    SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(
+                      classInfo.name,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
-              );
-            }),
-          ],
-          onChanged: (value) {
-            setState(() => _selectedClassId = value);
+                  ),
+                  Text(
+                    '${classInfo.studentCount} students',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          onChanged: _isLoading
+              ? null
+              : (value) {
+                  setState(() => _selectedClassId = value);
+                },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please select a class for the student';
+            }
+            return null;
           },
         );
       },
-      loading: () => const Center(
+      loading: () => Center(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: CircularProgressIndicator(),
+          padding: EdgeInsets.all(AppSpacing.md),
+          child: const CircularProgressIndicator(),
         ),
       ),
       error: (error, _) => Container(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: CleanColors.errorLight,
-          borderRadius: BorderRadius.circular(10),
+          color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft),
+          borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
         child: Row(
           children: [
-            Icon(Icons.error_outline, color: CleanColors.error, size: 20),
-            const SizedBox(width: 8),
+            Icon(Icons.error_outline, color: theme.colorScheme.error, size: AppIconSize.sm),
+            SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
                 'Failed to load classes',
-                style: TextStyle(color: CleanColors.error, fontSize: 13),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
             ),
           ],

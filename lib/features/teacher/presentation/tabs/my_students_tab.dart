@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/theme.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../providers/teacher_provider.dart';
@@ -53,12 +54,12 @@ class _ClassSelector extends ConsumerWidget {
     final selectedClassId = ref.watch(selectedClassProvider);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.outline.withValues(alpha: 0.15),
+            color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft + 0.03),
           ),
         ),
       ),
@@ -67,7 +68,9 @@ class _ClassSelector extends ConsumerWidget {
           if (classes.isEmpty) {
             return Text(
               'No classes assigned',
-              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             );
           }
 
@@ -77,7 +80,7 @@ class _ClassSelector extends ConsumerWidget {
               children: classes.map((classInfo) {
                 final isSelected = selectedClassId == classInfo.id;
                 return Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: EdgeInsets.only(right: AppSpacing.xs),
                   child: FilterChip(
                     label: Text(classInfo.name),
                     selected: isSelected,
@@ -88,7 +91,7 @@ class _ClassSelector extends ConsumerWidget {
                     },
                     avatar: Icon(
                       Icons.class_rounded,
-                      size: 18,
+                      size: AppIconSize.sm - 2,
                       color: isSelected
                           ? theme.colorScheme.primary
                           : theme.colorScheme.onSurfaceVariant,
@@ -99,16 +102,18 @@ class _ClassSelector extends ConsumerWidget {
             ),
           );
         },
-        loading: () => const Center(
+        loading: () => Center(
           child: SizedBox(
-            height: 24,
-            width: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            height: AppIconSize.md,
+            width: AppIconSize.md,
+            child: const CircularProgressIndicator(strokeWidth: 2),
           ),
         ),
         error: (_, _) => Text(
           'Failed to load classes',
-          style: TextStyle(color: theme.colorScheme.error),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.error,
+          ),
         ),
       ),
     );
@@ -130,23 +135,21 @@ class _EmptyStudents extends StatelessWidget {
         children: [
           Icon(
             Icons.groups_rounded,
-            size: isPlayful ? 72 : 64,
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            size: isPlayful ? AppIconSize.hero + 8 : AppIconSize.hero,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: AppOpacity.heavy - 0.08),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
           Text(
             'Select a class to view students',
-            style: TextStyle(
-              fontSize: isPlayful ? 18 : 16,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           Text(
             'Choose a class from the chips above',
-            style: TextStyle(
-              fontSize: isPlayful ? 14 : 13,
+            style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),
@@ -187,23 +190,21 @@ class _StudentsList extends ConsumerWidget {
                 children: [
                   Icon(
                     Icons.person_add_rounded,
-                    size: isPlayful ? 64 : 56,
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    size: isPlayful ? AppIconSize.hero : AppIconSize.xxl + 8,
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: AppOpacity.heavy - 0.08),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppSpacing.md),
                   Text(
                     'No students in this class',
-                    style: TextStyle(
-                      fontSize: isPlayful ? 18 : 16,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.xs),
                   Text(
                     'Use the button below to invite students',
-                    style: TextStyle(
-                      fontSize: isPlayful ? 14 : 13,
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                     ),
                   ),
@@ -216,19 +217,18 @@ class _StudentsList extends ConsumerWidget {
             children: [
               // Header
               Container(
-                padding: EdgeInsets.all(isPlayful ? 16 : 12),
+                padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
                 child: Row(
                   children: [
                     Icon(
                       Icons.people_rounded,
                       color: theme.colorScheme.primary,
-                      size: isPlayful ? 24 : 22,
+                      size: isPlayful ? AppIconSize.md : AppIconSize.sm + 2,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: AppSpacing.xs),
                     Text(
                       '${students.length} students',
-                      style: TextStyle(
-                        fontSize: isPlayful ? 16 : 15,
+                      style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -236,8 +236,7 @@ class _StudentsList extends ConsumerWidget {
                     if (className != null) ...[
                       Text(
                         ' in $className',
-                        style: TextStyle(
-                          fontSize: isPlayful ? 16 : 15,
+                        style: theme.textTheme.titleSmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -257,11 +256,11 @@ class _StudentsList extends ConsumerWidget {
                             : 1;
 
                     return GridView.builder(
-                      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+                      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
+                        crossAxisSpacing: AppSpacing.sm,
+                        mainAxisSpacing: AppSpacing.sm,
                         childAspectRatio: 1.5,
                       ),
                       itemCount: students.length,
@@ -287,15 +286,17 @@ class _StudentsList extends ConsumerWidget {
             children: [
               Icon(
                 Icons.error_outline_rounded,
-                size: 48,
+                size: AppIconSize.xxl,
                 color: theme.colorScheme.error,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               Text(
                 'Failed to load students',
-                style: TextStyle(color: theme.colorScheme.error),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               OutlinedButton.icon(
                 onPressed: () => ref.invalidate(classStudentsProvider(classId)),
                 icon: const Icon(Icons.refresh_rounded),
@@ -327,18 +328,18 @@ class _StudentsList extends ConsumerWidget {
         builder: (context, scrollController) => Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
           ),
           child: Column(
             children: [
               // Handle
               Center(
                 child: Container(
-                  margin: const EdgeInsets.only(top: 12),
+                  margin: EdgeInsets.only(top: AppSpacing.sm),
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: AppOpacity.medium + 0.14),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -348,12 +349,12 @@ class _StudentsList extends ConsumerWidget {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(24),
+                  padding: AppSpacing.dialogInsets,
                   children: [
                     // Avatar
                     Center(
                       child: CircleAvatar(
-                        radius: 48,
+                        radius: AppIconSize.xxl,
                         backgroundColor: theme.colorScheme.primaryContainer,
                         backgroundImage: student.avatarUrl != null
                             ? NetworkImage(student.avatarUrl!)
@@ -363,8 +364,7 @@ class _StudentsList extends ConsumerWidget {
                                 student.fullName.isNotEmpty
                                     ? student.fullName[0].toUpperCase()
                                     : '?',
-                                style: TextStyle(
-                                  fontSize: 36,
+                                style: theme.textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                   color: theme.colorScheme.onPrimaryContainer,
                                 ),
@@ -372,32 +372,30 @@ class _StudentsList extends ConsumerWidget {
                             : null,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
 
                     // Name
                     Center(
                       child: Text(
                         student.fullName,
-                        style: TextStyle(
-                          fontSize: 24,
+                        style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppSpacing.xs),
 
                     // Email
                     Center(
                       child: Text(
                         student.email ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: AppSpacing.xxl),
 
                     // Stats (placeholder)
                     Row(
@@ -408,18 +406,21 @@ class _StudentsList extends ConsumerWidget {
                           value: '--',
                           icon: Icons.grade_rounded,
                           color: theme.colorScheme.primary,
+                          isPlayful: isPlayful,
                         ),
                         _StatItem(
                           label: 'Attendance',
                           value: '--',
                           icon: Icons.how_to_reg_rounded,
-                          color: Colors.green,
+                          color: isPlayful ? PlayfulColors.success : CleanColors.success,
+                          isPlayful: isPlayful,
                         ),
                         _StatItem(
                           label: 'Assignments',
                           value: '--',
                           icon: Icons.assignment_rounded,
                           color: theme.colorScheme.tertiary,
+                          isPlayful: isPlayful,
                         ),
                       ],
                     ),
@@ -450,12 +451,14 @@ class _StatItem extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
+    required this.isPlayful,
   });
 
   final String label;
   final String value;
   final IconData icon;
   final Color color;
+  final bool isPlayful;
 
   @override
   Widget build(BuildContext context) {
@@ -464,26 +467,24 @@ class _StatItem extends StatelessWidget {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withValues(alpha: AppOpacity.soft - 0.02),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: color, size: 24),
+          child: Icon(icon, color: color, size: AppIconSize.md),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 20,
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
             color: theme.colorScheme.onSurface,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
+          style: theme.textTheme.labelSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),

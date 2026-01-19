@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:classio/features/auth/domain/entities/app_user.dart';
 import 'package:classio/features/auth/presentation/providers/auth_provider.dart';
 import 'package:classio/core/theme/app_colors.dart';
+import 'package:classio/core/theme/app_radius.dart';
+import 'package:classio/core/theme/spacing.dart';
 import '../providers/invite_provider.dart';
 import '../../domain/entities/invite_token.dart';
 
@@ -73,13 +75,14 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
   }
 
   Future<void> _generateToken() async {
-    if (_selectedRole == null) return;
+    final selectedRole = _selectedRole;
+    if (selectedRole == null) return;
 
     final currentUser = ref.read(currentUserProvider);
     final currentRole = currentUser?.role;
 
     // Validate class selection for teachers inviting students
-    if (currentRole == UserRole.teacher && _selectedRole == UserRole.student) {
+    if (currentRole == UserRole.teacher && selectedRole == UserRole.student) {
       if (_selectedClassId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -92,7 +95,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
     }
 
     final token = await ref.read(inviteNotifierProvider.notifier).generateInvite(
-          targetRole: _selectedRole!,
+          targetRole: selectedRole,
           classId: _selectedClassId,
           expiresAt: _hasExpiration ? _expiresAt : null,
         );
@@ -110,7 +113,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
         title: const Row(
           children: [
             Icon(Icons.check_circle, color: CleanColors.success),
-            SizedBox(width: 8),
+            SizedBox(width: AppSpacing.xs),
             Text('Token Generated'),
           ],
         ),
@@ -122,12 +125,12 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
               'Share this token with the person you want to invite:',
               style: TextStyle(color: CleanColors.textSecondary),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.cardInsets,
               decoration: BoxDecoration(
-                color: CleanColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(8),
+                color: CleanColors.surfaceMuted,
+                borderRadius: AppRadius.buttonBorderRadius,
                 border: Border.all(color: CleanColors.border),
               ),
               child: Row(
@@ -159,7 +162,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Text(
               'Role: ${_selectedRole?.name.toUpperCase() ?? "Unknown"}',
               style: const TextStyle(color: CleanColors.textSecondary),
@@ -248,7 +251,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: AppSpacing.cardInsets,
               decoration: const BoxDecoration(
                 border: Border(
                   bottom: BorderSide(color: CleanColors.divider),
@@ -257,7 +260,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
               child: Row(
                 children: [
                   const Icon(Icons.person_add, color: CleanColors.primary),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.xs),
                   const Expanded(
                     child: Text(
                       'Invite Users',
@@ -316,7 +319,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
         _selectedRole == UserRole.student;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.cardInsets,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -328,12 +331,12 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
               color: CleanColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           DropdownButtonFormField<UserRole>(
             initialValue: _selectedRole,
             decoration: InputDecoration(
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: AppRadius.buttonBorderRadius,
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -351,7 +354,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                       size: 20,
                       color: CleanColors.primary,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(_getRoleDisplayName(role)),
                     ),
@@ -373,7 +376,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
 
           // Class selection (for teachers inviting students)
           if (isTeacherInvitingStudent) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             const Text(
               'Select Class',
               style: TextStyle(
@@ -381,7 +384,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                 color: CleanColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xxs),
             const Text(
               'Students will be enrolled in this class upon registration',
               style: TextStyle(
@@ -389,12 +392,12 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                 color: CleanColors.textSecondary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             DropdownButtonFormField<String>(
               initialValue: _selectedClassId,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.buttonBorderRadius,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -420,7 +423,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
             ),
             if (_availableClasses.isEmpty)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   'No classes available. Please contact an administrator.',
                   style: TextStyle(
@@ -432,7 +435,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
           ],
 
           // Expiration toggle
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text('Set Expiration'),
@@ -453,29 +456,34 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
 
           // Expiration date picker
           if (_hasExpiration) ...[
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             InkWell(
               onTap: _selectExpirationDate,
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: AppSpacing.cardInsets,
                 decoration: BoxDecoration(
                   border: Border.all(color: CleanColors.border),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.buttonBorderRadius,
                 ),
                 child: Row(
                   children: [
                     const Icon(Icons.calendar_today, size: 20),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: Text(
-                        _expiresAt != null
-                            ? _formatDateTime(_expiresAt!)
-                            : 'Select date and time',
-                        style: TextStyle(
-                          color: _expiresAt != null
-                              ? CleanColors.textPrimary
-                              : CleanColors.hint,
-                        ),
+                      child: Builder(
+                        builder: (context) {
+                          final expiresAt = _expiresAt;
+                          return Text(
+                            expiresAt != null
+                                ? _formatDateTime(expiresAt)
+                                : 'Select date and time',
+                            style: TextStyle(
+                              color: expiresAt != null
+                                  ? CleanColors.textPrimary
+                                  : CleanColors.hint,
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const Icon(Icons.arrow_drop_down),
@@ -486,21 +494,21 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
           ],
 
           // Error message
-          if (inviteState.error != null) ...[
-            const SizedBox(height: 16),
+          if (inviteState.error case final error?) ...[
+            const SizedBox(height: AppSpacing.md),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 color: CleanColors.errorLight,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: AppRadius.buttonBorderRadius,
               ),
               child: Row(
                 children: [
                   const Icon(Icons.error, color: CleanColors.error, size: 20),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      inviteState.error!,
+                      error,
                       style: const TextStyle(color: CleanColors.error),
                     ),
                   ),
@@ -510,7 +518,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
           ],
 
           // Generate button
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -522,9 +530,9 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
               style: ElevatedButton.styleFrom(
                 backgroundColor: CleanColors.primary,
                 foregroundColor: CleanColors.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.buttonBorderRadius,
                 ),
               ),
               child: inviteState.isLoading
@@ -541,7 +549,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
           ),
 
           // Permission info
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _buildPermissionInfo(currentUser?.role),
         ],
       ),
@@ -566,7 +574,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
               size: 64,
               color: CleanColors.disabled,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Text(
               'No invite tokens yet',
               style: TextStyle(
@@ -574,7 +582,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                 fontSize: 16,
               ),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               'Create your first invite token to get started',
               style: TextStyle(
@@ -588,7 +596,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
     }
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: AppSpacing.cardInsets,
       children: [
         if (validTokens.isNotEmpty) ...[
           const Text(
@@ -598,11 +606,11 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
               color: CleanColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           ...validTokens.map((token) => _buildTokenCard(token)),
         ],
         if (usedTokens.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           const Text(
             'Used/Expired Tokens',
             style: TextStyle(
@@ -610,7 +618,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
               color: CleanColors.textSecondary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
           ...usedTokens.map((token) => _buildTokenCard(token, isInactive: true)),
         ],
       ],
@@ -619,21 +627,21 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
 
   Widget _buildTokenCard(InviteToken token, {bool isInactive = false}) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Opacity(
         opacity: isInactive ? 0.6 : 1.0,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           child: Row(
             children: [
               // Role icon
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: AppSpacing.smallInsets,
                 decoration: BoxDecoration(
                   color: isInactive
                       ? CleanColors.disabled.withValues(alpha: 0.1)
                       : CleanColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: AppRadius.buttonBorderRadius,
                 ),
                 child: Icon(
                   _getRoleIcon(token.role),
@@ -641,7 +649,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                   size: 20,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
 
               // Token info
               Expanded(
@@ -655,7 +663,7 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xxs),
                     Text(
                       'For: ${_getRoleDisplayName(token.role)}',
                       style: const TextStyle(
@@ -663,11 +671,11 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
                         color: CleanColors.textSecondary,
                       ),
                     ),
-                    if (token.expiresAt != null)
+                    if (token.expiresAt case final expiresAt?)
                       Text(
                         token.isExpired
-                            ? 'Expired: ${_formatDateTime(token.expiresAt!)}'
-                            : 'Expires: ${_formatDateTime(token.expiresAt!)}',
+                            ? 'Expired: ${_formatDateTime(expiresAt)}'
+                            : 'Expires: ${_formatDateTime(expiresAt)}',
                         style: TextStyle(
                           fontSize: 12,
                           color: token.isExpired
@@ -779,15 +787,15 @@ class _InviteDialogState extends ConsumerState<InviteDialog>
     }
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: CleanColors.infoLight,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadius.buttonBorderRadius,
       ),
       child: Row(
         children: [
           const Icon(Icons.info_outline, color: CleanColors.info, size: 20),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
               info,

@@ -214,8 +214,8 @@ GRANT ALL ON class_students TO service_role;
 GRANT ALL ON subjects TO service_role;
 GRANT ALL ON classes TO service_role;
 
--- Reset GENESIS-KEY for testing
-UPDATE invite_tokens SET is_used = false WHERE token = 'GENESIS-KEY';
+-- NOTE: Hardcoded GENESIS-KEY token removed for security.
+-- Use SELECT * FROM generate_genesis_token(); for bootstrap (see migration 20260118000001)
 
 -- =============================================================================
 -- END OF MIGRATION

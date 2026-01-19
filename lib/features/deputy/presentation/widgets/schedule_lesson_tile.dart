@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/schedule_lesson.dart';
 
 /// A compact tile widget displaying a lesson in the schedule grid.
@@ -34,6 +35,7 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
     final theme = Theme.of(context);
     final color = widget.lesson.subjectColor != null ? Color(widget.lesson.subjectColor!) : theme.colorScheme.primary;
     final isModified = widget.lesson.modifiedFromStable;
+    final cardRadius = AppRadius.getCardRadius(isPlayful: widget.isPlayful);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
@@ -44,38 +46,38 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
         child: Container(
           decoration: isModified
               ? BoxDecoration(
-                  color: theme.colorScheme.error.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(widget.isPlayful ? 14 : 10),
+                  color: theme.colorScheme.error.withValues(alpha: AppOpacity.subtle + 0.04),
+                  borderRadius: BorderRadius.circular(widget.isPlayful ? AppRadius.md + 2 : AppRadius.xs + 2),
                 )
               : null,
           padding: isModified ? const EdgeInsets.all(2) : EdgeInsets.zero,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(widget.isPlayful ? 12 : 8),
+              borderRadius: cardRadius,
               gradient: widget.isPlayful
                   ? LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
                         color.withValues(alpha: _isHovered ? 0.25 : 0.18),
-                        color.withValues(alpha: _isHovered ? 0.15 : 0.08),
+                        color.withValues(alpha: _isHovered ? AppOpacity.soft + 0.03 : AppOpacity.subtle + 0.04),
                       ],
                     )
                   : null,
               color: widget.isPlayful
                   ? null
-                  : color.withValues(alpha: _isHovered ? 0.2 : 0.15),
+                  : color.withValues(alpha: _isHovered ? AppOpacity.medium + 0.04 : AppOpacity.soft + 0.03),
               border: Border.all(
                 color: isModified
-                    ? theme.colorScheme.error.withValues(alpha: _isHovered ? 0.7 : 0.5)
-                    : color.withValues(alpha: _isHovered ? 0.5 : 0.3),
+                    ? theme.colorScheme.error.withValues(alpha: _isHovered ? 0.7 : AppOpacity.heavy)
+                    : color.withValues(alpha: _isHovered ? AppOpacity.heavy : AppOpacity.medium + 0.14),
                 width: _isHovered ? 2 : 1,
               ),
               boxShadow: _isHovered
                   ? [
                       BoxShadow(
-                        color: color.withValues(alpha: 0.2),
+                        color: color.withValues(alpha: AppOpacity.medium + 0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -90,12 +92,12 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
                 top: 0,
                 bottom: 0,
                 child: Container(
-                  width: 4,
+                  width: AppSpacing.xxs,
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(widget.isPlayful ? 12 : 8),
-                      bottomLeft: Radius.circular(widget.isPlayful ? 12 : 8),
+                      topLeft: Radius.circular(widget.isPlayful ? AppRadius.sm : AppRadius.xs),
+                      bottomLeft: Radius.circular(widget.isPlayful ? AppRadius.sm : AppRadius.xs),
                     ),
                   ),
                 ),
@@ -104,17 +106,17 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
               // Modified badge
               if (isModified)
                 Positioned(
-                  right: 4,
-                  bottom: 4,
+                  right: AppSpacing.xxs,
+                  bottom: AppSpacing.xxs,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.error.withValues(alpha: 0.15),
+                      color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft + 0.03),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     child: Text(
                       'MOD',
-                      style: TextStyle(
+                      style: theme.textTheme.labelSmall?.copyWith(
                         fontSize: 7,
                         fontWeight: FontWeight.w700,
                         color: theme.colorScheme.error,
@@ -126,7 +128,7 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
 
               // Content
               Padding(
-                padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
+                padding: EdgeInsets.fromLTRB(AppSpacing.xs + 2, AppSpacing.xs - 2, AppSpacing.xs - 2, AppSpacing.xs - 2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -135,7 +137,7 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
                     Flexible(
                       child: Text(
                         widget.lesson.subjectName ?? 'Unknown',
-                        style: TextStyle(
+                        style: theme.textTheme.labelSmall?.copyWith(
                           fontSize: widget.isPlayful ? 12 : 11,
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.onSurface,
@@ -147,23 +149,22 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
                     ),
                     const SizedBox(height: 2),
                     // Room
-                    if (widget.lesson.room != null &&
-                        widget.lesson.room!.isNotEmpty)
+                    if (widget.lesson.room?.isNotEmpty ?? false)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
                             Icons.room_outlined,
                             size: 10,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                           ),
                           const SizedBox(width: 2),
                           Flexible(
                             child: Text(
-                              widget.lesson.room!,
-                              style: TextStyle(
+                              widget.lesson.room ?? '',
+                              style: theme.textTheme.labelSmall?.copyWith(
                                 fontSize: 9,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -171,14 +172,13 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
                         ],
                       ),
                     // Teacher name
-                    if (widget.lesson.teacherName != null &&
-                        widget.lesson.teacherName!.isNotEmpty)
+                    if (widget.lesson.teacherName?.isNotEmpty ?? false)
                       Text(
-                        widget.lesson.teacherName!,
-                        style: TextStyle(
+                        widget.lesson.teacherName ?? '',
+                        style: theme.textTheme.labelSmall?.copyWith(
                           fontSize: 9,
                           fontStyle: FontStyle.italic,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -224,6 +224,11 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
 
     showModalBottomSheet(
       context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppRadius.lg),
+        ),
+      ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -232,6 +237,7 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
               leading: Icon(
                 Icons.edit_outlined,
                 color: theme.colorScheme.primary,
+                size: AppIconSize.md,
               ),
               title: const Text('Edit Lesson'),
               onTap: () {
@@ -243,17 +249,20 @@ class _ScheduleLessonTileState extends State<ScheduleLessonTile> {
               leading: Icon(
                 Icons.delete_outline,
                 color: theme.colorScheme.error,
+                size: AppIconSize.md,
               ),
               title: Text(
                 'Delete Lesson',
-                style: TextStyle(color: theme.colorScheme.error),
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
               onTap: () {
                 Navigator.pop(context);
                 _confirmDelete(context);
               },
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
           ],
         ),
       ),
@@ -311,12 +320,12 @@ class _ActionButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(AppRadius.xxs),
         child: Container(
           padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(4),
+            color: color.withValues(alpha: AppOpacity.soft + 0.03),
+            borderRadius: BorderRadius.circular(AppRadius.xxs),
           ),
           child: Icon(
             icon,

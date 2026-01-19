@@ -201,7 +201,7 @@ class ScheduleLesson {
       'room': room,
       'is_stable': isStable,
       if (stableLessonId != null) 'stable_lesson_id': stableLessonId,
-      if (weekStartDate != null) 'week_start_date': weekStartDate!.toIso8601String().split('T')[0],
+      if (weekStartDate case final wsd?) 'week_start_date': wsd.toIso8601String().split('T')[0],
     };
   }
 

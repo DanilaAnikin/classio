@@ -218,11 +218,12 @@ class InviteNotifier extends _$InviteNotifier {
         throw const InviteException('Not logged in');
       }
 
-      if (currentUser.schoolId == null) {
+      final schoolId = currentUser.schoolId;
+      if (schoolId == null) {
         throw const InviteException('User is not associated with a school');
       }
 
-      final tokens = await _repository.getSchoolTokens(currentUser.schoolId!);
+      final tokens = await _repository.getSchoolTokens(schoolId);
       state = state.copyWith(
         isLoading: false,
         schoolTokens: tokens,
@@ -277,11 +278,12 @@ class InviteNotifier extends _$InviteNotifier {
         throw const InviteException('Not logged in');
       }
 
-      if (currentUser.schoolId == null) {
+      final schoolId = currentUser.schoolId;
+      if (schoolId == null) {
         throw const InviteException('User is not associated with a school');
       }
 
-      final count = await _repository.cleanupExpiredTokens(currentUser.schoolId!);
+      final count = await _repository.cleanupExpiredTokens(schoolId);
 
       // Refresh the token lists
       await loadMyTokens();

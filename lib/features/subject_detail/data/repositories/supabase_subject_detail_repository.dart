@@ -3,15 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:classio/core/exceptions/app_exception.dart';
 import 'package:classio/features/dashboard/domain/entities/assignment.dart';
 import 'package:classio/features/dashboard/domain/entities/subject.dart';
 import '../../domain/domain.dart';
 
 /// Exception thrown when subject detail operations fail.
-class SubjectDetailException implements Exception {
-  const SubjectDetailException(this.message);
-
-  final String message;
+class SubjectDetailException extends RepositoryException {
+  const SubjectDetailException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'SubjectDetailException: $message';
@@ -79,7 +78,11 @@ class SupabaseSubjectDetailRepository implements SubjectDetailRepository {
             )
           ''')
           .eq('id', subjectId)
-          .single();
+          .maybeSingle();
+
+      if (subjectResponse == null) {
+        throw SubjectDetailException('Subject not found with id $subjectId');
+      }
 
       // Parse subject data
       final subjectName = subjectResponse['name'] as String? ?? 'Unknown Subject';
@@ -126,7 +129,11 @@ class SupabaseSubjectDetailRepository implements SubjectDetailRepository {
           .from('subjects')
           .select('id, name, teacher_id, profiles:teacher_id(first_name, last_name)')
           .eq('id', subjectId)
-          .single();
+          .maybeSingle();
+
+      if (subjectResponse == null) {
+        throw SubjectDetailException('Subject not found with id $subjectId');
+      }
 
       final subjectName = subjectResponse['name'] as String? ?? 'Unknown Subject';
       final teacherProfile = subjectResponse['profiles'] as Map<String, dynamic>?;

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../admin_panel/domain/entities/class_info.dart';
 import '../../../admin_panel/domain/entities/invite_code.dart';
 import '../../../auth/domain/entities/app_user.dart';
@@ -10,10 +11,8 @@ import '../../domain/entities/entities.dart';
 import '../../domain/repositories/principal_repository.dart';
 
 /// Exception thrown when principal operations fail.
-class PrincipalException implements Exception {
-  const PrincipalException(this.message);
-
-  final String message;
+class PrincipalException extends RepositoryException {
+  const PrincipalException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'PrincipalException: $message';
@@ -283,7 +282,11 @@ class SupabasePrincipalRepository implements PrincipalRepository {
             'head_teacher_id': headTeacherId,
           })
           .select('id, school_id, name, grade_level, academic_year, created_at')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const PrincipalException('Failed to create class: no data returned');
+      }
 
       return ClassInfo.fromJson(response);
     } on PostgrestException catch (e) {
@@ -313,7 +316,11 @@ class SupabasePrincipalRepository implements PrincipalRepository {
           .update(updateData)
           .eq('id', classInfo.id)
           .select('id, school_id, name, grade_level, academic_year, created_at')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw PrincipalException('Failed to update class: class not found with id ${classInfo.id}');
+      }
 
       return ClassInfo.fromJson(response);
     } on PostgrestException catch (e) {
@@ -579,7 +586,11 @@ class SupabasePrincipalRepository implements PrincipalRepository {
             expires_at,
             created_at
           ''')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const PrincipalException('Failed to generate invite code: no data returned');
+      }
 
       // Map invite_tokens schema to InviteCode entity
       final responseUsageLimit = response['usage_limit'] as int? ?? usageLimit;
@@ -618,7 +629,11 @@ class SupabasePrincipalRepository implements PrincipalRepository {
           .from('invite_tokens')
           .select('usage_limit')
           .eq('token', codeId)
-          .single();
+          .maybeSingle();
+
+      if (tokenResponse == null) {
+        throw PrincipalException('Invite code not found: $codeId');
+      }
 
       final usageLimit = tokenResponse['usage_limit'] as int? ?? 1;
 

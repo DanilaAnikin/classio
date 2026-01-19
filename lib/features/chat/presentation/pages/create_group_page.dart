@@ -268,7 +268,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
               radius: isPlayful ? 24 : 22,
               backgroundColor: theme.colorScheme.primaryContainer,
               backgroundImage: member.avatarUrl != null
-                  ? NetworkImage(member.avatarUrl!)
+                  ? NetworkImage(member.avatarUrl ?? '')
                   : null,
               child: member.avatarUrl == null
                   ? Text(

@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/entities.dart';
 
 /// Card widget displaying attendance statistics summary.
 ///
-/// Shows:
-/// - Attendance percentage as circular progress
-/// - Present, absent, late, and excused counts
-/// - Color-coded based on attendance performance
+/// Features:
+/// - Overall attendance rate with visual progress indicator
+/// - Breakdown of attendance types (present, absent, late, excused)
+/// - Color-coded statistics based on performance
+/// - Theme-aware styling (Clean vs Playful)
 class AttendanceSummaryCard extends ConsumerWidget {
   const AttendanceSummaryCard({
     super.key,
@@ -27,25 +29,47 @@ class AttendanceSummaryCard extends ConsumerWidget {
   /// Optional callback when the card is tapped.
   final VoidCallback? onTap;
 
+  Color _getPercentageColor({required bool isPlayful}) {
+    final percentage = stats.attendancePercentage;
+    if (percentage >= 95) {
+      return isPlayful
+          ? PlayfulColors.attendancePresent
+          : CleanColors.attendancePresent;
+    } else if (percentage >= 90) {
+      return isPlayful ? PlayfulColors.success : CleanColors.success;
+    } else if (percentage >= 80) {
+      return isPlayful ? PlayfulColors.warning : CleanColors.warning;
+    } else if (percentage >= 70) {
+      return isPlayful
+          ? PlayfulColors.attendanceLate
+          : CleanColors.attendanceLate;
+    } else {
+      return isPlayful ? PlayfulColors.error : CleanColors.error;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
+    final percentageColor = _getPercentageColor(isPlayful: isPlayful);
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
-      child: Container(
-        padding: EdgeInsets.all(isPlayful ? 20 : 16),
+      borderRadius: AppRadius.card(isPlayful: isPlayful),
+      child: AnimatedContainer(
+        duration: AppDuration.normal,
+        curve: AppCurves.standard,
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
+          borderRadius: AppRadius.card(isPlayful: isPlayful),
           gradient: isPlayful
               ? LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    stats.percentageColor.withValues(alpha: 0.15),
-                    stats.percentageColor.withValues(alpha: 0.05),
+                    percentageColor.withValues(alpha: AppOpacity.soft),
+                    percentageColor.withValues(alpha: AppOpacity.subtle),
                   ],
                 )
               : null,
@@ -53,74 +77,46 @@ class AttendanceSummaryCard extends ConsumerWidget {
           border: isPlayful
               ? null
               : Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                  width: 1,
+                  color: theme.colorScheme.outline.withValues(alpha: AppOpacity.medium),
                 ),
-          boxShadow: [
-            BoxShadow(
-              color: isPlayful
-                  ? stats.percentageColor.withValues(alpha: 0.2)
-                  : Colors.black.withValues(alpha: 0.05),
-              blurRadius: isPlayful ? 16 : 8,
-              offset: Offset(0, isPlayful ? 6 : 3),
-            ),
-          ],
+          boxShadow: isPlayful
+              ? [
+                  BoxShadow(
+                    color: percentageColor.withValues(alpha: AppOpacity.medium),
+                    blurRadius: AppSpacing.lg,
+                    offset: const Offset(0, AppSpacing.xs),
+                  ),
+                ]
+              : AppShadows.cleanSm,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title section
             if (title != null) ...[
               Text(
                 title!,
-                style: TextStyle(
-                  fontSize: isPlayful ? 18 : 16,
-                  fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
+                style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              SizedBox(height: isPlayful ? 16 : 12),
+              SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
             ],
+            // Main content: Progress ring + Stats
             Row(
               children: [
                 // Circular progress indicator
                 _AttendanceCircularProgress(
                   percentage: stats.attendancePercentage,
-                  color: stats.percentageColor,
+                  color: percentageColor,
                   isPlayful: isPlayful,
                 ),
-                SizedBox(width: isPlayful ? 24 : 20),
+                SizedBox(width: isPlayful ? AppSpacing.xl : AppSpacing.lg),
                 // Stats breakdown
                 Expanded(
-                  child: Column(
-                    children: [
-                      _StatRow(
-                        label: 'Present',
-                        value: stats.presentDays,
-                        color: AttendanceStatus.present.color,
-                        isPlayful: isPlayful,
-                      ),
-                      SizedBox(height: isPlayful ? 10 : 8),
-                      _StatRow(
-                        label: 'Absent',
-                        value: stats.absentDays,
-                        color: AttendanceStatus.absent.color,
-                        isPlayful: isPlayful,
-                      ),
-                      SizedBox(height: isPlayful ? 10 : 8),
-                      _StatRow(
-                        label: 'Late',
-                        value: stats.lateDays,
-                        color: AttendanceStatus.late.color,
-                        isPlayful: isPlayful,
-                      ),
-                      SizedBox(height: isPlayful ? 10 : 8),
-                      _StatRow(
-                        label: 'Excused',
-                        value: stats.excusedDays,
-                        color: AttendanceStatus.excused.color,
-                        isPlayful: isPlayful,
-                      ),
-                    ],
+                  child: _StatsBreakdown(
+                    stats: stats,
+                    isPlayful: isPlayful,
                   ),
                 ),
               ],
@@ -147,7 +143,9 @@ class _AttendanceCircularProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = isPlayful ? 100.0 : 80.0;
+    // Circular progress indicator sizes: 100px for playful, 80px for clean
+    final size = isPlayful ? AppSpacing.space96 + AppSpacing.space4 : AppSpacing.space80;
+    final strokeWidth = isPlayful ? AppSpacing.sm : AppSpacing.xs;
 
     return SizedBox(
       width: size,
@@ -155,49 +153,62 @@ class _AttendanceCircularProgress extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Background circle
+          // Background track
           SizedBox(
             width: size,
             height: size,
             child: CircularProgressIndicator(
               value: 1.0,
-              strokeWidth: isPlayful ? 10 : 8,
-              backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.1),
+              strokeWidth: strokeWidth,
+              backgroundColor: Colors.transparent,
               valueColor: AlwaysStoppedAnimation<Color>(
-                theme.colorScheme.outline.withValues(alpha: 0.1),
+                theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
               ),
             ),
           ),
-          // Progress circle
+          // Progress indicator with animation
           SizedBox(
             width: size,
             height: size,
-            child: CircularProgressIndicator(
-              value: percentage / 100,
-              strokeWidth: isPlayful ? 10 : 8,
-              backgroundColor: Colors.transparent,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
-              strokeCap: StrokeCap.round,
+            child: TweenAnimationBuilder<double>(
+              duration: AppDuration.slow,
+              curve: AppCurves.emphasized,
+              tween: Tween<double>(begin: 0, end: percentage / 100),
+              builder: (context, value, child) {
+                return CircularProgressIndicator(
+                  value: value,
+                  strokeWidth: strokeWidth,
+                  backgroundColor: Colors.transparent,
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  strokeCap: StrokeCap.round,
+                );
+              },
             ),
           ),
-          // Percentage text
+          // Center percentage text
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                '${percentage.toStringAsFixed(0)}%',
-                style: TextStyle(
-                  fontSize: isPlayful ? 24 : 20,
-                  fontWeight: FontWeight.w800,
-                  color: color,
-                ),
+              TweenAnimationBuilder<int>(
+                duration: AppDuration.slow,
+                tween: IntTween(begin: 0, end: percentage.round()),
+                builder: (context, value, child) {
+                  return Text(
+                    '$value%',
+                    style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: isPlayful ? AppFontSize.titleLarge : AppFontSize.titleMedium,
+                      color: color,
+                    ),
+                  );
+                },
               ),
               Text(
                 'Attendance',
-                style: TextStyle(
-                  fontSize: isPlayful ? 10 : 9,
+                style: AppTypography.caption(isPlayful: isPlayful).copyWith(
                   fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  fontSize: isPlayful ? AppFontSize.labelSmall : AppFontSize.overline,
+                  color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
                 ),
               ),
             ],
@@ -208,7 +219,59 @@ class _AttendanceCircularProgress extends StatelessWidget {
   }
 }
 
-/// Row showing a single statistic.
+/// Stats breakdown showing individual attendance categories.
+class _StatsBreakdown extends StatelessWidget {
+  const _StatsBreakdown({
+    required this.stats,
+    required this.isPlayful,
+  });
+
+  final AttendanceStats stats;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _StatRow(
+          label: 'Present',
+          value: stats.presentDays,
+          color: isPlayful
+              ? PlayfulColors.attendancePresent
+              : CleanColors.attendancePresent,
+          isPlayful: isPlayful,
+        ),
+        SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+        _StatRow(
+          label: 'Absent',
+          value: stats.absentDays,
+          color: isPlayful
+              ? PlayfulColors.attendanceAbsent
+              : CleanColors.attendanceAbsent,
+          isPlayful: isPlayful,
+        ),
+        SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+        _StatRow(
+          label: 'Late',
+          value: stats.lateDays,
+          color: isPlayful
+              ? PlayfulColors.attendanceLate
+              : CleanColors.attendanceLate,
+          isPlayful: isPlayful,
+        ),
+        SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+        _StatRow(
+          label: 'Excused',
+          value: stats.excusedDays,
+          color: isPlayful ? PlayfulColors.info : CleanColors.info,
+          isPlayful: isPlayful,
+        ),
+      ],
+    );
+  }
+}
+
+/// Row showing a single statistic with label and value.
 class _StatRow extends StatelessWidget {
   const _StatRow({
     required this.label,
@@ -225,41 +288,56 @@ class _StatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final dotSize = isPlayful ? AppSpacing.sm : AppSpacing.xs;
 
     return Row(
       children: [
+        // Color indicator dot
         Container(
-          width: isPlayful ? 14 : 12,
-          height: isPlayful ? 14 : 12,
+          width: dotSize,
+          height: dotSize,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
+            boxShadow: isPlayful
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: AppOpacity.strong),
+                      blurRadius: AppSpacing.xxs,
+                      offset: const Offset(0, AppSpacing.space2),
+                    ),
+                  ]
+                : null,
           ),
         ),
-        SizedBox(width: isPlayful ? 10 : 8),
+        SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+        // Label
         Expanded(
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: isPlayful ? 14 : 13,
+            style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
             ),
           ),
         ),
+        // Value badge
         Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isPlayful ? 12 : 10,
-            vertical: isPlayful ? 4 : 3,
+            horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+            vertical: isPlayful ? AppSpacing.xxs : AppSpacing.space2,
           ),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
+            color: color.withValues(alpha: AppOpacity.soft),
+            borderRadius: AppRadius.badge(isPlayful: isPlayful),
+            border: Border.all(
+              color: color.withValues(alpha: AppOpacity.semi),
+              width: isPlayful ? 1 : 0.5,
+            ),
           ),
           child: Text(
             value.toString(),
-            style: TextStyle(
-              fontSize: isPlayful ? 14 : 13,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w700,
               color: color,
             ),
@@ -279,48 +357,77 @@ class AttendanceSummaryCompact extends ConsumerWidget {
 
   final AttendanceStats stats;
 
+  Color _getPercentageColor({required bool isPlayful}) {
+    final percentage = stats.attendancePercentage;
+    if (percentage >= 95) {
+      return isPlayful
+          ? PlayfulColors.attendancePresent
+          : CleanColors.attendancePresent;
+    } else if (percentage >= 90) {
+      return isPlayful ? PlayfulColors.success : CleanColors.success;
+    } else if (percentage >= 80) {
+      return isPlayful ? PlayfulColors.warning : CleanColors.warning;
+    } else if (percentage >= 70) {
+      return isPlayful
+          ? PlayfulColors.attendanceLate
+          : CleanColors.attendanceLate;
+    } else {
+      return isPlayful ? PlayfulColors.error : CleanColors.error;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
+    final percentageColor = _getPercentageColor(isPlayful: isPlayful);
 
     return Row(
       children: [
         _CompactStat(
-          icon: Icons.check_circle,
+          icon: Icons.check_circle_rounded,
           value: stats.presentDays,
-          color: AttendanceStatus.present.color,
+          color: isPlayful
+              ? PlayfulColors.attendancePresent
+              : CleanColors.attendancePresent,
           isPlayful: isPlayful,
         ),
-        SizedBox(width: isPlayful ? 16 : 12),
+        SizedBox(width: isPlayful ? AppSpacing.md : AppSpacing.sm),
         _CompactStat(
-          icon: Icons.cancel,
+          icon: Icons.cancel_rounded,
           value: stats.absentDays,
-          color: AttendanceStatus.absent.color,
+          color: isPlayful
+              ? PlayfulColors.attendanceAbsent
+              : CleanColors.attendanceAbsent,
           isPlayful: isPlayful,
         ),
-        SizedBox(width: isPlayful ? 16 : 12),
+        SizedBox(width: isPlayful ? AppSpacing.md : AppSpacing.sm),
         _CompactStat(
-          icon: Icons.schedule,
+          icon: Icons.access_time_rounded,
           value: stats.lateDays,
-          color: AttendanceStatus.late.color,
+          color: isPlayful
+              ? PlayfulColors.attendanceLate
+              : CleanColors.attendanceLate,
           isPlayful: isPlayful,
         ),
         const Spacer(),
+        // Percentage badge
         Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isPlayful ? 12 : 10,
-            vertical: isPlayful ? 6 : 4,
+            horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+            vertical: isPlayful ? AppSpacing.xxs : AppSpacing.space2,
           ),
           decoration: BoxDecoration(
-            color: stats.percentageColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            color: percentageColor.withValues(alpha: AppOpacity.soft),
+            borderRadius: AppRadius.badge(isPlayful: isPlayful),
+            border: Border.all(
+              color: percentageColor.withValues(alpha: AppOpacity.semi),
+            ),
           ),
           child: Text(
             '${stats.attendancePercentage.toStringAsFixed(0)}%',
-            style: TextStyle(
-              fontSize: isPlayful ? 14 : 13,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w700,
-              color: stats.percentageColor,
+              color: percentageColor,
             ),
           ),
         ),
@@ -329,6 +436,7 @@ class AttendanceSummaryCompact extends ConsumerWidget {
   }
 }
 
+/// Compact stat item with icon and value.
 class _CompactStat extends StatelessWidget {
   const _CompactStat({
     required this.icon,
@@ -349,19 +457,192 @@ class _CompactStat extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: isPlayful ? 18 : 16,
+          size: isPlayful ? AppIconSize.sm : AppIconSize.xs,
           color: color,
         ),
-        SizedBox(width: isPlayful ? 4 : 3),
+        SizedBox(width: isPlayful ? AppSpacing.xxs : AppSpacing.space2),
         Text(
           value.toString(),
-          style: TextStyle(
-            fontSize: isPlayful ? 14 : 13,
+          style: AppTypography.caption(isPlayful: isPlayful).copyWith(
             fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Mini attendance summary for dashboard cards.
+class AttendanceMiniCard extends ConsumerWidget {
+  const AttendanceMiniCard({
+    super.key,
+    required this.stats,
+    this.onTap,
+  });
+
+  final AttendanceStats stats;
+  final VoidCallback? onTap;
+
+  Color _getPercentageColor({required bool isPlayful}) {
+    final percentage = stats.attendancePercentage;
+    if (percentage >= 95) {
+      return isPlayful
+          ? PlayfulColors.attendancePresent
+          : CleanColors.attendancePresent;
+    } else if (percentage >= 85) {
+      return isPlayful ? PlayfulColors.success : CleanColors.success;
+    } else if (percentage >= 75) {
+      return isPlayful ? PlayfulColors.warning : CleanColors.warning;
+    } else {
+      return isPlayful ? PlayfulColors.error : CleanColors.error;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
+    final percentageColor = _getPercentageColor(isPlayful: isPlayful);
+    final percentage = stats.attendancePercentage.round();
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.card(isPlayful: isPlayful),
+          gradient: isPlayful
+              ? LinearGradient(
+                  colors: [
+                    percentageColor.withValues(alpha: AppOpacity.soft),
+                    percentageColor.withValues(alpha: AppOpacity.light),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isPlayful
+              ? null
+              : percentageColor.withValues(alpha: AppOpacity.soft),
+          border: Border.all(
+            color: percentageColor.withValues(alpha: AppOpacity.semi),
+            width: isPlayful ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Mini progress indicator
+            _MiniProgressIndicator(
+              percentage: stats.attendancePercentage,
+              color: percentageColor,
+              isPlayful: isPlayful,
+            ),
+            SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+            // Text content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Attendance Rate',
+                    style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: isPlayful ? AppSpacing.space2 : 0),
+                  Row(
+                    children: [
+                      Text(
+                        '$percentage%',
+                        style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+                          color: percentageColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(width: isPlayful ? AppSpacing.xs : AppSpacing.xxs),
+                      Text(
+                        '(${stats.totalDays} days)',
+                        style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Arrow if tappable
+            if (onTap != null)
+              Icon(
+                Icons.chevron_right_rounded,
+                size: isPlayful ? AppIconSize.md : AppIconSize.sm,
+                color: percentageColor.withValues(alpha: AppOpacity.dominant),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Mini circular progress indicator for compact view.
+class _MiniProgressIndicator extends StatelessWidget {
+  const _MiniProgressIndicator({
+    required this.percentage,
+    required this.color,
+    required this.isPlayful,
+  });
+
+  final double percentage;
+  final Color color;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final size = isPlayful ? AppSpacing.xxxl : AppSpacing.xxl;
+    final strokeWidth = isPlayful ? AppSpacing.xxs : AppSpacing.space2 + 1;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Background track
+          CircularProgressIndicator(
+            value: 1.0,
+            strokeWidth: strokeWidth,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
+            ),
+          ),
+          // Progress
+          TweenAnimationBuilder<double>(
+            duration: AppDuration.slow,
+            curve: AppCurves.emphasized,
+            tween: Tween<double>(begin: 0, end: percentage / 100),
+            builder: (context, value, child) {
+              return CircularProgressIndicator(
+                value: value,
+                strokeWidth: strokeWidth,
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+                strokeCap: StrokeCap.round,
+              );
+            },
+          ),
+          // Center icon
+          Icon(
+            percentage >= 85
+                ? Icons.trending_up_rounded
+                : Icons.trending_down_rounded,
+            size: isPlayful ? AppIconSize.xs : AppIconSize.badge,
+            color: color,
+          ),
+        ],
+      ),
     );
   }
 }

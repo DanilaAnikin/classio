@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
+import 'package:classio/core/theme/app_radius.dart';
+import 'package:classio/core/theme/spacing.dart';
 import '../../../auth/domain/entities/app_user.dart';
 
 /// Provider that fetches a user's profile by their ID.
@@ -49,21 +52,21 @@ class UserProfilePage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: AppSpacing.dialogInsets,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.error_outline_rounded,
-                  size: 64,
+                  size: AppIconSize.xxl + AppSpacing.md,
                   color: theme.colorScheme.error.withValues(alpha:0.6),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
                 Text(
                   'Error loading profile',
                   style: theme.textTheme.titleMedium,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Text(
                   err.toString(),
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -71,7 +74,7 @@ class UserProfilePage extends ConsumerWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
                 ElevatedButton.icon(
                   onPressed: () => ref.invalidate(userProfileProvider(userId)),
                   icon: const Icon(Icons.refresh),
@@ -89,15 +92,15 @@ class UserProfilePage extends ConsumerWidget {
                 children: [
                   Icon(
                     Icons.person_off_outlined,
-                    size: 64,
+                    size: AppIconSize.xxl + AppSpacing.md,
                     color: theme.colorScheme.onSurface.withValues(alpha:0.3),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppSpacing.md),
                   Text(
                     'User not found',
                     style: theme.textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.xs),
                   Text(
                     'This user may have been removed or does not exist.',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -105,7 +108,7 @@ class UserProfilePage extends ConsumerWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppSpacing.md),
                   ElevatedButton.icon(
                     onPressed: () => context.pop(),
                     icon: const Icon(Icons.arrow_back),
@@ -124,7 +127,7 @@ class UserProfilePage extends ConsumerWidget {
   Widget _buildUserProfile(
       BuildContext context, ThemeData theme, AppUser user) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: AppSpacing.dialogInsets,
       child: Column(
         children: [
           // Large Avatar
@@ -145,7 +148,7 @@ class UserProfilePage extends ConsumerWidget {
                   )
                 : null,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
 
           // Name
           Text(
@@ -154,14 +157,14 @@ class UserProfilePage extends ConsumerWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
 
           // Role Badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
             decoration: BoxDecoration(
               color: _getRoleColor(theme, user.role).withValues(alpha:0.1),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: AppRadius.dialogBorderRadius,
             ),
             child: Text(
               _getRoleDisplayName(user.role),
@@ -171,7 +174,7 @@ class UserProfilePage extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: AppSpacing.xxl),
 
           // Info Cards
           _buildInfoCard(
@@ -180,7 +183,7 @@ class UserProfilePage extends ConsumerWidget {
             'Email',
             user.email ?? 'Not provided',
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.sm),
           _buildInfoCard(
             theme,
             Icons.calendar_today_outlined,
@@ -189,7 +192,7 @@ class UserProfilePage extends ConsumerWidget {
                 ? _formatDate(user.createdAt!)
                 : 'Unknown',
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppSpacing.xl),
 
           // Message Button
           SizedBox(
@@ -202,7 +205,7 @@ class UserProfilePage extends ConsumerWidget {
               icon: const Icon(Icons.message_outlined),
               label: const Text('Send Message'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
               ),
             ),
           ),
@@ -220,24 +223,24 @@ class UserProfilePage extends ConsumerWidget {
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadius.cardBorderRadius,
         side: BorderSide(
           color: theme.colorScheme.outline.withValues(alpha:0.2),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.cardInsets,
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
                 color: theme.colorScheme.primary.withValues(alpha:0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(AppSpacing.xs),
               ),
               child: Icon(icon, color: theme.colorScheme.primary),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,7 +251,7 @@ class UserProfilePage extends ConsumerWidget {
                       color: theme.colorScheme.onSurface.withValues(alpha:0.6),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: AppSpacing.xxs / 2),
                   Text(
                     value,
                     style: theme.textTheme.bodyLarge?.copyWith(
@@ -265,19 +268,20 @@ class UserProfilePage extends ConsumerWidget {
   }
 
   Color _getRoleColor(ThemeData theme, UserRole role) {
+    // Using CleanColors as default since this is a standalone profile page
     switch (role) {
       case UserRole.superadmin:
-        return Colors.purple;
+        return CleanColors.superadminRole;
       case UserRole.bigadmin:
-        return Colors.indigo;
+        return CleanColors.principalRole;
       case UserRole.admin:
-        return Colors.blue;
+        return CleanColors.deputyRole;
       case UserRole.teacher:
-        return Colors.teal;
+        return CleanColors.teacherRole;
       case UserRole.student:
-        return Colors.green;
+        return CleanColors.studentRole;
       case UserRole.parent:
-        return Colors.orange;
+        return CleanColors.parentRole;
     }
   }
 

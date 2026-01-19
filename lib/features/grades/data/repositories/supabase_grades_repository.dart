@@ -1,14 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/utils/subject_colors.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/grades_repository.dart';
+import '../dtos/grade_dto.dart';
 
 /// Exception thrown when grade operations fail.
-class GradesException implements Exception {
-  const GradesException(this.message);
-
-  final String message;
+class GradesException extends RepositoryException {
+  const GradesException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'GradesException: $message';
@@ -92,8 +93,8 @@ class SupabaseGradesRepository implements GradesRepository {
         final gradesData = entry.value;
         final subjectName = subjectNames[subjectId] ?? 'Unknown Subject';
 
-        // Convert grade data to Grade entities
-        final grades = gradesData.map((data) => _mapToGrade(data)).toList();
+        // Convert grade data to Grade entities using DTO with validation
+        final grades = _mapToGrades(gradesData);
 
         // Calculate weighted average
         final average = _calculateWeightedAverage(grades);
@@ -160,9 +161,10 @@ class SupabaseGradesRepository implements GradesRepository {
 
       final subjectName = subjectResponse['name'] as String;
 
-      // Convert grade data to Grade entities
-      final grades =
-          gradesResponse.map((data) => _mapToGrade(data)).toList();
+      // Convert grade data to Grade entities using DTO with validation
+      final grades = _mapToGrades(
+        List<Map<String, dynamic>>.from(gradesResponse),
+      );
 
       // If no grades exist for this subject, return stats with empty grades
       final average = _calculateWeightedAverage(grades);
@@ -185,20 +187,49 @@ class SupabaseGradesRepository implements GradesRepository {
     }
   }
 
-  /// Maps a database row to a [Grade] entity.
+  /// Maps a database row to a [Grade] entity using DTO for safe parsing.
   ///
   /// The [data] map should contain the grade fields from the database.
-  Grade _mapToGrade(Map<String, dynamic> data) {
-    return Grade(
-      id: data['id'] as String,
-      subjectId: data['subject_id'] as String,
-      score: (data['score'] as num).toDouble(),
-      weight: (data['weight'] as num?)?.toDouble() ?? 1.0,
-      description: data['grade_type'] as String? ??
-          data['comment'] as String? ??
-          'Grade',
-      date: DateTime.parse(data['created_at'] as String),
-    );
+  /// Uses [GradeDTO] for type-safe parsing with validation.
+  /// Returns null and logs warning if the grade data is invalid.
+  Grade? _mapToGrade(Map<String, dynamic> data) {
+    final dto = GradeDTO.fromJson(data);
+
+    if (!dto.isValid) {
+      debugPrint('Warning: Invalid grade data received:');
+      for (final error in dto.validationErrors) {
+        debugPrint('  - $error');
+      }
+      debugPrint('  Raw data: $data');
+      return null;
+    }
+
+    return dto.toEntity();
+  }
+
+  /// Maps a list of database rows to [Grade] entities, filtering invalid ones.
+  ///
+  /// Uses DTOs for safe parsing and logs warnings for invalid grades.
+  List<Grade> _mapToGrades(List<Map<String, dynamic>> dataList) {
+    final grades = <Grade>[];
+    var invalidCount = 0;
+
+    for (final data in dataList) {
+      final grade = _mapToGrade(data);
+      if (grade != null) {
+        grades.add(grade);
+      } else {
+        invalidCount++;
+      }
+    }
+
+    if (invalidCount > 0) {
+      debugPrint(
+        'Warning: $invalidCount invalid grade(s) were skipped during parsing',
+      );
+    }
+
+    return grades;
   }
 
   /// Calculates the weighted average of a list of grades.

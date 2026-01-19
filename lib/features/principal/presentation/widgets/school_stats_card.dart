@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_card.dart';
 import '../../domain/entities/school_stats.dart';
+
+// =============================================================================
+// SCHOOL STATS CARD - Principal Dashboard Overview
+// =============================================================================
+// A premium card component for displaying school statistics with a
+// visually appealing grid layout and proper visual hierarchy.
+//
+// Features:
+// - Uses AppCard.elevated for featured content styling
+// - AppTypography for all text styles
+// - AppSpacing for all margins/padding
+// - AppRadius for border radius
+// - Semantic color coding for each stat
+// - Theme-aware styling (Clean vs Playful)
+// =============================================================================
 
 /// A card widget displaying school statistics.
 ///
@@ -10,126 +31,153 @@ class SchoolStatsCard extends StatelessWidget {
   const SchoolStatsCard({
     super.key,
     required this.stats,
-    this.isPlayful = false,
   });
 
   /// The school statistics to display.
   final SchoolStats stats;
 
-  /// Whether to use playful styling.
-  final bool isPlayful;
+  /// Detects if the current theme is playful.
+  bool _isPlayful(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.toARGB32() == PlayfulColors.primary.toARGB32() ||
+        (primaryColor.r * 255 > 100 && primaryColor.b * 255 > 200);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isPlayful = _isPlayful(context);
+    final primaryColor =
+        isPlayful ? PlayfulColors.primary : CleanColors.primary;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
-        color: theme.colorScheme.surface,
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.2),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isPlayful
-                ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                : Colors.black.withValues(alpha: 0.05),
-            blurRadius: isPlayful ? 12 : 8,
-            offset: Offset(0, isPlayful ? 4 : 2),
-          ),
+    return AppCard.elevated(
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with icon and title
+          _CardHeader(isPlayful: isPlayful, primaryColor: primaryColor),
+          SizedBox(height: AppSpacing.xl),
+          // Stats grid
+          _StatsGrid(stats: stats, isPlayful: isPlayful),
         ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 22 : 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(isPlayful ? 12 : 10),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(isPlayful ? 14 : 12),
-                  ),
-                  child: Icon(
-                    Icons.analytics_outlined,
-                    color: theme.colorScheme.primary,
-                    size: isPlayful ? 26 : 24,
-                  ),
-                ),
-                SizedBox(width: isPlayful ? 14 : 12),
-                Text(
-                  'School Overview',
-                  style: TextStyle(
-                    fontSize: isPlayful ? 20 : 18,
-                    fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: isPlayful ? 26 : 24),
-            GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: isPlayful ? 18 : 16,
-              crossAxisSpacing: isPlayful ? 18 : 16,
-              childAspectRatio: 0.75,
-              children: [
-                _StatTile(
-                  icon: Icons.people_outline,
-                  label: 'Staff',
-                  value: stats.totalStaff.toString(),
-                  color: theme.colorScheme.primary,
-                  isPlayful: isPlayful,
-                ),
-                _StatTile(
-                  icon: Icons.school_outlined,
-                  label: 'Teachers',
-                  value: stats.totalTeachers.toString(),
-                  color: Colors.blue,
-                  isPlayful: isPlayful,
-                ),
-                _StatTile(
-                  icon: Icons.admin_panel_settings_outlined,
-                  label: 'Admins',
-                  value: stats.totalAdmins.toString(),
-                  color: Colors.indigo,
-                  isPlayful: isPlayful,
-                ),
-                _StatTile(
-                  icon: Icons.class_outlined,
-                  label: 'Classes',
-                  value: stats.totalClasses.toString(),
-                  color: Colors.green,
-                  isPlayful: isPlayful,
-                ),
-                _StatTile(
-                  icon: Icons.person_outline,
-                  label: 'Students',
-                  value: stats.totalStudents.toString(),
-                  color: Colors.orange,
-                  isPlayful: isPlayful,
-                ),
-                _StatTile(
-                  icon: Icons.mail_outline,
-                  label: 'Invites',
-                  value: stats.activeInviteCodes.toString(),
-                  color: Colors.red,
-                  isPlayful: isPlayful,
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
 }
 
+// =============================================================================
+// SUBCOMPONENTS
+// =============================================================================
+
+/// Card header with analytics icon and title.
+class _CardHeader extends StatelessWidget {
+  const _CardHeader({
+    required this.isPlayful,
+    required this.primaryColor,
+  });
+
+  final bool isPlayful;
+  final Color primaryColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor =
+        isPlayful ? PlayfulColors.primarySubtle : CleanColors.primarySubtle;
+
+    return Row(
+      children: [
+        // Icon container
+        Container(
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: AppRadius.badge(isPlayful: isPlayful),
+          ),
+          child: Icon(
+            Icons.analytics_outlined,
+            color: primaryColor,
+            size: isPlayful ? AppIconSize.lg : AppIconSize.md,
+          ),
+        ),
+        SizedBox(width: AppSpacing.md),
+        // Title
+        Text(
+          'School Overview',
+          style: AppTypography.sectionTitle(isPlayful: isPlayful),
+        ),
+      ],
+    );
+  }
+}
+
+/// Grid displaying all statistics.
+class _StatsGrid extends StatelessWidget {
+  const _StatsGrid({
+    required this.stats,
+    required this.isPlayful,
+  });
+
+  final SchoolStats stats;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: AppSpacing.md,
+      crossAxisSpacing: AppSpacing.md,
+      childAspectRatio: 0.75,
+      children: [
+        _StatTile(
+          icon: Icons.people_outline,
+          label: 'Staff',
+          value: stats.totalStaff.toString(),
+          color: isPlayful ? PlayfulColors.statPurple : CleanColors.statPurple,
+          isPlayful: isPlayful,
+        ),
+        _StatTile(
+          icon: Icons.school_outlined,
+          label: 'Teachers',
+          value: stats.totalTeachers.toString(),
+          color: isPlayful ? PlayfulColors.statBlue : CleanColors.statBlue,
+          isPlayful: isPlayful,
+        ),
+        _StatTile(
+          icon: Icons.admin_panel_settings_outlined,
+          label: 'Admins',
+          value: stats.totalAdmins.toString(),
+          color: isPlayful ? PlayfulColors.statIndigo : CleanColors.statIndigo,
+          isPlayful: isPlayful,
+        ),
+        _StatTile(
+          icon: Icons.class_outlined,
+          label: 'Classes',
+          value: stats.totalClasses.toString(),
+          color: isPlayful ? PlayfulColors.statGreen : CleanColors.statGreen,
+          isPlayful: isPlayful,
+        ),
+        _StatTile(
+          icon: Icons.person_outline,
+          label: 'Students',
+          value: stats.totalStudents.toString(),
+          color: isPlayful ? PlayfulColors.statOrange : CleanColors.statOrange,
+          isPlayful: isPlayful,
+        ),
+        _StatTile(
+          icon: Icons.mail_outline,
+          label: 'Invites',
+          value: stats.activeInviteCodes.toString(),
+          color: isPlayful ? PlayfulColors.statPink : CleanColors.statPink,
+          isPlayful: isPlayful,
+        ),
+      ],
+    );
+  }
+}
+
+/// Individual stat tile with icon, value, and label.
 class _StatTile extends StatelessWidget {
   const _StatTile({
     required this.icon,
@@ -147,37 +195,45 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final backgroundColor = color.withValues(
+      alpha: isPlayful ? AppOpacity.soft : AppOpacity.subtle,
+    );
+    final borderColor = color.withValues(alpha: AppOpacity.medium);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 14 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: isPlayful ? 0.08 : 0.05),
-        borderRadius: BorderRadius.circular(isPlayful ? 14 : 12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.2),
-        ),
+        color: backgroundColor,
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: isPlayful ? 26 : 24),
-          SizedBox(height: isPlayful ? 6 : 4),
+          // Icon
+          Icon(
+            icon,
+            color: color,
+            size: isPlayful ? AppIconSize.lg : AppIconSize.md,
+          ),
+          SizedBox(height: isPlayful ? AppSpacing.xs : AppSpacing.xxs),
+          // Value
           Text(
             value,
-            style: TextStyle(
-              fontSize: isPlayful ? 20 : 18,
+            style: AppTypography.sectionTitle(isPlayful: isPlayful).copyWith(
               fontWeight: isPlayful ? FontWeight.w800 : FontWeight.w700,
               color: color,
             ),
           ),
-          SizedBox(height: isPlayful ? 2 : 1),
+          SizedBox(height: AppSpacing.space2),
+          // Label
           Text(
             label,
-            style: TextStyle(
-              fontSize: isPlayful ? 11 : 10,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+              color: isPlayful
+                  ? PlayfulColors.textSecondary
+                  : CleanColors.textSecondary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

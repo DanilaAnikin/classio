@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/entities.dart';
 
 /// Widget displaying a single attendance record in a list.
@@ -12,6 +13,7 @@ import '../../domain/entities/entities.dart';
 /// - Subject name
 /// - Attendance status with color coding
 /// - Excuse status badge if applicable
+/// - Theme-aware styling (Clean vs Playful)
 class AttendanceListItem extends ConsumerWidget {
   const AttendanceListItem({
     super.key,
@@ -33,170 +35,287 @@ class AttendanceListItem extends ConsumerWidget {
   /// Callback when the excuse button is tapped.
   final VoidCallback? onExcuseTap;
 
+  Color _getStatusColor({required bool isPlayful}) {
+    switch (attendance.status) {
+      case AttendanceStatus.present:
+        return isPlayful
+            ? PlayfulColors.attendancePresent
+            : CleanColors.attendancePresent;
+      case AttendanceStatus.absent:
+        return isPlayful
+            ? PlayfulColors.attendanceAbsent
+            : CleanColors.attendanceAbsent;
+      case AttendanceStatus.late:
+        return isPlayful
+            ? PlayfulColors.attendanceLate
+            : CleanColors.attendanceLate;
+      case AttendanceStatus.leftEarly:
+        return isPlayful
+            ? PlayfulColors.attendanceExcused
+            : CleanColors.attendanceExcused;
+      case AttendanceStatus.excused:
+        return isPlayful ? PlayfulColors.info : CleanColors.info;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
+    final statusColor = _getStatusColor(isPlayful: isPlayful);
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-      child: Container(
-        padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      borderRadius: AppRadius.card(isPlayful: isPlayful),
+      child: AnimatedContainer(
+        duration: AppDuration.fast,
+        curve: AppCurves.standard,
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+          borderRadius: AppRadius.card(isPlayful: isPlayful),
           color: theme.colorScheme.surface,
           border: Border.all(
-            color: attendance.status.color.withValues(alpha: 0.3),
-            width: isPlayful ? 2 : 1,
+            color: statusColor.withValues(alpha: AppOpacity.semi),
+            width: isPlayful ? AppSpacing.space2 : 1,
           ),
           boxShadow: isPlayful
               ? [
                   BoxShadow(
-                    color: attendance.status.color.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: statusColor.withValues(alpha: AppOpacity.soft),
+                    blurRadius: AppSpacing.xs,
+                    offset: const Offset(0, AppSpacing.space2),
                   ),
                 ]
-              : null,
+              : AppShadows.cleanXs,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header row: Date and status
-            Row(
-              children: [
-                // Date
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        DateFormat('EEEE, MMM d, yyyy').format(attendance.date),
-                        style: TextStyle(
-                          fontSize: isPlayful ? 16 : 14,
-                          fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      if (attendance.lessonStartTime != null) ...[
-                        SizedBox(height: isPlayful ? 4 : 2),
-                        Text(
-                          '${DateFormat('HH:mm').format(attendance.lessonStartTime!)} - ${attendance.lessonEndTime != null ? DateFormat('HH:mm').format(attendance.lessonEndTime!) : ''}',
-                          style: TextStyle(
-                            fontSize: isPlayful ? 13 : 12,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // Status badge
-                _StatusBadge(
-                  status: attendance.status,
-                  isPlayful: isPlayful,
-                ),
-              ],
+            _HeaderRow(
+              attendance: attendance,
+              statusColor: statusColor,
+              isPlayful: isPlayful,
             ),
-            SizedBox(height: isPlayful ? 12 : 10),
+            SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
 
             // Subject info
-            Row(
-              children: [
-                Icon(
-                  Icons.book_outlined,
-                  size: isPlayful ? 18 : 16,
-                  color: theme.colorScheme.primary,
-                ),
-                SizedBox(width: isPlayful ? 8 : 6),
-                Expanded(
-                  child: Text(
-                    attendance.subjectName ?? 'Unknown Subject',
-                    style: TextStyle(
-                      fontSize: isPlayful ? 15 : 14,
-                      fontWeight: FontWeight.w500,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ),
-              ],
+            _SubjectRow(
+              attendance: attendance,
+              isPlayful: isPlayful,
             ),
 
             // Note if present
-            if (attendance.note != null && attendance.note!.isNotEmpty) ...[
-              SizedBox(height: isPlayful ? 10 : 8),
-              Container(
-                padding: EdgeInsets.all(isPlayful ? 10 : 8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.note_outlined,
-                      size: isPlayful ? 16 : 14,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                    SizedBox(width: isPlayful ? 8 : 6),
-                    Expanded(
-                      child: Text(
-                        attendance.note!,
-                        style: TextStyle(
-                          fontSize: isPlayful ? 13 : 12,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            if (attendance.note?.isNotEmpty ?? false) ...[
+              SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+              _NoteSection(
+                note: attendance.note!,
+                isPlayful: isPlayful,
               ),
             ],
 
             // Excuse status row
             if (attendance.isNegative) ...[
-              SizedBox(height: isPlayful ? 12 : 10),
-              Row(
-                children: [
-                  // Excuse status badge
-                  ExcuseStatusBadge(
-                    status: attendance.excuseStatus,
-                    isPlayful: isPlayful,
-                  ),
-                  const Spacer(),
-                  // Submit excuse button (for parents)
-                  if (showExcuseButton && attendance.canSubmitExcuse)
-                    TextButton.icon(
-                      onPressed: onExcuseTap,
-                      icon: Icon(
-                        Icons.edit_note_rounded,
-                        size: isPlayful ? 20 : 18,
-                      ),
-                      label: Text(
-                        attendance.excuseStatus == ExcuseStatus.rejected
-                            ? 'Resubmit'
-                            : 'Submit Excuse',
-                        style: TextStyle(
-                          fontSize: isPlayful ? 14 : 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isPlayful ? 12 : 10,
-                          vertical: isPlayful ? 8 : 6,
-                        ),
-                      ),
-                    ),
-                ],
+              SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
+              _ExcuseRow(
+                attendance: attendance,
+                showExcuseButton: showExcuseButton,
+                onExcuseTap: onExcuseTap,
+                isPlayful: isPlayful,
               ),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Header row with date and status badge.
+class _HeaderRow extends StatelessWidget {
+  const _HeaderRow({
+    required this.attendance,
+    required this.statusColor,
+    required this.isPlayful,
+  });
+
+  final AttendanceEntity attendance;
+  final Color statusColor;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        // Date
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                DateFormat('EEEE, MMM d, yyyy').format(attendance.date),
+                style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+                  fontSize: isPlayful ? AppFontSize.titleSmall : AppFontSize.bodyMedium,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              if (attendance.lessonStartTime != null) ...[
+                SizedBox(height: isPlayful ? AppSpacing.xxs : AppSpacing.space2),
+                Text(
+                  '${DateFormat('HH:mm').format(attendance.lessonStartTime!)} - ${attendance.lessonEndTime != null ? DateFormat('HH:mm').format(attendance.lessonEndTime!) : ''}',
+                  style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        // Status badge
+        _StatusBadge(
+          status: attendance.status,
+          isPlayful: isPlayful,
+        ),
+      ],
+    );
+  }
+}
+
+/// Subject information row.
+class _SubjectRow extends StatelessWidget {
+  const _SubjectRow({
+    required this.attendance,
+    required this.isPlayful,
+  });
+
+  final AttendanceEntity attendance;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Icon(
+          Icons.book_outlined,
+          size: isPlayful ? AppIconSize.sm : AppIconSize.xs,
+          color: theme.colorScheme.primary,
+        ),
+        SizedBox(width: isPlayful ? AppSpacing.xs : AppSpacing.xxs),
+        Expanded(
+          child: Text(
+            attendance.subjectName ?? 'Unknown Subject',
+            style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.almostOpaque),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Note section with icon.
+class _NoteSection extends StatelessWidget {
+  const _NoteSection({
+    required this.note,
+    required this.isPlayful,
+  });
+
+  final String note;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.outline.withValues(alpha: AppOpacity.subtle),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.note_outlined,
+            size: isPlayful ? AppIconSize.xs : AppIconSize.badge,
+            color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
+          ),
+          SizedBox(width: isPlayful ? AppSpacing.xs : AppSpacing.xxs),
+          Expanded(
+            child: Text(
+              note,
+              style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Excuse status row with optional button.
+class _ExcuseRow extends StatelessWidget {
+  const _ExcuseRow({
+    required this.attendance,
+    required this.showExcuseButton,
+    required this.onExcuseTap,
+    required this.isPlayful,
+  });
+
+  final AttendanceEntity attendance;
+  final bool showExcuseButton;
+  final VoidCallback? onExcuseTap;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        // Excuse status badge
+        ExcuseStatusBadge(
+          status: attendance.excuseStatus,
+          isPlayful: isPlayful,
+        ),
+        const Spacer(),
+        // Submit excuse button (for parents)
+        if (showExcuseButton && attendance.canSubmitExcuse)
+          TextButton.icon(
+            onPressed: onExcuseTap,
+            icon: Icon(
+              Icons.edit_note_rounded,
+              size: isPlayful ? AppIconSize.sm : AppIconSize.xs,
+            ),
+            label: Text(
+              attendance.excuseStatus == ExcuseStatus.rejected
+                  ? 'Resubmit'
+                  : 'Submit Excuse',
+              style: AppTypography.buttonTextSmall(isPlayful: isPlayful).copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+                vertical: isPlayful ? AppSpacing.xs : AppSpacing.xxs,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: AppRadius.buttonSmall(isPlayful: isPlayful),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -211,19 +330,43 @@ class _StatusBadge extends StatelessWidget {
   final AttendanceStatus status;
   final bool isPlayful;
 
+  Color _getStatusColor() {
+    switch (status) {
+      case AttendanceStatus.present:
+        return isPlayful
+            ? PlayfulColors.attendancePresent
+            : CleanColors.attendancePresent;
+      case AttendanceStatus.absent:
+        return isPlayful
+            ? PlayfulColors.attendanceAbsent
+            : CleanColors.attendanceAbsent;
+      case AttendanceStatus.late:
+        return isPlayful
+            ? PlayfulColors.attendanceLate
+            : CleanColors.attendanceLate;
+      case AttendanceStatus.leftEarly:
+        return isPlayful
+            ? PlayfulColors.attendanceExcused
+            : CleanColors.attendanceExcused;
+      case AttendanceStatus.excused:
+        return isPlayful ? PlayfulColors.info : CleanColors.info;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final color = _getStatusColor();
+
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 14 : 12,
-        vertical: isPlayful ? 8 : 6,
+        horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+        vertical: isPlayful ? AppSpacing.xs : AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+        color: color.withValues(alpha: AppOpacity.soft),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
         border: Border.all(
-          color: status.color.withValues(alpha: 0.3),
-          width: 1,
+          color: color.withValues(alpha: AppOpacity.semi),
         ),
       ),
       child: Row(
@@ -231,16 +374,15 @@ class _StatusBadge extends StatelessWidget {
         children: [
           Icon(
             status.icon,
-            size: isPlayful ? 18 : 16,
-            color: status.color,
+            size: isPlayful ? AppIconSize.xs : AppIconSize.badge,
+            color: color,
           ),
-          SizedBox(width: isPlayful ? 6 : 4),
+          SizedBox(width: isPlayful ? AppSpacing.xxs : AppSpacing.space2),
           Text(
             status.label,
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w600,
-              color: status.color,
+              color: color,
             ),
           ),
         ],
@@ -273,32 +415,49 @@ class ExcuseStatusBadge extends StatelessWidget {
     }
   }
 
+  Color _getStatusColor() {
+    switch (status) {
+      case ExcuseStatus.none:
+        return isPlayful
+            ? PlayfulColors.attendanceUnknown
+            : CleanColors.attendanceUnknown;
+      case ExcuseStatus.pending:
+        return isPlayful ? PlayfulColors.warning : CleanColors.warning;
+      case ExcuseStatus.approved:
+        return isPlayful ? PlayfulColors.success : CleanColors.success;
+      case ExcuseStatus.rejected:
+        return isPlayful ? PlayfulColors.error : CleanColors.error;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final color = _getStatusColor();
+
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 10 : 8,
-        vertical: isPlayful ? 6 : 4,
+        horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs,
+        vertical: isPlayful ? AppSpacing.xxs : AppSpacing.space2,
       ),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(isPlayful ? 10 : 6),
+        color: color.withValues(alpha: AppOpacity.soft),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             _icon,
-            size: isPlayful ? 16 : 14,
-            color: status.color,
+            size: isPlayful ? AppIconSize.xs : AppIconSize.badge,
+            color: color,
           ),
-          SizedBox(width: isPlayful ? 6 : 4),
+          SizedBox(width: isPlayful ? AppSpacing.xxs : AppSpacing.space2),
           Text(
             status.label,
-            style: TextStyle(
-              fontSize: isPlayful ? 12 : 11,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w600,
-              color: status.color,
+              fontSize: isPlayful ? AppFontSize.caption : AppFontSize.labelSmall,
+              color: color,
             ),
           ),
         ],

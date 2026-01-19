@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../student/domain/entities/entities.dart';
 import '../../../student/presentation/widgets/widgets.dart';
@@ -86,7 +87,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
                   child: const Center(child: CircularProgressIndicator()),
                 ),
                 error: (e, _) => Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppSpacing.cardInsets,
                   child: Text('Error loading stats: $e'),
                 ),
               ),
@@ -120,7 +121,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
                   child: const Center(child: CircularProgressIndicator()),
                 ),
                 error: (e, _) => Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: AppSpacing.cardInsets,
                   child: Text('Error loading calendar: $e'),
                 ),
               ),
@@ -177,14 +178,14 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
                               size: 48,
                               color: Colors.green.withValues(alpha: 0.6),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: AppSpacing.sm),
                             Text(
                               'No attendance issues',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: AppSpacing.xxs),
                             Text(
                               'Your child has a great attendance record!',
                               style: theme.textTheme.bodyMedium?.copyWith(
@@ -216,7 +217,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
                 },
                 loading: () => const Center(
                   child: Padding(
-                    padding: EdgeInsets.all(24),
+                    padding: AppSpacing.dialogInsets,
                     child: CircularProgressIndicator(),
                   ),
                 ),
@@ -251,7 +252,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
               Icons.edit_note_rounded,
               color: theme.colorScheme.primary,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: AppSpacing.xs),
             const Text('Submit Excuse'),
           ],
         ),
@@ -298,7 +299,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
 
             // Excuse reason input
             TextFormField(
@@ -313,7 +314,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
               maxLines: 4,
               textInputAction: TextInputAction.done,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               'Note: Excuse submissions are reviewed by teachers.',
               style: TextStyle(
@@ -421,7 +422,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
                     Icons.history_rounded,
                     color: theme.colorScheme.primary,
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: AppSpacing.xs),
                   Text(
                     'Excuse History',
                     style: theme.textTheme.titleLarge?.copyWith(
@@ -446,7 +447,7 @@ class _ChildAttendancePageState extends ConsumerState<ChildAttendancePage> {
                             color: theme.colorScheme.outline
                                 .withValues(alpha: 0.5),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: AppSpacing.sm),
                           Text(
                             'No excuse submissions yet',
                             style: theme.textTheme.bodyLarge?.copyWith(
@@ -544,7 +545,7 @@ class _ExcuseHistoryItem extends StatelessWidget {
               ),
             ],
           ),
-          if (excuse.excuseNote != null && excuse.excuseNote!.isNotEmpty) ...[
+          if (excuse.excuseNote?.isNotEmpty ?? false) ...[
             SizedBox(height: isPlayful ? 10 : 8),
             Container(
               padding: EdgeInsets.all(isPlayful ? 10 : 8),
@@ -563,7 +564,7 @@ class _ExcuseHistoryItem extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      excuse.excuseNote!,
+                      excuse.excuseNote ?? '',
                       style: TextStyle(
                         fontSize: isPlayful ? 13 : 12,
                         color:

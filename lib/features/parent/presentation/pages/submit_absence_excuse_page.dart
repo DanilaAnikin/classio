@@ -102,9 +102,9 @@ class _SubmitAbsenceExcusePageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Attendance Info Card
-              if (widget.attendance != null) ...[
+              if (widget.attendance case final attendance?) ...[
                 _AttendanceInfoCard(
-                  attendance: widget.attendance!,
+                  attendance: attendance,
                   isPlayful: isPlayful,
                 ),
                 SizedBox(height: isPlayful ? 24 : 20),
@@ -151,13 +151,12 @@ class _SubmitAbsenceExcusePageState
   }
 
   void _submitExcuse() {
-    if (_formKey.currentState!.validate()) {
-      ref.read(excuseSubmitterProvider.notifier).submitExcuse(
-            attendanceId: widget.attendanceId,
-            studentId: widget.childId,
-            reason: _reasonController.text.trim(),
-          );
-    }
+    if (_formKey.currentState?.validate() != true) return;
+    ref.read(excuseSubmitterProvider.notifier).submitExcuse(
+          attendanceId: widget.attendanceId,
+          studentId: widget.childId,
+          reason: _reasonController.text.trim(),
+        );
   }
 }
 
@@ -228,7 +227,7 @@ class _AttendanceInfoCard extends StatelessWidget {
               ),
             ],
           ),
-          if (attendance.subjectName != null) ...[
+          if (attendance.subjectName case final subjectName?) ...[
             const SizedBox(height: 16),
             Row(
               children: [
@@ -239,7 +238,7 @@ class _AttendanceInfoCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  attendance.subjectName!,
+                  subjectName,
                   style: TextStyle(
                     fontSize: isPlayful ? 15 : 14,
                     fontWeight: FontWeight.w500,
@@ -248,7 +247,7 @@ class _AttendanceInfoCard extends StatelessWidget {
               ],
             ),
           ],
-          if (attendance.lessonStartTime != null) ...[
+          if (attendance.lessonStartTime case final lessonStartTime?) ...[
             const SizedBox(height: 8),
             Row(
               children: [
@@ -259,7 +258,7 @@ class _AttendanceInfoCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${DateFormat('HH:mm').format(attendance.lessonStartTime!)} - ${attendance.lessonEndTime != null ? DateFormat('HH:mm').format(attendance.lessonEndTime!) : ''}',
+                  '${DateFormat('HH:mm').format(lessonStartTime)}${attendance.lessonEndTime != null ? ' - ${DateFormat('HH:mm').format(attendance.lessonEndTime!)}' : ''}',
                   style: TextStyle(
                     fontSize: isPlayful ? 14 : 13,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -359,7 +358,7 @@ class _ExistingExcuseCard extends StatelessWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              if (teacherResponse != null && teacherResponse!.isNotEmpty) ...[
+              if (teacherResponse?.isNotEmpty ?? false) ...[
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 12),
@@ -373,7 +372,7 @@ class _ExistingExcuseCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  teacherResponse!,
+                  teacherResponse ?? '',
                   style: TextStyle(
                     fontSize: isPlayful ? 15 : 14,
                     color: theme.colorScheme.onSurface,

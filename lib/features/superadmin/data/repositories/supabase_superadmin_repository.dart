@@ -2,16 +2,15 @@ import 'dart:math';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../admin_panel/domain/entities/school.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/superadmin_repository.dart';
 
 /// Exception thrown when superadmin operations fail.
-class SuperAdminException implements Exception {
-  const SuperAdminException(this.message);
-
-  final String message;
+class SuperAdminException extends RepositoryException {
+  const SuperAdminException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'SuperAdminException: $message';
@@ -42,7 +41,11 @@ class SupabaseSuperAdminRepository implements SuperAdminRepository {
             'subscription_status': SubscriptionStatus.trial.toJson(),
           })
           .select('id, name, created_at')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const SuperAdminException('Failed to create school: no data returned');
+      }
 
       return School.fromJson(response);
     } on PostgrestException catch (e) {
@@ -147,7 +150,11 @@ class SupabaseSuperAdminRepository implements SuperAdminRepository {
           .from('schools')
           .select('id, name, created_at')
           .eq('id', id)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw SuperAdminException('School not found with id $id');
+      }
 
       return School.fromJson(response);
     } on PostgrestException catch (e) {
@@ -166,7 +173,11 @@ class SupabaseSuperAdminRepository implements SuperAdminRepository {
           .from('schools')
           .select('id, name, subscription_status, subscription_expires_at, created_at')
           .eq('id', schoolId)
-          .single();
+          .maybeSingle();
+
+      if (schoolResponse == null) {
+        throw SuperAdminException('School not found with id $schoolId');
+      }
 
       // Get user counts
       final usersResponse = await _supabase
@@ -398,7 +409,11 @@ class SupabaseSuperAdminRepository implements SuperAdminRepository {
           .update({'name': newName})
           .eq('id', schoolId)
           .select('id, name, created_at')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw SuperAdminException('Failed to update school: school not found with id $schoolId');
+      }
 
       return School.fromJson(response);
     } on PostgrestException catch (e) {
@@ -447,7 +462,11 @@ class SupabaseSuperAdminRepository implements SuperAdminRepository {
           .from('schools')
           .select('id, name')
           .eq('id', schoolId)
-          .single();
+          .maybeSingle();
+
+      if (schoolResponse == null) {
+        throw SuperAdminException('School not found with id $schoolId');
+      }
 
       // Get user counts by role
       final usersResponse = await _supabase

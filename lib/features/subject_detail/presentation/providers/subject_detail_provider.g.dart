@@ -6,6 +6,31 @@ part of 'subject_detail_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$subjectDetailRepositoryHash() =>
+    r'2d33312870bebe1a0125a05621c92c044b4df594';
+
+/// Provider for the SubjectDetailRepository instance.
+///
+/// Provides the Supabase implementation for production use.
+/// Can be overridden in tests to provide a mock implementation.
+///
+/// Copied from [subjectDetailRepository].
+@ProviderFor(subjectDetailRepository)
+final subjectDetailRepositoryProvider =
+    AutoDisposeProvider<SubjectDetailRepository>.internal(
+      subjectDetailRepository,
+      name: r'subjectDetailRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$subjectDetailRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef SubjectDetailRepositoryRef =
+    AutoDisposeProviderRef<SubjectDetailRepository>;
 String _$subjectDetailDataHash() => r'6c755571e007af62ad52ef2d8fca3d86069e6c54';
 
 /// Copied from Dart SDK
@@ -826,7 +851,7 @@ class _SubjectDetailErrorProviderElement
 }
 
 String _$subjectDetailNotifierHash() =>
-    r'bd69646b76808cf0e76a3bf0445e2be56f08543d';
+    r'13d83c327664e8f645e4eebb4037143aacf57888';
 
 abstract class _$SubjectDetailNotifier
     extends BuildlessAutoDisposeNotifier<SubjectDetailState> {

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../providers/teacher_provider.dart';
@@ -59,21 +60,20 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
 
                   return ResponsiveCenterScrollView(
                     maxWidth: 1000,
-                    padding: EdgeInsets.all(isPlayful ? 16 : 12),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           '${filtered.length} ${_filter == 'all' ? 'total' : _filter} assignment${filtered.length == 1 ? '' : 's'}',
-                          style: TextStyle(
-                            fontSize: isPlayful ? 14 : 13,
+                          style: theme.textTheme.labelMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        SizedBox(height: isPlayful ? 12 : 10),
+                        SizedBox(height: AppSpacing.sm),
                         ...filtered.map((assignment) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: EdgeInsets.only(bottom: AppSpacing.sm),
                               child: AssignmentCard(
                                 assignment: assignment,
                                 isPlayful: isPlayful,
@@ -83,7 +83,7 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                                     _deleteAssignment(assignment),
                               ),
                             )),
-                        const SizedBox(height: 80), // Space for FAB
+                        SizedBox(height: AppSpacing.xxxxl + AppSpacing.xxl), // Space for FAB
                       ],
                     ),
                   );
@@ -96,15 +96,17 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                     children: [
                       Icon(
                         Icons.error_outline_rounded,
-                        size: 48,
+                        size: AppIconSize.xxl,
                         color: theme.colorScheme.error,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                       Text(
                         'Failed to load assignments',
-                        style: TextStyle(color: theme.colorScheme.error),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppSpacing.xs),
                       OutlinedButton.icon(
                         onPressed: () => ref.invalidate(myAssignmentsProvider),
                         icon: const Icon(Icons.refresh_rounded),
@@ -161,33 +163,32 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
         builder: (context, scrollController) => Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
           ),
           child: Column(
             children: [
               // Handle
               Center(
                 child: Container(
-                  margin: const EdgeInsets.only(top: 12),
-                  width: 40,
-                  height: 4,
+                  margin: EdgeInsets.only(top: AppSpacing.sm),
+                  width: AppSpacing.xxxl,
+                  height: AppSpacing.xxs,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: AppOpacity.soft),
+                    borderRadius: BorderRadius.circular(AppRadius.xxs),
                   ),
                 ),
               ),
 
               // Header
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(AppSpacing.lg),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
                         assignment.title,
-                        style: TextStyle(
-                          fontSize: isPlayful ? 22 : 20,
+                        style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: theme.colorScheme.onSurface,
                         ),
@@ -205,17 +206,18 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                   children: [
                     // Subject
                     if (assignment.subjectName != null) ...[
                       _DetailRow(
                         icon: Icons.menu_book_rounded,
                         label: 'Subject',
-                        value: assignment.subjectName!,
+                        value: assignment.subjectName ?? '',
                         color: theme.colorScheme.primary,
+                        isPlayful: isPlayful,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                     ],
 
                     // Due Date
@@ -223,13 +225,15 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                       _DetailRow(
                         icon: Icons.calendar_today_rounded,
                         label: 'Due Date',
-                        value: DateFormat('EEEE, MMMM d, y')
-                            .format(assignment.dueDate!),
+                        value: assignment.dueDate != null
+                            ? DateFormat('EEEE, MMMM d, y').format(assignment.dueDate!)
+                            : '',
                         color: assignment.isPastDue
                             ? theme.colorScheme.error
-                            : Colors.green,
+                            : (isPlayful ? PlayfulColors.success : CleanColors.success),
+                        isPlayful: isPlayful,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                     ],
 
                     // Max Score
@@ -238,49 +242,46 @@ class _AssignmentsTabState extends ConsumerState<AssignmentsTab> {
                       label: 'Max Score',
                       value: assignment.maxScore.toString(),
                       color: theme.colorScheme.tertiary,
+                      isPlayful: isPlayful,
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
 
                     // Description
-                    if (assignment.description != null &&
-                        assignment.description!.isNotEmpty) ...[
+                    if (assignment.description?.isNotEmpty ?? false) ...[
                       Text(
                         'Description',
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: theme.textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppSpacing.xs),
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: Text(
-                          assignment.description!,
-                          style: TextStyle(
-                            fontSize: 15,
+                          assignment.description ?? '',
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurface,
                             height: 1.5,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: AppSpacing.xl),
                     ],
 
                     // Submissions Section
                     Text(
                       'Submissions',
-                      style: TextStyle(
-                        fontSize: 18,
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: AppSpacing.sm),
                     _SubmissionsSection(
                       assignmentId: assignment.id,
                       maxScore: assignment.maxScore,
@@ -344,12 +345,12 @@ class _FilterBar extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: theme.colorScheme.outline.withValues(alpha: 0.15),
+            color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
           ),
         ),
       ),
@@ -358,21 +359,21 @@ class _FilterBar extends StatelessWidget {
           Icon(
             Icons.filter_list_rounded,
             color: theme.colorScheme.onSurfaceVariant,
-            size: 20,
+            size: AppIconSize.sm,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSpacing.sm),
           _FilterChip(
             label: 'All',
             isSelected: currentFilter == 'all',
             onSelected: () => onFilterChanged('all'),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: AppSpacing.xs),
           _FilterChip(
             label: 'Upcoming',
             isSelected: currentFilter == 'upcoming',
             onSelected: () => onFilterChanged('upcoming'),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: AppSpacing.xs),
           _FilterChip(
             label: 'Past Due',
             isSelected: currentFilter == 'past',
@@ -431,24 +432,22 @@ class _EmptyAssignments extends StatelessWidget {
         children: [
           Icon(
             Icons.assignment_outlined,
-            size: isPlayful ? 72 : 64,
-            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+            size: AppIconSize.hero,
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: AppOpacity.medium),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
           Text(
             message,
-            style: TextStyle(
-              fontSize: isPlayful ? 18 : 16,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           Text(
             'Create a new assignment to get started',
-            style: TextStyle(
-              fontSize: isPlayful ? 14 : 13,
-              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: AppOpacity.heavy),
             ),
           ),
         ],
@@ -463,12 +462,14 @@ class _DetailRow extends StatelessWidget {
     required this.label,
     required this.value,
     required this.color,
+    required this.isPlayful,
   });
 
   final IconData icon;
   final String label;
   final String value;
   final Color color;
+  final bool isPlayful;
 
   @override
   Widget build(BuildContext context) {
@@ -477,28 +478,26 @@ class _DetailRow extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
+            color: color.withValues(alpha: AppOpacity.soft),
+            borderRadius: AppRadius.getButtonRadius(isPlayful: isPlayful),
           ),
-          child: Icon(icon, color: color, size: 20),
+          child: Icon(icon, color: color, size: AppIconSize.sm),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: AppSpacing.sm),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             Text(
               value,
-              style: TextStyle(
-                fontSize: 15,
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.onSurface,
               ),
@@ -527,26 +526,28 @@ class _SubmissionsSection extends ConsumerWidget {
     final submissionsAsync =
         ref.watch(assignmentSubmissionsProvider(assignmentId));
 
+    final successColor = isPlayful ? PlayfulColors.success : CleanColors.success;
+
     return submissionsAsync.when(
       data: (submissions) {
         if (submissions.isEmpty) {
           return Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Column(
               children: [
                 Icon(
                   Icons.inbox_rounded,
-                  size: 40,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                  size: AppIconSize.xxl,
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: AppOpacity.heavy),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Text(
                   'No submissions yet',
-                  style: TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -558,43 +559,43 @@ class _SubmissionsSection extends ConsumerWidget {
         return Column(
           children: submissions.map((submission) {
             return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(12),
+              margin: EdgeInsets.only(bottom: AppSpacing.xs),
+              padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 18,
+                    radius: AppSpacing.lg,
                     backgroundColor: theme.colorScheme.primaryContainer,
                     child: Text(
                       submission.studentName?.isNotEmpty == true
-                          ? submission.studentName![0].toUpperCase()
+                          ? (submission.studentName ?? '?')[0].toUpperCase()
                           : '?',
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           submission.studentName ?? 'Unknown Student',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         Text(
                           submission.submittedAt != null
-                              ? 'Submitted ${DateFormat('MMM d, h:mm a').format(submission.submittedAt!)}'
+                              ? 'Submitted ${DateFormat('MMM d, h:mm a').format(submission.submittedAt ?? DateTime.now())}'
                               : 'Not submitted',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
@@ -612,21 +613,21 @@ class _SubmissionsSection extends ConsumerWidget {
                           ),
                         );
                       },
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xs,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          color: successColor.withValues(alpha: AppOpacity.soft),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(
-                          '${submission.grade!.toInt()}',
-                          style: const TextStyle(
+                          '${(submission.grade ?? 0).toInt()}',
+                          style: theme.textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: Colors.green,
+                            color: successColor,
                           ),
                         ),
                       ),
@@ -650,17 +651,19 @@ class _SubmissionsSection extends ConsumerWidget {
           }).toList(),
         );
       },
-      loading: () => const Center(
+      loading: () => Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
-          child: CircularProgressIndicator(),
+          padding: EdgeInsets.all(AppSpacing.xl),
+          child: const CircularProgressIndicator(),
         ),
       ),
-      error: (_, _) => Container(
-        padding: const EdgeInsets.all(24),
+      error: (error, stack) => Container(
+        padding: EdgeInsets.all(AppSpacing.xl),
         child: Text(
           'Failed to load submissions',
-          style: TextStyle(color: theme.colorScheme.error),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.error,
+          ),
         ),
       ),
     );

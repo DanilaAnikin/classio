@@ -3,15 +3,15 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/chat_repository.dart';
+import '../dtos/message_dto.dart';
 
 /// Exception thrown when chat operations fail.
-class ChatException implements Exception {
-  const ChatException(this.message);
-
-  final String message;
+class ChatException extends RepositoryException {
+  const ChatException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'ChatException: $message';
@@ -80,10 +80,59 @@ class SupabaseChatRepository implements ChatRepository {
     }
   }
 
+  /// Parses a single message JSON to a MessageEntity using DTO.
+  ///
+  /// Uses [MessageDTO] for type-safe parsing with validation logging.
+  /// Returns null if the message data is invalid.
+  MessageEntity? _parseMessage(Map<String, dynamic> json, {String? currentUserId}) {
+    final dto = MessageDTO.fromJson(json, currentUserId: currentUserId);
+
+    if (!dto.isValid) {
+      debugPrint('Warning: Invalid message data received:');
+      for (final error in dto.validationErrors) {
+        debugPrint('  - $error');
+      }
+      return null;
+    }
+
+    return dto.toEntity();
+  }
+
+  /// Parses a list of message JSON to MessageEntity list using DTOs.
+  ///
+  /// Logs warnings for invalid messages and filters them out.
+  List<MessageEntity> _parseMessages(
+    List<Map<String, dynamic>> jsonList, {
+    String? currentUserId,
+  }) {
+    final messages = <MessageEntity>[];
+    var invalidCount = 0;
+
+    for (final json in jsonList) {
+      final message = _parseMessage(json, currentUserId: currentUserId);
+      if (message != null) {
+        messages.add(message);
+      } else {
+        invalidCount++;
+      }
+    }
+
+    if (invalidCount > 0) {
+      debugPrint(
+        'Warning: $invalidCount invalid message(s) were skipped during parsing',
+      );
+    }
+
+    return messages;
+  }
+
   @override
   Future<List<ConversationEntity>> getConversations() async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       final List<ConversationEntity> conversations = [];
@@ -183,7 +232,7 @@ class SupabaseChatRepository implements ChatRepository {
       final otherId = senderId == userId ? recipientId : senderId;
 
       conversationMessages.putIfAbsent(otherId, () => []);
-      conversationMessages[otherId]!.add(msg);
+      conversationMessages[otherId]?.add(msg);
 
       // Store participant info
       if (!participantInfo.containsKey(otherId)) {
@@ -209,9 +258,11 @@ class SupabaseChatRepository implements ChatRepository {
         !(m['is_read'] as bool? ?? false)
       ).length;
 
-      // Get last message
+      // Get last message using DTO-based parsing
       final lastMsgData = msgs.first;
-      final lastMessage = MessageEntity.fromJson(lastMsgData, currentUserId: userId);
+      final lastMessage = _parseMessage(lastMsgData, currentUserId: userId);
+      // Skip this conversation if we couldn't parse the last message
+      if (lastMessage == null) continue;
 
       // Build name from profile (with superadmin transformation)
       String name = 'Unknown User';
@@ -280,9 +331,10 @@ class SupabaseChatRepository implements ChatRepository {
           .order('created_at', ascending: false)
           .limit(1);
 
+      // Get last message using DTO-based parsing
       MessageEntity? lastMessage;
       if (lastMessages.isNotEmpty) {
-        lastMessage = MessageEntity.fromJson(lastMessages.first, currentUserId: userId);
+        lastMessage = _parseMessage(lastMessages.first, currentUserId: userId);
       }
 
       // Fetch unread count for group (messages not sent by current user that aren't read)
@@ -327,7 +379,10 @@ class SupabaseChatRepository implements ChatRepository {
     String? beforeId,
   }) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       // FIX: Use separate queries for messages sent and received to ensure proper filtering
@@ -340,8 +395,10 @@ class SupabaseChatRepository implements ChatRepository {
             .from('messages')
             .select('created_at')
             .eq('id', beforeId)
-            .single();
-        beforeTime = beforeMessage['created_at'] as String;
+            .maybeSingle();
+        if (beforeMessage != null) {
+          beforeTime = beforeMessage['created_at'] as String;
+        }
       }
 
       // Get messages sent BY current user TO the other user
@@ -416,9 +473,11 @@ class SupabaseChatRepository implements ChatRepository {
       // Take only the requested limit
       final limitedMessages = allMessages.take(limit).toList();
 
-      return limitedMessages
-          .map((data) => MessageEntity.fromJson(data, currentUserId: userId))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseMessages(
+        List<Map<String, dynamic>>.from(limitedMessages),
+        currentUserId: userId,
+      );
     } on PostgrestException catch (e) {
       throw ChatException('Failed to fetch messages: ${e.message}');
     } catch (e) {
@@ -430,7 +489,10 @@ class SupabaseChatRepository implements ChatRepository {
   @override
   Future<MessageEntity> sendDirectMessage(String recipientId, String content) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       final response = await _supabase
@@ -453,9 +515,18 @@ class SupabaseChatRepository implements ChatRepository {
             sender:profiles!messages_sender_id_fkey(id, first_name, last_name, avatar_url, role),
             recipient:profiles!messages_recipient_id_fkey(id, first_name, last_name, avatar_url, role)
           ''')
-          .single();
+          .maybeSingle();
 
-      return MessageEntity.fromJson(response, currentUserId: userId);
+      if (response == null) {
+        throw const ChatException('Failed to send message: no data returned');
+      }
+
+      // Use DTO-based parsing with validation
+      final message = _parseMessage(response, currentUserId: userId);
+      if (message == null) {
+        throw const ChatException('Failed to parse sent message');
+      }
+      return message;
     } on PostgrestException catch (e) {
       throw ChatException('Failed to send message: ${e.message}');
     } catch (e) {
@@ -467,7 +538,10 @@ class SupabaseChatRepository implements ChatRepository {
   @override
   Future<void> markDirectMessagesAsRead(String otherUserId) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       await _supabase
@@ -495,7 +569,10 @@ class SupabaseChatRepository implements ChatRepository {
     String? beforeId,
   }) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       // SECURITY: Verify user is a member of this group before fetching messages
@@ -531,18 +608,22 @@ class SupabaseChatRepository implements ChatRepository {
             .from('messages')
             .select('created_at')
             .eq('id', beforeId)
-            .single();
-        final beforeTime = beforeMessage['created_at'] as String;
-        filterBuilder = filterBuilder.lt('created_at', beforeTime);
+            .maybeSingle();
+        if (beforeMessage != null) {
+          final beforeTime = beforeMessage['created_at'] as String;
+          filterBuilder = filterBuilder.lt('created_at', beforeTime);
+        }
       }
 
       final response = await filterBuilder
           .order('created_at', ascending: false)
           .limit(limit);
 
-      return response
-          .map((data) => MessageEntity.fromJson(data, currentUserId: userId))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseMessages(
+        List<Map<String, dynamic>>.from(response),
+        currentUserId: userId,
+      );
     } on PostgrestException catch (e) {
       throw ChatException('Failed to fetch group messages: ${e.message}');
     } catch (e) {
@@ -554,7 +635,10 @@ class SupabaseChatRepository implements ChatRepository {
   @override
   Future<MessageEntity> sendGroupMessage(String groupId, String content) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       final response = await _supabase
@@ -576,9 +660,18 @@ class SupabaseChatRepository implements ChatRepository {
             created_at,
             sender:profiles!messages_sender_id_fkey(id, first_name, last_name, avatar_url, role)
           ''')
-          .single();
+          .maybeSingle();
 
-      return MessageEntity.fromJson(response, currentUserId: userId);
+      if (response == null) {
+        throw const ChatException('Failed to send group message: no data returned');
+      }
+
+      // Use DTO-based parsing with validation
+      final message = _parseMessage(response, currentUserId: userId);
+      if (message == null) {
+        throw const ChatException('Failed to parse sent group message');
+      }
+      return message;
     } on PostgrestException catch (e) {
       throw ChatException('Failed to send group message: ${e.message}');
     } catch (e) {
@@ -590,7 +683,10 @@ class SupabaseChatRepository implements ChatRepository {
   @override
   Future<void> markGroupMessagesAsRead(String groupId) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       // For group messages, we mark all messages not sent by current user as read
@@ -618,7 +714,10 @@ class SupabaseChatRepository implements ChatRepository {
     String type = 'custom',
   }) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       // Get user's profile including role and school_id
@@ -626,7 +725,12 @@ class SupabaseChatRepository implements ChatRepository {
           .from('profiles')
           .select('school_id, role')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (userProfile == null) {
+        throw const ChatException('User profile not found');
+      }
+
       final userSchoolId = userProfile['school_id'] as String?;
       final userRole = userProfile['role'] as String?;
       final isSuperadmin = userRole == 'superadmin';
@@ -666,7 +770,11 @@ class SupabaseChatRepository implements ChatRepository {
             'created_by': userId,
           })
           .select()
-          .single();
+          .maybeSingle();
+
+      if (groupResponse == null) {
+        throw const ChatException('Failed to create group: no data returned');
+      }
 
       final groupId = groupResponse['id'] as String;
 
@@ -734,7 +842,10 @@ class SupabaseChatRepository implements ChatRepository {
   @override
   Future<void> leaveGroup(String groupId) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     await removeGroupMember(groupId, userId);
   }
@@ -823,7 +934,10 @@ class SupabaseChatRepository implements ChatRepository {
   /// Fallback implementation for getAvailableRecipients when RPC function
   /// is not available (migration not yet applied).
   Future<List<AppUser>> _getAvailableRecipientsFallback() async {
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       // Get current user's profile to determine role and school
@@ -831,7 +945,11 @@ class SupabaseChatRepository implements ChatRepository {
           .from('profiles')
           .select('id, email, role, school_id, first_name, last_name, avatar_url')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (currentUserProfile == null) {
+        throw const ChatException('User profile not found');
+      }
 
       final role = currentUserProfile['role'] as String?;
       final schoolId = currentUserProfile['school_id'] as String?;
@@ -1041,7 +1159,10 @@ class SupabaseChatRepository implements ChatRepository {
     List<String>? targetGroupIds,
   }) async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       final response = await _supabase
@@ -1061,9 +1182,18 @@ class SupabaseChatRepository implements ChatRepository {
             created_at,
             sender:profiles!messages_sender_id_fkey(id, first_name, last_name, avatar_url, role)
           ''')
-          .single();
+          .maybeSingle();
 
-      return MessageEntity.fromJson(response, currentUserId: userId);
+      if (response == null) {
+        throw const ChatException('Failed to send announcement: no data returned');
+      }
+
+      // Use DTO-based parsing with validation
+      final message = _parseMessage(response, currentUserId: userId);
+      if (message == null) {
+        throw const ChatException('Failed to parse sent announcement');
+      }
+      return message;
     } on PostgrestException catch (e) {
       throw ChatException('Failed to send announcement: ${e.message}');
     } catch (e) {
@@ -1075,7 +1205,10 @@ class SupabaseChatRepository implements ChatRepository {
   @override
   Stream<MessageEntity> subscribeToMessages() {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     _messageStreamController?.close();
     _messageStreamController = StreamController<MessageEntity>.broadcast();
@@ -1114,7 +1247,8 @@ class SupabaseChatRepository implements ChatRepository {
               isRelevant = true;
             }
 
-            if (isRelevant && !_messageStreamController!.isClosed) {
+            final streamController = _messageStreamController;
+            if (isRelevant && streamController != null && !streamController.isClosed) {
               // Fetch full message with joined data (include role for superadmin name transformation)
               try {
                 final fullMessage = await _supabase
@@ -1132,10 +1266,15 @@ class SupabaseChatRepository implements ChatRepository {
                       recipient:profiles!messages_recipient_id_fkey(id, first_name, last_name, avatar_url, role)
                     ''')
                     .eq('id', newRecord['id'] as String)
-                    .single();
+                    .maybeSingle();
 
-                final message = MessageEntity.fromJson(fullMessage, currentUserId: userId);
-                _messageStreamController!.add(message);
+                if (fullMessage != null) {
+                  // Use DTO-based parsing with validation
+                  final message = _parseMessage(fullMessage, currentUserId: userId);
+                  if (message != null) {
+                    streamController.add(message);
+                  }
+                }
               } catch (e, stackTrace) {
                 debugPrint('Error fetching message for stream: $e');
                 debugPrint('Stack trace: $stackTrace');
@@ -1146,7 +1285,11 @@ class SupabaseChatRepository implements ChatRepository {
         )
         .subscribe();
 
-    return _messageStreamController!.stream;
+    final controller = _messageStreamController;
+    if (controller == null) {
+      throw const ChatException('Failed to create message stream');
+    }
+    return controller.stream;
   }
 
   @override
@@ -1156,8 +1299,9 @@ class SupabaseChatRepository implements ChatRepository {
 
     // Initial fetch
     getConversations().then((conversations) {
-      if (!_conversationStreamController!.isClosed) {
-        _conversationStreamController!.add(conversations);
+      final controller = _conversationStreamController;
+      if (controller != null && !controller.isClosed) {
+        controller.add(conversations);
       }
     });
 
@@ -1166,8 +1310,9 @@ class SupabaseChatRepository implements ChatRepository {
       // Refresh conversations when new message arrives
       try {
         final conversations = await getConversations();
-        if (!_conversationStreamController!.isClosed) {
-          _conversationStreamController!.add(conversations);
+        final controller = _conversationStreamController;
+        if (controller != null && !controller.isClosed) {
+          controller.add(conversations);
         }
       } catch (e, stackTrace) {
         debugPrint('Error refreshing conversations stream: $e');
@@ -1176,13 +1321,20 @@ class SupabaseChatRepository implements ChatRepository {
       }
     });
 
-    return _conversationStreamController!.stream;
+    final controller = _conversationStreamController;
+    if (controller == null) {
+      throw const ChatException('Failed to create conversation stream');
+    }
+    return controller.stream;
   }
 
   @override
   Future<int> getTotalUnreadCount() async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       // Count unread direct messages (where user is recipient)
@@ -1231,8 +1383,9 @@ class SupabaseChatRepository implements ChatRepository {
 
     // Initial fetch
     getTotalUnreadCount().then((count) {
-      if (!_unreadCountStreamController!.isClosed) {
-        _unreadCountStreamController!.add(count);
+      final controller = _unreadCountStreamController;
+      if (controller != null && !controller.isClosed) {
+        controller.add(count);
       }
     });
 
@@ -1240,8 +1393,9 @@ class SupabaseChatRepository implements ChatRepository {
     subscribeToMessages().listen((_) async {
       try {
         final count = await getTotalUnreadCount();
-        if (!_unreadCountStreamController!.isClosed) {
-          _unreadCountStreamController!.add(count);
+        final controller = _unreadCountStreamController;
+        if (controller != null && !controller.isClosed) {
+          controller.add(count);
         }
       } catch (e, stackTrace) {
         debugPrint('Error updating unread count stream: $e');
@@ -1250,7 +1404,11 @@ class SupabaseChatRepository implements ChatRepository {
       }
     });
 
-    return _unreadCountStreamController!.stream;
+    final controller = _unreadCountStreamController;
+    if (controller == null) {
+      throw const ChatException('Failed to create unread count stream');
+    }
+    return controller.stream;
   }
 
   @override
@@ -1283,7 +1441,10 @@ class SupabaseChatRepository implements ChatRepository {
   @override
   Future<List<MessageGroupEntity>> getUserGroups() async {
     _requireAuth();
-    final userId = _currentUserId!;
+    final userId = _currentUserId;
+    if (userId == null) {
+      throw const ChatException('User not authenticated');
+    }
 
     try {
       final memberships = await _supabase
@@ -1325,7 +1486,7 @@ class SupabaseChatRepository implements ChatRepository {
       for (final m in membersResponse) {
         final groupId = m['group_id'] as String;
         membersByGroupId.putIfAbsent(groupId, () => []);
-        membersByGroupId[groupId]!.add(GroupMemberEntity.fromJson(m));
+        membersByGroupId[groupId]?.add(GroupMemberEntity.fromJson(m));
       }
 
       // Build MessageGroupEntity list with members
@@ -1354,11 +1515,12 @@ class SupabaseChatRepository implements ChatRepository {
 
   /// Notifies listeners that conversations may have changed.
   void _notifyConversationsChanged() {
-    if (_conversationStreamController != null &&
-        !_conversationStreamController!.isClosed) {
+    final controller = _conversationStreamController;
+    if (controller != null && !controller.isClosed) {
       getConversations().then((conversations) {
-        if (!_conversationStreamController!.isClosed) {
-          _conversationStreamController!.add(conversations);
+        final ctrl = _conversationStreamController;
+        if (ctrl != null && !ctrl.isClosed) {
+          ctrl.add(conversations);
         }
       });
     }
@@ -1366,11 +1528,12 @@ class SupabaseChatRepository implements ChatRepository {
 
   /// Notifies listeners that unread count may have changed.
   void _notifyUnreadCountChanged() {
-    if (_unreadCountStreamController != null &&
-        !_unreadCountStreamController!.isClosed) {
+    final controller = _unreadCountStreamController;
+    if (controller != null && !controller.isClosed) {
       getTotalUnreadCount().then((count) {
-        if (!_unreadCountStreamController!.isClosed) {
-          _unreadCountStreamController!.add(count);
+        final ctrl = _unreadCountStreamController;
+        if (ctrl != null && !ctrl.isClosed) {
+          ctrl.add(count);
         }
       });
     }

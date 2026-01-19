@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../providers/principal_providers.dart';
 import '../widgets/school_stats_card.dart';
@@ -46,7 +47,7 @@ class OverviewTab extends ConsumerWidget {
 
             // Stats card
             statsAsync.when(
-              data: (stats) => SchoolStatsCard(stats: stats, isPlayful: isPlayful),
+              data: (stats) => SchoolStatsCard(stats: stats),
               loading: () => Container(
                 padding: const EdgeInsets.all(48),
                 decoration: BoxDecoration(
@@ -59,7 +60,7 @@ class OverviewTab extends ConsumerWidget {
                 child: const Center(child: CircularProgressIndicator()),
               ),
               error: (error, _) => Container(
-                padding: const EdgeInsets.all(24),
+                padding: AppSpacing.dialogInsets,
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
@@ -71,7 +72,7 @@ class OverviewTab extends ConsumerWidget {
                   children: [
                     Icon(Icons.error_outline,
                         color: theme.colorScheme.error, size: 48),
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
                     Text(
                       'Failed to load statistics',
                       style: TextStyle(
@@ -79,7 +80,7 @@ class OverviewTab extends ConsumerWidget {
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       error.toString(),
                       style: TextStyle(

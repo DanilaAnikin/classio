@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../attendance/domain/entities/absence_excuse.dart';
@@ -38,7 +39,6 @@ class _AbsenceExcusesPageState extends ConsumerState<AbsenceExcusesPage>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
     final pendingExcuses = ref.watch(teacherPendingExcusesProvider);
     final allExcuses = ref.watch(teacherAllExcusesProvider);
@@ -76,7 +76,7 @@ class _AbsenceExcusesPageState extends ConsumerState<AbsenceExcusesPage>
                   pendingExcuses.when(
                     data: (excuses) => _CountBadge(
                       count: excuses.length,
-                      color: Colors.orange,
+                      color: isPlayful ? PlayfulColors.attendanceLate : CleanColors.attendanceLate,
                       isPlayful: isPlayful,
                     ),
                     loading: () => const SizedBox.shrink(),
@@ -259,7 +259,7 @@ class _EmptyState extends StatelessWidget {
             Icon(
               Icons.check_circle_outline,
               size: isPlayful ? 72 : 64,
-              color: Colors.green.withValues(alpha: 0.5),
+              color: (isPlayful ? PlayfulColors.attendancePresent : CleanColors.attendancePresent).withValues(alpha: 0.5),
             ),
             SizedBox(height: isPlayful ? 24 : 16),
             Text(
@@ -519,14 +519,17 @@ class _TeacherExcuseCard extends ConsumerWidget {
           // Teacher response (for declined)
           if (excuse.isDeclined && excuse.teacherResponse != null) ...[
             const SizedBox(height: 12),
-            Container(
+            Builder(
+              builder: (context) {
+                final declinedColor = isPlayful ? PlayfulColors.attendanceAbsent : CleanColors.attendanceAbsent;
+                return Container(
               width: double.infinity,
               padding: EdgeInsets.all(isPlayful ? 12 : 10),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.08),
+                color: declinedColor.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
                 border: Border.all(
-                  color: Colors.red.withValues(alpha: 0.2),
+                  color: declinedColor.withValues(alpha: 0.2),
                 ),
               ),
               child: Column(
@@ -537,7 +540,7 @@ class _TeacherExcuseCard extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: isPlayful ? 12 : 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.red,
+                      color: declinedColor,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -550,6 +553,8 @@ class _TeacherExcuseCard extends ConsumerWidget {
                   ),
                 ],
               ),
+            );
+              },
             ),
           ],
 
@@ -592,7 +597,7 @@ class _TeacherExcuseCard extends ConsumerWidget {
                     style: TextStyle(fontSize: isPlayful ? 14 : 13),
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: isPlayful ? PlayfulColors.attendancePresent : CleanColors.attendancePresent,
                     padding: EdgeInsets.symmetric(
                       horizontal: isPlayful ? 16 : 12,
                       vertical: isPlayful ? 10 : 8,
@@ -609,6 +614,7 @@ class _TeacherExcuseCard extends ConsumerWidget {
 
   void _approveExcuse(BuildContext context, WidgetRef ref) async {
     final isPlayful = ref.read(themeNotifierProvider) == ThemeType.playful;
+    final approveColor = isPlayful ? PlayfulColors.attendancePresent : CleanColors.attendancePresent;
 
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
@@ -625,7 +631,7 @@ class _TeacherExcuseCard extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.green),
+            style: FilledButton.styleFrom(backgroundColor: approveColor),
             child: const Text('Approve'),
           ),
         ],
@@ -639,7 +645,7 @@ class _TeacherExcuseCard extends ConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Excuse approved successfully'),
-            backgroundColor: Colors.green,
+            backgroundColor: approveColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
@@ -667,11 +673,11 @@ class _TeacherExcuseCard extends ConsumerWidget {
   Color _getStatusColor(AbsenceExcuseStatus status) {
     switch (status) {
       case AbsenceExcuseStatus.pending:
-        return Colors.orange;
+        return CleanColors.warning;
       case AbsenceExcuseStatus.approved:
-        return Colors.green;
+        return CleanColors.success;
       case AbsenceExcuseStatus.declined:
-        return Colors.red;
+        return CleanColors.error;
     }
   }
 }
@@ -724,11 +730,11 @@ class _StatusBadge extends StatelessWidget {
   Color _getStatusColor(AbsenceExcuseStatus status) {
     switch (status) {
       case AbsenceExcuseStatus.pending:
-        return Colors.orange;
+        return isPlayful ? PlayfulColors.warning : CleanColors.warning;
       case AbsenceExcuseStatus.approved:
-        return Colors.green;
+        return isPlayful ? PlayfulColors.success : CleanColors.success;
       case AbsenceExcuseStatus.declined:
-        return Colors.red;
+        return isPlayful ? PlayfulColors.error : CleanColors.error;
     }
   }
 

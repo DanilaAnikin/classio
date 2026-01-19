@@ -3,15 +3,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../domain/entities/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../../invite/domain/entities/invite_token.dart';
 
 /// Exception thrown when authentication operations fail.
-class AuthException implements Exception {
-  const AuthException(this.message);
-
-  final String message;
+class AuthException extends RepositoryException {
+  const AuthException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'AuthException: $message';
@@ -93,7 +92,11 @@ class SupabaseAuthRepository implements AuthRepository {
           .select(
               'id, email, role, first_name, last_name, school_id, avatar_url, created_at')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw Exception('Profile not found for user: $userId');
+      }
 
       final user = AppUser.fromJson(response);
       _authStateController.add(user);
@@ -134,7 +137,11 @@ class SupabaseAuthRepository implements AuthRepository {
           .select(
               'id, email, role, first_name, last_name, school_id, avatar_url, created_at')
           .eq('id', authUser.id)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw Exception('Profile not found for user: ${authUser.id}');
+      }
 
       return AppUser.fromJson(response);
     } catch (e, stackTrace) {
@@ -187,7 +194,11 @@ class SupabaseAuthRepository implements AuthRepository {
             .select(
                 'id, email, role, first_name, last_name, school_id, avatar_url, created_at')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
+
+        if (profileResponse == null) {
+          throw Exception('Profile not found for user: ${user.id}');
+        }
 
         return AppUser.fromJson(profileResponse);
       } catch (e, stackTrace) {

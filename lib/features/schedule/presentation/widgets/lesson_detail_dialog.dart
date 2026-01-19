@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 
 import 'package:classio/core/localization/localization.dart';
 import 'package:classio/core/providers/theme_provider.dart';
-import '../../../dashboard/domain/entities/lesson.dart';
+import 'package:classio/core/theme/theme.dart';
+import 'package:classio/features/dashboard/domain/entities/lesson.dart';
 
 /// Shows a detailed dialog for a lesson.
 ///
@@ -39,82 +40,43 @@ class LessonDetailDialog extends ConsumerWidget {
 
     final changes = lesson.getChangesFromStable();
     final hasChanges = changes.isNotEmpty;
+    final dialogRadius = AppRadius.dialog(isPlayful: isPlayful);
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 24 : 16),
+        borderRadius: dialogRadius,
       ),
+      elevation: isPlayful ? AppSpacing.xs : AppSpacing.space2,
+      shadowColor: theme.colorScheme.shadow.withValues(alpha: AppOpacity.light),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400),
-        padding: EdgeInsets.all(isPlayful ? 24 : 20),
+        constraints: BoxConstraints(maxWidth: AppSpacing.xxxxl * 5),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md + AppSpacing.space2),
+        decoration: BoxDecoration(
+          borderRadius: dialogRadius,
+          gradient: isPlayful
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    theme.colorScheme.surface,
+                    theme.colorScheme.surface.withValues(alpha: AppOpacity.almostOpaque),
+                  ],
+                )
+              : null,
+          color: isPlayful ? null : theme.colorScheme.surface,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header with subject color indicator
-            Row(
-              children: [
-                Container(
-                  width: isPlayful ? 6 : 4,
-                  height: isPlayful ? 48 : 40,
-                  decoration: BoxDecoration(
-                    color: Color(lesson.subject.color),
-                    borderRadius: BorderRadius.circular(isPlayful ? 3 : 2),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        lesson.subject.name,
-                        style: TextStyle(
-                          fontSize: isPlayful ? 20 : 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      if (lesson.subject.teacherName != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          lesson.subject.teacherName!,
-                          style: TextStyle(
-                            fontSize: isPlayful ? 14 : 13,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-                // Status badge
-                if (lesson.status != LessonStatus.normal)
-                  _StatusBadge(status: lesson.status, isPlayful: isPlayful),
-                // Modified indicator
-                if (lesson.modifiedFromStable && lesson.status == LessonStatus.normal)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isPlayful ? 10 : 8,
-                      vertical: isPlayful ? 4 : 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.error.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(isPlayful ? 10 : 6),
-                    ),
-                    child: Text(
-                      l10n.scheduleLessonModified,
-                      style: TextStyle(
-                        fontSize: isPlayful ? 11 : 10,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.error,
-                      ),
-                    ),
-                  ),
-              ],
+            _DialogHeader(
+              lesson: lesson,
+              isPlayful: isPlayful,
+              l10n: l10n,
             ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: AppSpacing.md + AppSpacing.space2),
 
             // Lesson details
             _DetailRow(
@@ -123,7 +85,7 @@ class LessonDetailDialog extends ConsumerWidget {
               value: _formatTimeRange(lesson.startTime, lesson.endTime, locale),
               isPlayful: isPlayful,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             _DetailRow(
               icon: Icons.room,
               label: l10n.scheduleLessonRoom,
@@ -131,7 +93,7 @@ class LessonDetailDialog extends ConsumerWidget {
               isPlayful: isPlayful,
             ),
             if (lesson.weekStartDate != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               _DetailRow(
                 icon: Icons.calendar_today,
                 label: l10n.scheduleLessonDate,
@@ -140,44 +102,50 @@ class LessonDetailDialog extends ConsumerWidget {
               ),
             ],
             if (lesson.substituteTeacher != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.sm),
               _DetailRow(
                 icon: Icons.person_outline,
                 label: l10n.scheduleLessonSubstitute,
-                value: lesson.substituteTeacher!,
+                value: lesson.substituteTeacher ?? '',
                 isPlayful: isPlayful,
                 valueColor: theme.colorScheme.tertiary,
               ),
             ],
-            if (lesson.note != null && lesson.note!.isNotEmpty) ...[
-              const SizedBox(height: 12),
+            if (lesson.note?.isNotEmpty ?? false) ...[
+              SizedBox(height: AppSpacing.sm),
               _DetailRow(
                 icon: Icons.note,
                 label: l10n.scheduleLessonNote,
-                value: lesson.note!,
+                value: lesson.note ?? '',
                 isPlayful: isPlayful,
               ),
             ],
 
             // Changes from stable section
             if (hasChanges) ...[
-              const SizedBox(height: 20),
-              Divider(color: theme.colorScheme.error.withValues(alpha: 0.3)),
-              const SizedBox(height: 12),
+              SizedBox(height: AppSpacing.md + AppSpacing.space2),
+              Divider(
+                color: theme.colorScheme.error.withValues(alpha: AppOpacity.light),
+                thickness: 1,
+              ),
+              SizedBox(height: AppSpacing.sm),
               Text(
                 l10n.scheduleLessonChangesFromStable,
-                style: TextStyle(
-                  fontSize: isPlayful ? 14 : 13,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontSize: isPlayful
+                      ? AppFontSize.titleSmall
+                      : AppFontSize.bodyMedium,
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.error,
+                  letterSpacing: isPlayful ? AppLetterSpacing.titleSmall : 0,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               ...changes.entries.map((entry) {
                 final fieldLabel = _getFieldLabel(context, entry.key);
                 final (stableValue, currentValue) = entry.value;
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: AppSpacing.xs),
                   child: _ChangeRow(
                     fieldLabel: fieldLabel,
                     stableValue: stableValue,
@@ -190,36 +158,14 @@ class LessonDetailDialog extends ConsumerWidget {
 
             // Stable lesson indicator
             if (lesson.isStable) ...[
-              const SizedBox(height: 20),
-              Container(
-                padding: EdgeInsets.all(isPlayful ? 12 : 10),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.schedule,
-                      size: isPlayful ? 20 : 18,
-                      color: theme.colorScheme.secondary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.scheduleLessonStableDescription,
-                        style: TextStyle(
-                          fontSize: isPlayful ? 13 : 12,
-                          color: theme.colorScheme.secondary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              SizedBox(height: AppSpacing.md + AppSpacing.space2),
+              _StableIndicator(
+                isPlayful: isPlayful,
+                description: l10n.scheduleLessonStableDescription,
               ),
             ],
 
-            const SizedBox(height: 20),
+            SizedBox(height: AppSpacing.md + AppSpacing.space2),
 
             // Close button
             Align(
@@ -228,15 +174,21 @@ class LessonDetailDialog extends ConsumerWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isPlayful ? 20 : 16,
-                    vertical: isPlayful ? 10 : 8,
+                    horizontal: isPlayful ? AppSpacing.md + AppSpacing.space2 : AppSpacing.md,
+                    vertical: isPlayful ? AppSpacing.sm + AppSpacing.space2 : AppSpacing.sm,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppRadius.button(isPlayful: isPlayful),
                   ),
                 ),
                 child: Text(
                   l10n.close,
-                  style: TextStyle(
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontSize: isPlayful
+                        ? AppFontSize.bodyMedium + 1
+                        : AppFontSize.bodyMedium,
                     fontWeight: FontWeight.w600,
-                    fontSize: isPlayful ? 15 : 14,
+                    letterSpacing: isPlayful ? AppLetterSpacing.labelLarge : 0,
                   ),
                 ),
               ),
@@ -271,6 +223,95 @@ class LessonDetailDialog extends ConsumerWidget {
   }
 }
 
+/// Header section of the dialog showing subject name and status.
+class _DialogHeader extends StatelessWidget {
+  const _DialogHeader({
+    required this.lesson,
+    required this.isPlayful,
+    required this.l10n,
+  });
+
+  final Lesson lesson;
+  final bool isPlayful;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subjectColor = Color(lesson.subject.color);
+
+    return Row(
+      children: [
+        // Subject color indicator
+        Container(
+          width: isPlayful ? AppSpacing.xs + AppSpacing.space2 : AppSpacing.xs,
+          height: isPlayful ? AppSpacing.xxl + AppSpacing.sm : AppSpacing.xxl,
+          decoration: BoxDecoration(
+            gradient: isPlayful
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      subjectColor,
+                      subjectColor.withValues(alpha: AppOpacity.almostOpaque),
+                    ],
+                  )
+                : null,
+            color: isPlayful ? null : subjectColor,
+            borderRadius: AppRadius.fullRadius,
+            boxShadow: isPlayful
+                ? [
+                    BoxShadow(
+                      color: subjectColor.withValues(alpha: AppOpacity.light),
+                      blurRadius: AppSpacing.xs,
+                      offset: Offset(0, AppSpacing.space2),
+                    ),
+                  ]
+                : null,
+          ),
+        ),
+        SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                lesson.subject.name,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: isPlayful
+                      ? AppFontSize.titleMedium + AppSpacing.space2
+                      : AppFontSize.titleMedium,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurface,
+                  letterSpacing: isPlayful ? AppLetterSpacing.titleMedium : 0,
+                ),
+              ),
+              if (lesson.subject.teacherName != null) ...[
+                SizedBox(height: AppSpacing.space2),
+                Text(
+                  lesson.subject.teacherName ?? '',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: isPlayful
+                        ? AppFontSize.bodyMedium
+                        : AppFontSize.bodySmall + 1,
+                    color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        // Status badge
+        if (lesson.status != LessonStatus.normal)
+          _StatusBadge(status: lesson.status, isPlayful: isPlayful),
+        // Modified indicator
+        if (lesson.modifiedFromStable && lesson.status == LessonStatus.normal)
+          _ModifiedBadge(isPlayful: isPlayful, label: l10n.scheduleLessonModified),
+      ],
+    );
+  }
+}
+
 /// A row showing a single detail with icon and label.
 class _DetailRow extends StatelessWidget {
   const _DetailRow({
@@ -294,28 +335,44 @@ class _DetailRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: isPlayful ? 20 : 18,
-          color: theme.colorScheme.primary.withValues(alpha: 0.7),
+        Container(
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.xs : AppSpacing.xxs + AppSpacing.space2),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+            borderRadius: isPlayful
+                ? AppRadius.fullRadius
+                : AppRadius.smRadius,
+          ),
+          child: Icon(
+            icon,
+            size: isPlayful
+                ? AppIconSize.sm
+                : AppIconSize.xs + AppSpacing.space2,
+            color: theme.colorScheme.primary.withValues(alpha: AppOpacity.iconOnColor),
+          ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: isPlayful ? 12 : 11,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: isPlayful
+                      ? AppFontSize.labelSmall + 1
+                      : AppFontSize.overline,
+                  color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+                  letterSpacing: isPlayful ? AppLetterSpacing.labelSmall : 0,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: AppSpacing.space2),
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: isPlayful ? 15 : 14,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: isPlayful
+                      ? AppFontSize.bodyMedium + 1
+                      : AppFontSize.bodyMedium,
                   fontWeight: FontWeight.w500,
                   color: valueColor ?? theme.colorScheme.onSurface,
                 ),
@@ -347,12 +404,13 @@ class _ChangeRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 10 : 8),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.sm + AppSpacing.space2 : AppSpacing.sm),
       decoration: BoxDecoration(
-        color: theme.colorScheme.error.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(isPlayful ? 10 : 6),
+        color: theme.colorScheme.error.withValues(alpha: AppOpacity.subtle),
+        borderRadius: AppRadius.button(isPlayful: isPlayful),
         border: Border.all(
-          color: theme.colorScheme.error.withValues(alpha: 0.2),
+          color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft),
+          width: 1,
         ),
       ),
       child: Row(
@@ -363,38 +421,51 @@ class _ChangeRow extends StatelessWidget {
               children: [
                 Text(
                   fieldLabel,
-                  style: TextStyle(
-                    fontSize: isPlayful ? 11 : 10,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: isPlayful
+                        ? AppFontSize.overline + 1
+                        : AppFontSize.overline,
                     fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.error.withValues(alpha: 0.8),
+                    color: theme.colorScheme.error.withValues(alpha: AppOpacity.almostOpaque),
+                    letterSpacing: isPlayful ? AppLetterSpacing.labelSmall : 0,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Row(
                   children: [
                     // Stable value (strikethrough)
-                    Text(
-                      stableValue,
-                      style: TextStyle(
-                        fontSize: isPlayful ? 13 : 12,
-                        decoration: TextDecoration.lineThrough,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    Flexible(
+                      child: Text(
+                        stableValue,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: isPlayful
+                              ? AppFontSize.bodySmall + 1
+                              : AppFontSize.bodySmall,
+                          decoration: TextDecoration.lineThrough,
+                          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.medium),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: AppSpacing.xs),
                     Icon(
                       Icons.arrow_forward,
-                      size: isPlayful ? 14 : 12,
+                      size: isPlayful
+                          ? AppIconSize.xs
+                          : AppIconSize.xs - AppSpacing.space2,
                       color: theme.colorScheme.error,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: AppSpacing.xs),
                     // Current value (highlighted)
-                    Text(
-                      currentValue,
-                      style: TextStyle(
-                        fontSize: isPlayful ? 13 : 12,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.error,
+                    Flexible(
+                      child: Text(
+                        currentValue,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: isPlayful
+                              ? AppFontSize.bodySmall + 1
+                              : AppFontSize.bodySmall,
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.error,
+                        ),
                       ),
                     ),
                   ],
@@ -429,35 +500,152 @@ class _StatusBadge extends StatelessWidget {
 
     switch (status) {
       case LessonStatus.cancelled:
-        backgroundColor = theme.colorScheme.error.withValues(alpha: 0.1);
+        backgroundColor = theme.colorScheme.error.withValues(alpha: AppOpacity.soft);
         textColor = theme.colorScheme.error;
         label = l10n.scheduleLessonCancelled;
-        break;
       case LessonStatus.substitution:
-        backgroundColor = theme.colorScheme.tertiary.withValues(alpha: 0.1);
+        backgroundColor = theme.colorScheme.tertiary.withValues(alpha: AppOpacity.soft);
         textColor = theme.colorScheme.tertiary;
         label = l10n.scheduleLessonSubstitution;
-        break;
       case LessonStatus.normal:
         return const SizedBox.shrink();
     }
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 10 : 8,
-        vertical: isPlayful ? 4 : 3,
+        horizontal: isPlayful ? AppSpacing.sm + AppSpacing.space2 : AppSpacing.sm,
+        vertical: isPlayful ? AppSpacing.xxs + AppSpacing.space2 : AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(isPlayful ? 10 : 6),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+        boxShadow: isPlayful
+            ? [
+                BoxShadow(
+                  color: textColor.withValues(alpha: AppOpacity.light),
+                  blurRadius: AppSpacing.xs,
+                  offset: Offset(0, AppSpacing.space2),
+                ),
+              ]
+            : null,
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: isPlayful ? 11 : 10,
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontSize: isPlayful
+              ? AppFontSize.overline + 1
+              : AppFontSize.overline,
           fontWeight: FontWeight.w600,
           color: textColor,
+          letterSpacing: AppLetterSpacing.labelSmall,
         ),
+      ),
+    );
+  }
+}
+
+/// Badge for modified lessons.
+class _ModifiedBadge extends StatelessWidget {
+  const _ModifiedBadge({
+    required this.isPlayful,
+    required this.label,
+  });
+
+  final bool isPlayful;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isPlayful ? AppSpacing.sm + AppSpacing.space2 : AppSpacing.sm,
+        vertical: isPlayful ? AppSpacing.xxs + AppSpacing.space2 : AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+        boxShadow: isPlayful
+            ? [
+                BoxShadow(
+                  color: theme.colorScheme.error.withValues(alpha: AppOpacity.light),
+                  blurRadius: AppSpacing.xs,
+                  offset: Offset(0, AppSpacing.space2),
+                ),
+              ]
+            : null,
+      ),
+      child: Text(
+        label,
+        style: theme.textTheme.labelSmall?.copyWith(
+          fontSize: isPlayful
+              ? AppFontSize.overline + 1
+              : AppFontSize.overline,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.error,
+          letterSpacing: AppLetterSpacing.labelSmall,
+        ),
+      ),
+    );
+  }
+}
+
+/// Indicator for stable timetable lessons.
+class _StableIndicator extends StatelessWidget {
+  const _StableIndicator({
+    required this.isPlayful,
+    required this.description,
+  });
+
+  final bool isPlayful;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.sm - AppSpacing.space2),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondary.withValues(alpha: AppOpacity.soft),
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+        border: Border.all(
+          color: theme.colorScheme.secondary.withValues(alpha: AppOpacity.light),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(isPlayful ? AppSpacing.xxs + AppSpacing.space2 : AppSpacing.xxs),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondary.withValues(alpha: AppOpacity.medium),
+              borderRadius: isPlayful
+                  ? AppRadius.fullRadius
+                  : AppRadius.smRadius,
+            ),
+            child: Icon(
+              Icons.schedule,
+              size: isPlayful
+                  ? AppIconSize.sm
+                  : AppIconSize.xs + AppSpacing.space2,
+              color: theme.colorScheme.secondary,
+            ),
+          ),
+          SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              description,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: isPlayful
+                    ? AppFontSize.bodySmall + 1
+                    : AppFontSize.bodySmall,
+                color: theme.colorScheme.secondary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

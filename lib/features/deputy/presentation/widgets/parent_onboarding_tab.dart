@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:classio/core/theme/theme.dart';
 import 'package:classio/shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/deputy_provider.dart';
@@ -35,7 +36,7 @@ class ParentOnboardingTab extends ConsumerWidget {
       },
       child: ResponsiveCenterScrollView(
         maxWidth: 1000,
-        padding: EdgeInsets.all(isPlayful ? 16 : 12),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
         physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,7 +47,7 @@ class ParentOnboardingTab extends ConsumerWidget {
               invitesAsync: invitesAsync,
               isPlayful: isPlayful,
             ),
-            SizedBox(height: isPlayful ? 24 : 20),
+            SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
             // Students Without Parents Section
             _SectionHeader(
@@ -56,7 +57,7 @@ class ParentOnboardingTab extends ConsumerWidget {
               actionLabel: 'Link Parent',
               onActionTap: () => _showLinkParentDialog(context, ref),
             ),
-            SizedBox(height: isPlayful ? 12 : 8),
+            SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
             studentsAsync.when(
               data: (students) {
                 if (students.isEmpty) {
@@ -71,7 +72,7 @@ class ParentOnboardingTab extends ConsumerWidget {
                 return Column(
                   children: students.take(5).map((student) {
                     return Padding(
-                      padding: EdgeInsets.only(bottom: isPlayful ? 10 : 8),
+                      padding: EdgeInsets.only(bottom: isPlayful ? 10 : AppSpacing.xs),
                       child: _StudentCard(
                         student: student,
                         isPlayful: isPlayful,
@@ -92,22 +93,22 @@ class ParentOnboardingTab extends ConsumerWidget {
                 isPlayful: isPlayful,
               ),
             ),
-            if (studentsAsync.hasValue && studentsAsync.value!.length > 5) ...[
+            if (studentsAsync.hasValue && (studentsAsync.value?.length ?? 0) > 5) ...[
               TextButton(
                 onPressed: () => _showAllStudentsWithoutParents(
                   context,
                   ref,
-                  studentsAsync.value!,
+                  studentsAsync.value ?? [],
                 ),
                 child: Text(
-                  'View all ${studentsAsync.value!.length} students',
-                  style: TextStyle(
+                  'View all ${studentsAsync.value?.length ?? 0} students',
+                  style: const TextStyle(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
-            SizedBox(height: isPlayful ? 24 : 20),
+            SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
             // Pending Invites Section
             _SectionHeader(
@@ -115,7 +116,7 @@ class ParentOnboardingTab extends ConsumerWidget {
               icon: Icons.mail_outline_rounded,
               isPlayful: isPlayful,
             ),
-            SizedBox(height: isPlayful ? 12 : 8),
+            SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
             invitesAsync.when(
               data: (invites) {
                 if (invites.isEmpty) {
@@ -129,7 +130,7 @@ class ParentOnboardingTab extends ConsumerWidget {
                 return Column(
                   children: invites.map((invite) {
                     return Padding(
-                      padding: EdgeInsets.only(bottom: isPlayful ? 10 : 8),
+                      padding: EdgeInsets.only(bottom: isPlayful ? 10 : AppSpacing.xs),
                       child: _InviteCard(
                         invite: invite,
                         isPlayful: isPlayful,
@@ -147,7 +148,7 @@ class ParentOnboardingTab extends ConsumerWidget {
                 isPlayful: isPlayful,
               ),
             ),
-            SizedBox(height: isPlayful ? 80 : 72), // Space for FAB
+            SizedBox(height: isPlayful ? 80 : 72), // Space for FAB (non-standard size for FAB clearance)
           ],
         ),
       ),
@@ -245,13 +246,13 @@ class ParentOnboardingTab extends ConsumerWidget {
           return Container(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.lg)),
             ),
             child: Column(
               children: [
                 // Handle bar
                 Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  margin: EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
@@ -261,14 +262,14 @@ class ParentOnboardingTab extends ConsumerWidget {
                 ),
                 // Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.xs),
                   child: Row(
                     children: [
                       Icon(
                         Icons.person_outline_rounded,
                         color: theme.colorScheme.primary,
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           'Students Without Parents (${students.length})',
@@ -289,12 +290,12 @@ class ParentOnboardingTab extends ConsumerWidget {
                 Expanded(
                   child: ListView.builder(
                     controller: scrollController,
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     itemCount: students.length,
                     itemBuilder: (context, index) {
                       final student = students[index];
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                        padding: EdgeInsets.only(bottom: AppSpacing.sm),
                         child: _StudentCard(
                           student: student,
                           isPlayful: isPlayful,
@@ -335,18 +336,21 @@ class _OnboardingStatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
+    final warningColor = isPlayful ? PlayfulColors.warning : CleanColors.warning;
+    final infoColor = isPlayful ? PlayfulColors.info : CleanColors.info;
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 20 : 16),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
+        borderRadius: cardRadius,
         gradient: isPlayful
             ? LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  theme.colorScheme.tertiary.withValues(alpha: 0.15),
-                  theme.colorScheme.primary.withValues(alpha: 0.1),
+                  theme.colorScheme.tertiary.withValues(alpha: AppOpacity.soft),
+                  theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
                 ],
               )
             : null,
@@ -354,53 +358,43 @@ class _OnboardingStatsCard extends StatelessWidget {
         border: isPlayful
             ? null
             : Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
                 width: 1,
               ),
-        boxShadow: [
-          BoxShadow(
-            color: isPlayful
-                ? theme.colorScheme.tertiary.withValues(alpha: 0.15)
-                : Colors.black.withValues(alpha: 0.05),
-            blurRadius: isPlayful ? 16 : 8,
-            offset: Offset(0, isPlayful ? 6 : 3),
-          ),
-        ],
+        boxShadow: AppShadows.card(isPlayful: isPlayful),
       ),
       child: Row(
         children: [
           Container(
-            width: isPlayful ? 56 : 48,
-            height: isPlayful ? 56 : 48,
+            width: isPlayful ? AppIconSize.hero - 8 : AppIconSize.xxl,
+            height: isPlayful ? AppIconSize.hero - 8 : AppIconSize.xxl,
             decoration: BoxDecoration(
-              color: theme.colorScheme.tertiary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+              color: theme.colorScheme.tertiary.withValues(alpha: AppOpacity.soft),
+              borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
             ),
             child: Icon(
               Icons.family_restroom_rounded,
-              size: isPlayful ? 32 : 28,
+              size: isPlayful ? AppIconSize.xl : AppIconSize.lg,
               color: theme.colorScheme.tertiary,
             ),
           ),
-          SizedBox(width: isPlayful ? 20 : 16),
+          SizedBox(width: isPlayful ? AppSpacing.lg : AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Parent Onboarding',
-                  style: TextStyle(
-                    fontSize: isPlayful ? 14 : 12,
+                  style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Text(
                   'Link parents with their children',
-                  style: TextStyle(
-                    fontSize: isPlayful ? 12 : 11,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -416,10 +410,10 @@ class _OnboardingStatsCard extends StatelessWidget {
                   loading: () => '...',
                   error: (_, _) => '-',
                 ),
-                color: Colors.orange,
+                color: warningColor,
                 isPlayful: isPlayful,
               ),
-              SizedBox(height: isPlayful ? 6 : 4),
+              SizedBox(height: isPlayful ? AppSpacing.xxs + 2 : AppSpacing.xxs),
               _StatItem(
                 label: 'Pending',
                 value: invitesAsync.when(
@@ -427,7 +421,7 @@ class _OnboardingStatsCard extends StatelessWidget {
                   loading: () => '...',
                   error: (_, _) => '-',
                 ),
-                color: Colors.blue,
+                color: infoColor,
                 isPlayful: isPlayful,
               ),
             ],
@@ -454,22 +448,21 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           '$value ',
-          style: TextStyle(
-            fontSize: isPlayful ? 16 : 14,
+          style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w700,
             color: color,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
-            fontSize: isPlayful ? 12 : 11,
-            color: color.withValues(alpha: 0.8),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: color.withValues(alpha: AppOpacity.heavy),
           ),
         ),
       ],
@@ -501,17 +494,15 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: isPlayful ? 22 : 20,
+          size: isPlayful ? AppIconSize.md - 2 : AppIconSize.sm,
           color: theme.colorScheme.primary,
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.xs),
         Flexible(
           child: Text(
             title,
-            style: TextStyle(
-              fontSize: isPlayful ? 18 : 16,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
-              color: theme.colorScheme.onSurface,
               letterSpacing: isPlayful ? 0.3 : -0.3,
             ),
             overflow: TextOverflow.ellipsis,
@@ -521,7 +512,7 @@ class _SectionHeader extends StatelessWidget {
         if (actionLabel != null && onActionTap != null)
           TextButton.icon(
             onPressed: onActionTap,
-            icon: const Icon(Icons.add_rounded, size: 18),
+            icon: Icon(Icons.add_rounded, size: AppIconSize.xs + 2),
             label: Text(actionLabel!),
             style: TextButton.styleFrom(
               visualDensity: VisualDensity.compact,
@@ -547,23 +538,19 @@ class _StudentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
+    final warningColor = isPlayful ? PlayfulColors.warning : CleanColors.warning;
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 14 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md - 2 : AppSpacing.sm),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: cardRadius,
         color: theme.colorScheme.surface,
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.15),
+          color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.button(isPlayful: isPlayful),
       ),
       child: Row(
         children: [
@@ -572,21 +559,20 @@ class _StudentCard extends StatelessWidget {
             width: isPlayful ? 44 : 40,
             height: isPlayful ? 44 : 40,
             decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.15),
+              color: warningColor.withValues(alpha: AppOpacity.soft),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 student.initials,
-                style: TextStyle(
-                  fontSize: isPlayful ? 16 : 14,
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: Colors.orange,
+                  color: warningColor,
                 ),
               ),
             ),
           ),
-          SizedBox(width: isPlayful ? 14 : 12),
+          SizedBox(width: isPlayful ? AppSpacing.md - 2 : AppSpacing.sm),
 
           // Info
           Expanded(
@@ -595,19 +581,16 @@ class _StudentCard extends StatelessWidget {
               children: [
                 Text(
                   student.fullName,
-                  style: TextStyle(
-                    fontSize: isPlayful ? 15 : 14,
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 if (student.className != null) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: AppSpacing.xxs - 2),
                   Text(
                     'Class ${student.className}',
-                    style: TextStyle(
-                      fontSize: isPlayful ? 13 : 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -618,11 +601,11 @@ class _StudentCard extends StatelessWidget {
           // Link button
           OutlinedButton.icon(
             onPressed: onLinkParent,
-            icon: const Icon(Icons.link_rounded, size: 16),
+            icon: Icon(Icons.link_rounded, size: AppIconSize.xs),
             label: const Text('Link'),
             style: OutlinedButton.styleFrom(
               visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
             ),
           ),
         ],
@@ -648,26 +631,21 @@ class _InviteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
     final isExpired = invite.isExpired;
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 14 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md - 2 : AppSpacing.sm),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: cardRadius,
         color: theme.colorScheme.surface,
         border: Border.all(
           color: isExpired
-              ? theme.colorScheme.error.withValues(alpha: 0.3)
-              : theme.colorScheme.outline.withValues(alpha: 0.15),
+              ? theme.colorScheme.error.withValues(alpha: AppOpacity.medium)
+              : theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadows.button(isPlayful: isPlayful),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -680,19 +658,19 @@ class _InviteCard extends StatelessWidget {
                 height: isPlayful ? 44 : 40,
                 decoration: BoxDecoration(
                   color: isExpired
-                      ? theme.colorScheme.error.withValues(alpha: 0.1)
-                      : theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                      ? theme.colorScheme.error.withValues(alpha: AppOpacity.soft)
+                      : theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+                  borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
                 ),
                 child: Icon(
                   isExpired ? Icons.timer_off_outlined : Icons.vpn_key_rounded,
-                  size: isPlayful ? 24 : 20,
+                  size: isPlayful ? AppIconSize.md : AppIconSize.sm,
                   color: isExpired
                       ? theme.colorScheme.error
                       : theme.colorScheme.primary,
                 ),
               ),
-              SizedBox(width: isPlayful ? 14 : 12),
+              SizedBox(width: isPlayful ? AppSpacing.md - 2 : AppSpacing.sm),
 
               // Info
               Expanded(
@@ -703,26 +681,24 @@ class _InviteCard extends StatelessWidget {
                       children: [
                         Text(
                           invite.studentName ?? 'Unknown Student',
-                          style: TextStyle(
-                            fontSize: isPlayful ? 15 : 14,
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         if (isExpired) ...[
-                          const SizedBox(width: 8),
+                          SizedBox(width: AppSpacing.xs),
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: AppSpacing.xxs + 2,
+                              vertical: AppSpacing.xxs - 2,
                             ),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
+                              color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft),
+                              borderRadius: BorderRadius.circular(AppRadius.xs),
                             ),
                             child: Text(
                               'EXPIRED',
-                              style: TextStyle(
+                              style: theme.textTheme.labelSmall?.copyWith(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w700,
                                 color: theme.colorScheme.error,
@@ -732,12 +708,11 @@ class _InviteCard extends StatelessWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: AppSpacing.xxs),
                     // Code
                     SelectableText(
                       invite.code,
-                      style: TextStyle(
-                        fontSize: isPlayful ? 14 : 13,
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontFamily: 'monospace',
                         color: theme.colorScheme.primary,
@@ -756,7 +731,7 @@ class _InviteCard extends StatelessWidget {
                     icon: const Icon(Icons.copy_rounded),
                     tooltip: 'Copy code',
                     onPressed: onCopy,
-                    iconSize: 20,
+                    iconSize: AppIconSize.sm,
                     visualDensity: VisualDensity.compact,
                   ),
                   IconButton(
@@ -766,7 +741,7 @@ class _InviteCard extends StatelessWidget {
                     ),
                     tooltip: 'Revoke invite',
                     onPressed: onRevoke,
-                    iconSize: 20,
+                    iconSize: AppIconSize.sm,
                     visualDensity: VisualDensity.compact,
                   ),
                 ],
@@ -798,17 +773,19 @@ class _EmptyStateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = isPositive ? Colors.green : theme.colorScheme.onSurface;
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
+    final successColor = isPlayful ? PlayfulColors.success : CleanColors.success;
+    final color = isPositive ? successColor : theme.colorScheme.onSurface;
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 24 : 20),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.lg),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        color: (isPositive ? Colors.green : theme.colorScheme.primary)
-            .withValues(alpha: 0.05),
+        borderRadius: cardRadius,
+        color: (isPositive ? successColor : theme.colorScheme.primary)
+            .withValues(alpha: AppOpacity.subtle),
         border: Border.all(
-          color: (isPositive ? Colors.green : theme.colorScheme.outline)
-              .withValues(alpha: 0.15),
+          color: (isPositive ? successColor : theme.colorScheme.outline)
+              .withValues(alpha: AppOpacity.soft),
           width: 1,
         ),
       ),
@@ -816,24 +793,22 @@ class _EmptyStateCard extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: isPlayful ? 40 : 36,
-            color: color.withValues(alpha: 0.6),
+            size: isPlayful ? AppIconSize.xl + 8 : AppIconSize.xl + 4,
+            color: color.withValues(alpha: AppOpacity.medium),
           ),
-          SizedBox(height: isPlayful ? 12 : 10),
+          SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.sm),
           Text(
             title,
-            style: TextStyle(
-              fontSize: isPlayful ? 16 : 15,
+            style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: color.withValues(alpha: 0.8),
+              color: color.withValues(alpha: AppOpacity.heavy),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: AppSpacing.xxs),
           Text(
             message,
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
-              color: color.withValues(alpha: 0.6),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: color.withValues(alpha: AppOpacity.medium),
             ),
             textAlign: TextAlign.center,
           ),
@@ -852,7 +827,7 @@ class _LoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 32 : 24),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.xxl : AppSpacing.xl),
       child: const Center(
         child: CircularProgressIndicator(),
       ),
@@ -875,14 +850,15 @@ class _ErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 24 : 20),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.lg),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        color: theme.colorScheme.error.withValues(alpha: 0.05),
+        borderRadius: cardRadius,
+        color: theme.colorScheme.error.withValues(alpha: AppOpacity.subtle),
         border: Border.all(
-          color: theme.colorScheme.error.withValues(alpha: 0.2),
+          color: theme.colorScheme.error.withValues(alpha: AppOpacity.soft),
           width: 1,
         ),
       ),
@@ -890,22 +866,21 @@ class _ErrorCard extends StatelessWidget {
         children: [
           Icon(
             Icons.error_outline_rounded,
-            size: 36,
-            color: theme.colorScheme.error.withValues(alpha: 0.6),
+            size: AppIconSize.xl + 4,
+            color: theme.colorScheme.error.withValues(alpha: AppOpacity.medium),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.sm),
           Text(
             error,
-            style: TextStyle(
-              fontSize: 13,
-              color: theme.colorScheme.error.withValues(alpha: 0.8),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error.withValues(alpha: AppOpacity.heavy),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.sm),
           TextButton.icon(
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded, size: 18),
+            icon: Icon(Icons.refresh_rounded, size: AppIconSize.xs + 2),
             label: const Text('Retry'),
           ),
         ],

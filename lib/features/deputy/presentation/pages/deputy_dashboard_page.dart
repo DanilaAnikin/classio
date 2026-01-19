@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:classio/core/localization/app_localizations.dart';
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/app_colors.dart';
+import 'package:classio/core/theme/spacing.dart';
 import 'package:classio/features/auth/presentation/providers/auth_provider.dart';
 import 'package:classio/shared/widgets/responsive_center.dart';
 
@@ -79,7 +81,7 @@ class _DeputyDashboardPageState extends ConsumerState<DeputyDashboardPage>
                 size: 64,
                 color: theme.colorScheme.error.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               Text(
                 context.l10n.accessDenied,
                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -87,7 +89,7 @@ class _DeputyDashboardPageState extends ConsumerState<DeputyDashboardPage>
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 context.l10n.noPermissionToAccessPage,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -117,7 +119,7 @@ class _DeputyDashboardPageState extends ConsumerState<DeputyDashboardPage>
                 size: 64,
                 color: theme.colorScheme.primary.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               Text(
                 context.l10n.noSchoolAssigned,
                 style: theme.textTheme.headlineSmall?.copyWith(
@@ -125,7 +127,7 @@ class _DeputyDashboardPageState extends ConsumerState<DeputyDashboardPage>
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 context.l10n.notAssignedToSchool,
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -268,9 +270,9 @@ class _OverviewTab extends ConsumerWidget {
                 size: 48,
                 color: theme.colorScheme.error,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               Text('Error loading stats: $error'),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               ElevatedButton(
                 onPressed: () => ref.invalidate(deputyStatsProvider(schoolId)),
                 child: const Text('Retry'),
@@ -318,13 +320,13 @@ class _WelcomeCard extends StatelessWidget {
             width: isPlayful ? 64 : 56,
             height: isPlayful ? 64 : 56,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
             ),
             child: Icon(
               Icons.admin_panel_settings_rounded,
               size: isPlayful ? 36 : 32,
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
             ),
           ),
           SizedBox(width: isPlayful ? 20 : 16),
@@ -337,7 +339,7 @@ class _WelcomeCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: isPlayful ? 24 : 22,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: theme.colorScheme.onPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -345,7 +347,7 @@ class _WelcomeCard extends StatelessWidget {
                   'Manage schedules and parent onboarding',
                   style: TextStyle(
                     fontSize: isPlayful ? 15 : 14,
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: theme.colorScheme.onPrimary.withValues(alpha: 0.9),
                   ),
                 ),
               ],
@@ -368,43 +370,48 @@ class _StatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      mainAxisSpacing: isPlayful ? 16 : 12,
-      crossAxisSpacing: isPlayful ? 16 : 12,
-      childAspectRatio: 1.5,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      children: [
-        _StatCard(
-          title: 'Total Lessons',
-          value: stats.totalLessons.toString(),
-          icon: Icons.calendar_today_rounded,
-          color: Colors.blue,
-          isPlayful: isPlayful,
-        ),
-        _StatCard(
-          title: 'Classes',
-          value: stats.totalClasses.toString(),
-          icon: Icons.class_rounded,
-          color: Colors.green,
-          isPlayful: isPlayful,
-        ),
-        _StatCard(
-          title: 'Without Parents',
-          value: stats.studentsWithoutParents.toString(),
-          icon: Icons.person_off_rounded,
-          color: Colors.orange,
-          isPlayful: isPlayful,
-        ),
-        _StatCard(
-          title: 'Pending Invites',
-          value: stats.pendingParentInvites.toString(),
-          icon: Icons.mail_outline_rounded,
-          color: Colors.purple,
-          isPlayful: isPlayful,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth < 400 ? 1 : 2;
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          mainAxisSpacing: isPlayful ? 16 : 12,
+          crossAxisSpacing: isPlayful ? 16 : 12,
+          childAspectRatio: crossAxisCount == 1 ? 2.5 : 1.5,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            _StatCard(
+              title: 'Total Lessons',
+              value: stats.totalLessons.toString(),
+              icon: Icons.calendar_today_rounded,
+              color: AppSemanticColors.getStatColor('blue', isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+            _StatCard(
+              title: 'Classes',
+              value: stats.totalClasses.toString(),
+              icon: Icons.class_rounded,
+              color: AppSemanticColors.getStatColor('green', isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+            _StatCard(
+              title: 'Without Parents',
+              value: stats.studentsWithoutParents.toString(),
+              icon: Icons.person_off_rounded,
+              color: AppSemanticColors.getStatColor('orange', isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+            _StatCard(
+              title: 'Pending Invites',
+              value: stats.pendingParentInvites.toString(),
+              icon: Icons.mail_outline_rounded,
+              color: AppSemanticColors.getStatColor('purple', isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -515,7 +522,7 @@ class _QuickActionsGrid extends ConsumerWidget {
         _QuickActionCard(
           title: 'Add Lesson',
           icon: Icons.add_circle_outline_rounded,
-          color: Colors.blue,
+          color: AppSemanticColors.getStatColor('blue', isPlayful: isPlayful),
           isPlayful: isPlayful,
           onTap: () {
             // Navigate to schedule editor
@@ -525,7 +532,7 @@ class _QuickActionsGrid extends ConsumerWidget {
         _QuickActionCard(
           title: 'Add Subject',
           icon: Icons.book_outlined,
-          color: Colors.purple,
+          color: AppSemanticColors.getStatColor('purple', isPlayful: isPlayful),
           isPlayful: isPlayful,
           onTap: () {
             // Navigate to subjects management
@@ -535,7 +542,7 @@ class _QuickActionsGrid extends ConsumerWidget {
         _QuickActionCard(
           title: 'Generate Invite',
           icon: Icons.person_add_alt_rounded,
-          color: Colors.green,
+          color: AppSemanticColors.getStatColor('green', isPlayful: isPlayful),
           isPlayful: isPlayful,
           onTap: () {
             // Navigate to parent onboarding
@@ -545,7 +552,7 @@ class _QuickActionsGrid extends ConsumerWidget {
         _QuickActionCard(
           title: 'Manage Classes',
           icon: Icons.group_rounded,
-          color: Colors.orange,
+          color: AppSemanticColors.getStatColor('orange', isPlayful: isPlayful),
           isPlayful: isPlayful,
           onTap: () {
             // Navigate to schedule editor (where class management is accessible)
@@ -574,8 +581,10 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Material(
-      color: Colors.transparent,
+      color: theme.colorScheme.surface.withValues(alpha: 0),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),

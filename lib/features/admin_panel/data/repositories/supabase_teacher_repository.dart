@@ -1,13 +1,12 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/utils/subject_colors.dart';
 import '../../domain/domain.dart';
 
 /// Exception thrown when teacher operations fail.
-class TeacherException implements Exception {
-  const TeacherException(this.message);
-
-  final String message;
+class TeacherException extends RepositoryException {
+  const TeacherException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'TeacherException: $message';

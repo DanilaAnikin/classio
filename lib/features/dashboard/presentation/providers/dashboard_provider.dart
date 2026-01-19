@@ -7,6 +7,15 @@ import 'dashboard_state.dart';
 
 part 'dashboard_provider.g.dart';
 
+/// Provider for the DashboardRepository instance.
+///
+/// Provides the Supabase implementation for production use.
+/// Can be overridden in tests to provide a mock implementation.
+@riverpod
+DashboardRepository dashboardRepository(Ref ref) {
+  return SupabaseDashboardRepository();
+}
+
 /// Riverpod notifier for managing dashboard state.
 ///
 /// Handles loading, refreshing, and managing dashboard data.
@@ -17,8 +26,8 @@ class DashboardNotifier extends _$DashboardNotifier {
 
   @override
   DashboardState build() {
-    // Initialize repository - Supabase implementation for production
-    _repository = SupabaseDashboardRepository();
+    // Initialize repository via provider for testability
+    _repository = ref.watch(dashboardRepositoryProvider);
 
     // Load data on build
     loadDashboard();

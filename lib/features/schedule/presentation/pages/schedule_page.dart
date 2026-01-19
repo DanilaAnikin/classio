@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:classio/core/localization/localization.dart';
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/spacing.dart';
 import 'package:classio/shared/widgets/responsive_center.dart';
 import '../providers/schedule_provider.dart';
 import '../widgets/widgets.dart';
@@ -74,7 +75,7 @@ class SchedulePage extends ConsumerWidget {
                     : theme.colorScheme.surface,
                 elevation: isPlayful ? 0 : 1,
                 flexibleSpace: FlexibleSpaceBar(
-                  titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+                  titlePadding: EdgeInsets.only(left: AppSpacing.md, bottom: AppSpacing.md),
                   title: Text(
                     l10n.navSchedule,
                     style: TextStyle(
@@ -105,7 +106,7 @@ class SchedulePage extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: ResponsiveCenter(
                   maxWidth: 1200,
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.xs),
                   child: const WeekSelector(),
                 ),
               ),
@@ -114,21 +115,21 @@ class SchedulePage extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: ResponsiveCenter(
                   maxWidth: 1200,
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const DaySelector(),
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
                       // Selected day header
                       Row(
                         children: [
                           Icon(
                             Icons.event_rounded,
-                            size: isPlayful ? 20 : 18,
+                            size: isPlayful ? AppIconSize.sm : 18,
                             color: theme.colorScheme.primary,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: AppSpacing.xs),
                           Text(
                             selectedDay >= 1 && selectedDay <= 7
                                 ? dayLabels[selectedDay - 1]
@@ -140,7 +141,7 @@ class SchedulePage extends ConsumerWidget {
                               letterSpacing: isPlayful ? 0.3 : 0,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: AppSpacing.xs),
                           Text(
                             lessons.length == 1
                                 ? l10n.scheduleLessonCount(lessons.length)
@@ -185,7 +186,7 @@ class SchedulePage extends ConsumerWidget {
                 SliverToBoxAdapter(
                   child: ResponsiveCenter(
                     maxWidth: 1200,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: AppSpacing.horizontalInsets,
                     child: Column(
                       children: List.generate(
                         lessons.length,
@@ -209,8 +210,8 @@ class SchedulePage extends ConsumerWidget {
                 ),
 
               // Bottom spacing
-              const SliverToBoxAdapter(
-                child: SizedBox(height: 32),
+              SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.xxl),
               ),
             ],
           ),
@@ -237,23 +238,23 @@ class _EmptyState extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(isPlayful ? 24 : 20),
+              padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.lg),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: theme.colorScheme.primary.withValues(alpha: 0.1),
               ),
               child: Icon(
                 isWeekend ? Icons.weekend_rounded : Icons.beach_access_rounded,
-                size: isPlayful ? 56 : 48,
+                size: isPlayful ? 56 : AppIconSize.xxl,
                 color: theme.colorScheme.primary.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             Text(
               isWeekend ? l10n.scheduleWeekend : l10n.scheduleNoLessons,
               style: TextStyle(
@@ -262,7 +263,7 @@ class _EmptyState extends StatelessWidget {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               isWeekend
                   ? l10n.scheduleEnjoyTimeOff
@@ -297,7 +298,7 @@ class _ErrorView extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -306,7 +307,7 @@ class _ErrorView extends StatelessWidget {
               size: 64,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Text(
               l10n.dashboardSomethingWrong,
               style: TextStyle(
@@ -315,7 +316,7 @@ class _ErrorView extends StatelessWidget {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               message,
               style: TextStyle(
@@ -324,7 +325,7 @@ class _ErrorView extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),

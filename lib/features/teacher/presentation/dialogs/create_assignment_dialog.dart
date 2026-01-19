@@ -3,9 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_input.dart';
 import '../providers/teacher_provider.dart';
 
 /// Dialog for creating a new assignment.
+///
+/// Features premium design with theme-aware styling (Clean vs Playful).
 class CreateAssignmentDialog extends ConsumerStatefulWidget {
   const CreateAssignmentDialog({
     super.key,
@@ -13,6 +22,39 @@ class CreateAssignmentDialog extends ConsumerStatefulWidget {
   });
 
   final String? preselectedSubjectId;
+
+  /// Shows the dialog and returns true if an assignment was successfully created.
+  static Future<bool?> show(
+    BuildContext context, {
+    String? preselectedSubjectId,
+  }) {
+    return showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: AppDuration.medium,
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: AppCurves.modalEnter,
+          reverseCurve: AppCurves.modalExit,
+        );
+        return FadeTransition(
+          opacity: curvedAnimation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.95, end: 1.0).animate(curvedAnimation),
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return CreateAssignmentDialog(
+          preselectedSubjectId: preselectedSubjectId,
+        );
+      },
+    );
+  }
 
   @override
   ConsumerState<CreateAssignmentDialog> createState() =>
@@ -31,6 +73,11 @@ class _CreateAssignmentDialogState
   TimeOfDay? _dueTime;
   bool _isLoading = false;
 
+  bool get _isPlayful {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.value == PlayfulColors.primary.value;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -46,17 +93,40 @@ class _CreateAssignmentDialogState
   }
 
   Future<void> _selectDueDate() async {
+    final isPlayful = _isPlayful;
+    final primaryColor = isPlayful ? PlayfulColors.primary : CleanColors.primary;
+
     final date = await showDatePicker(
       context: context,
       initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 7)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+                  primary: primaryColor,
+                ),
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (date != null && mounted) {
       final time = await showTimePicker(
         context: context,
         initialTime: _dueTime ?? const TimeOfDay(hour: 23, minute: 59),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: Theme.of(context).colorScheme.copyWith(
+                    primary: primaryColor,
+                  ),
+            ),
+            child: child!,
+          );
+        },
       );
 
       setState(() {
@@ -67,22 +137,26 @@ class _CreateAssignmentDialogState
   }
 
   DateTime? get _combinedDueDate {
-    if (_dueDate == null) return null;
+    final dueDate = _dueDate;
+    if (dueDate == null) return null;
     final time = _dueTime ?? const TimeOfDay(hour: 23, minute: 59);
     return DateTime(
-      _dueDate!.year,
-      _dueDate!.month,
-      _dueDate!.day,
+      dueDate.year,
+      dueDate.month,
+      dueDate.day,
       time.hour,
       time.minute,
     );
   }
 
   Future<void> _createAssignment() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
     if (_selectedSubjectId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a subject')),
+        SnackBar(
+          content: const Text('Please select a subject'),
+          backgroundColor: _isPlayful ? PlayfulColors.error : CleanColors.error,
+        ),
       );
       return;
     }
@@ -106,16 +180,18 @@ class _CreateAssignmentDialogState
         if (success) {
           Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Assignment created successfully'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Assignment created successfully'),
+              backgroundColor:
+                  _isPlayful ? PlayfulColors.success : CleanColors.success,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to create assignment. Please try again.'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Failed to create assignment. Please try again.'),
+              backgroundColor:
+                  _isPlayful ? PlayfulColors.error : CleanColors.error,
             ),
           );
         }
@@ -125,7 +201,7 @@ class _CreateAssignmentDialogState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: _isPlayful ? PlayfulColors.error : CleanColors.error,
           ),
         );
       }
@@ -138,281 +214,417 @@ class _CreateAssignmentDialogState
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isPlayful = _isPlayful;
     final subjectsAsync = ref.watch(mySubjectsProvider);
 
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    Icon(
-                      Icons.assignment_outlined,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'New Assignment',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: theme.colorScheme.onSurface,
+    // Theme-aware colors
+    final surfaceColor =
+        isPlayful ? PlayfulColors.surfaceElevated : CleanColors.surfaceElevated;
+    final borderColor = isPlayful ? PlayfulColors.border : CleanColors.border;
+    final primaryColor = isPlayful ? PlayfulColors.primary : CleanColors.primary;
+    final textPrimary =
+        isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+    final textSecondary =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+
+    return Material(
+      color: Colors.transparent,
+      child: SafeArea(
+        child: Padding(
+          padding: AppSpacing.pagePaddingMobile,
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: AppRadius.dialog(isPlayful: isPlayful),
+                border: Border.all(
+                  color: borderColor.withValues(alpha: 0.5),
+                ),
+                boxShadow: AppShadows.modal(isPlayful: isPlayful),
+              ),
+              child: ClipRRect(
+                borderRadius: AppRadius.dialog(isPlayful: isPlayful),
+                child: SingleChildScrollView(
+                  padding: AppSpacing.dialogInsets,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Header
+                        _buildHeader(
+                          isPlayful: isPlayful,
+                          primaryColor: primaryColor,
+                          textPrimary: textPrimary,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                        AppSpacing.gap24,
 
-                // Subject Selector
-                subjectsAsync.when(
-                  data: (subjects) => DropdownButtonFormField<String>(
-                    initialValue: subjects.any((s) => s.id == _selectedSubjectId)
-                        ? _selectedSubjectId
-                        : null,
-                    decoration: InputDecoration(
-                      labelText: 'Subject',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefixIcon: const Icon(Icons.menu_book_rounded),
-                    ),
-                    isExpanded: true,
-                    items: subjects.map((subject) {
-                      return DropdownMenuItem(
-                        value: subject.id,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: Color(subject.color),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                subject.name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() => _selectedSubjectId = value);
-                    },
-                    validator: (value) {
-                      if (value == null) return 'Please select a subject';
-                      return null;
-                    },
-                  ),
-                  loading: () => const LinearProgressIndicator(),
-                  error: (_, _) => Text(
-                    'Failed to load subjects',
-                    style: TextStyle(color: theme.colorScheme.error),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Title
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    labelText: 'Title',
-                    hintText: 'e.g., Chapter 5 Quiz',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.title_rounded),
-                  ),
-                  textCapitalization: TextCapitalization.sentences,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a title';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Description
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    labelText: 'Description (optional)',
-                    hintText: 'Add instructions or details...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.description_rounded),
-                    alignLabelWithHint: true,
-                  ),
-                  maxLines: 3,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 16),
-
-                // Due Date and Max Score Row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Due Date Picker
-                    Expanded(
-                      flex: 2,
-                      child: InkWell(
-                        onTap: _selectDueDate,
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: theme.colorScheme.outline.withValues(alpha: 0.5),
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                        // Subject Selector
+                        subjectsAsync.when(
+                          data: (subjects) => _buildSubjectDropdown(
+                            subjects: subjects,
+                            isPlayful: isPlayful,
+                            textSecondary: textSecondary,
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.calendar_today_rounded,
-                                color: theme.colorScheme.onSurfaceVariant,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Due Date',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: theme.colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _dueDate != null
-                                          ? DateFormat('MMM d, y')
-                                              .format(_dueDate!)
-                                          : 'No deadline',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                    if (_dueTime != null && _dueDate != null)
-                                      Text(
-                                        'at ${_dueTime!.format(context)}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color:
-                                              theme.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              if (_dueDate != null)
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _dueDate = null;
-                                      _dueTime = null;
-                                    });
-                                  },
-                                  icon: Icon(
-                                    Icons.clear_rounded,
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                    size: 18,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(),
-                                ),
-                            ],
+                          loading: () => LinearProgressIndicator(
+                            color: primaryColor,
+                            backgroundColor: primaryColor.withValues(alpha: 0.2),
+                          ),
+                          error: (error, stack) => Text(
+                            'Failed to load subjects',
+                            style: AppTypography.secondaryText(isPlayful: isPlayful)
+                                .copyWith(
+                              color:
+                                  isPlayful ? PlayfulColors.error : CleanColors.error,
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                        AppSpacing.gap16,
 
-                    // Max Score
-                    Expanded(
-                      child: TextFormField(
-                        controller: _maxScoreController,
-                        decoration: InputDecoration(
-                          labelText: 'Max Score',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                        // Title Field
+                        AppInput(
+                          controller: _titleController,
+                          label: 'Title',
+                          hint: 'e.g., Chapter 5 Quiz',
+                          prefixIcon: Icons.title_rounded,
+                          textCapitalization: TextCapitalization.sentences,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter a title';
+                            }
+                            return null;
+                          },
+                        ),
+                        AppSpacing.gap16,
+
+                        // Description Field
+                        AppInput.multiline(
+                          controller: _descriptionController,
+                          label: 'Description (optional)',
+                          hint: 'Add instructions or details...',
+                          prefixIcon: Icons.description_rounded,
+                          maxLines: 3,
+                          minLines: 2,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                        AppSpacing.gap16,
+
+                        // Due Date and Max Score Row
+                        _buildDueDateAndScoreRow(
+                          isPlayful: isPlayful,
+                          textSecondary: textSecondary,
+                        ),
+                        AppSpacing.gap24,
+
+                        // Actions
+                        _buildActions(isPlayful: isPlayful),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader({
+    required bool isPlayful,
+    required Color primaryColor,
+    required Color textPrimary,
+  }) {
+    final iconBgColor =
+        isPlayful ? PlayfulColors.primarySubtle : CleanColors.primarySubtle;
+
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: iconBgColor,
+            borderRadius: AppRadius.button(isPlayful: isPlayful),
+          ),
+          child: Icon(
+            Icons.assignment_outlined,
+            color: primaryColor,
+            size: AppIconSize.md,
+          ),
+        ),
+        SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            'New Assignment',
+            style: AppTypography.sectionTitle(isPlayful: isPlayful).copyWith(
+              color: textPrimary,
+            ),
+          ),
+        ),
+        _CloseButton(isPlayful: isPlayful),
+      ],
+    );
+  }
+
+  Widget _buildSubjectDropdown({
+    required List<dynamic> subjects,
+    required bool isPlayful,
+    required Color textSecondary,
+  }) {
+    final borderColor = isPlayful ? PlayfulColors.inputBorder : CleanColors.inputBorder;
+    final focusBorderColor =
+        isPlayful ? PlayfulColors.inputBorderFocus : CleanColors.inputBorderFocus;
+
+    return DropdownButtonFormField<String>(
+      value: subjects.any((s) => s.id == _selectedSubjectId)
+          ? _selectedSubjectId
+          : null,
+      decoration: InputDecoration(
+        labelText: 'Subject',
+        labelStyle: AppTypography.inputLabel(isPlayful: isPlayful),
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: focusBorderColor, width: 2),
+        ),
+        prefixIcon: Icon(Icons.menu_book_rounded, color: textSecondary),
+        contentPadding: AppSpacing.inputInsets,
+      ),
+      style: AppTypography.inputText(isPlayful: isPlayful),
+      isExpanded: true,
+      items: subjects.map((subject) {
+        return DropdownMenuItem<String>(
+          value: subject.id as String,
+          child: Row(
+            children: [
+              Container(
+                width: AppSpacing.sm,
+                height: AppSpacing.sm,
+                decoration: BoxDecoration(
+                  color: Color(subject.color as int),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  subject.name as String,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() => _selectedSubjectId = value);
+      },
+      validator: (value) {
+        if (value == null) return 'Please select a subject';
+        return null;
+      },
+    );
+  }
+
+  Widget _buildDueDateAndScoreRow({
+    required bool isPlayful,
+    required Color textSecondary,
+  }) {
+    final borderColor = isPlayful ? PlayfulColors.inputBorder : CleanColors.inputBorder;
+    final surfaceColor =
+        isPlayful ? PlayfulColors.surfaceSecondary : CleanColors.surfaceSecondary;
+    final textPrimary =
+        isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Due Date Picker
+        Expanded(
+          flex: 2,
+          child: InkWell(
+            onTap: _selectDueDate,
+            borderRadius: AppRadius.input(isPlayful: isPlayful),
+            child: Container(
+              padding: EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                border: Border.all(color: borderColor),
+                borderRadius: AppRadius.input(isPlayful: isPlayful),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today_rounded,
+                    color: textSecondary,
+                    size: AppIconSize.sm,
+                  ),
+                  SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Due Date',
+                          style: AppTypography.tertiaryText(isPlayful: isPlayful),
+                        ),
+                        SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          _dueDate != null
+                              ? DateFormat('MMM d, y').format(_dueDate!)
+                              : 'No deadline',
+                          style: AppTypography.inputText(isPlayful: isPlayful)
+                              .copyWith(
+                            color: textPrimary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Required';
-                          }
-                          final score = int.tryParse(value);
-                          if (score == null || score <= 0) {
-                            return 'Invalid';
-                          }
-                          return null;
-                        },
-                      ),
+                        if (_dueTime != null && _dueDate != null)
+                          Text(
+                            'at ${(_dueTime ?? const TimeOfDay(hour: 23, minute: 59)).format(context)}',
+                            style: AppTypography.tertiaryText(isPlayful: isPlayful),
+                          ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                  ),
+                  if (_dueDate != null)
+                    _ClearDateButton(
+                      isPlayful: isPlayful,
+                      onPressed: () {
+                        setState(() {
+                          _dueDate = null;
+                          _dueTime = null;
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: AppSpacing.sm),
 
-                // Actions
-                Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    TextButton(
-                      onPressed:
-                          _isLoading ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                    FilledButton.icon(
-                      onPressed: _isLoading ? null : _createAssignment,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.add_rounded, size: 18),
-                      label: const Text('Create Assignment'),
-                    ),
-                  ],
-                ),
-              ],
+        // Max Score
+        Expanded(
+          child: AppInput(
+            controller: _maxScoreController,
+            label: 'Max Score',
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Required';
+              }
+              final score = int.tryParse(value);
+              if (score == null || score <= 0) {
+                return 'Invalid';
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions({required bool isPlayful}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        AppButton.secondary(
+          label: 'Cancel',
+          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+          size: ButtonSize.medium,
+        ),
+        SizedBox(width: AppSpacing.sm),
+        AppButton.primary(
+          label: 'Create',
+          icon: Icons.add_rounded,
+          onPressed: _isLoading ? null : _createAssignment,
+          isLoading: _isLoading,
+          size: ButtonSize.medium,
+        ),
+      ],
+    );
+  }
+}
+
+/// Close button for the dialog header.
+class _CloseButton extends StatelessWidget {
+  const _CloseButton({required this.isPlayful});
+
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor =
+        isPlayful ? PlayfulColors.textTertiary : CleanColors.textTertiary;
+    final hoverColor =
+        isPlayful ? PlayfulColors.surfaceHover : CleanColors.surfaceHover;
+
+    return Semantics(
+      button: true,
+      label: 'Close dialog',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.of(context).pop(),
+          borderRadius: AppRadius.fullRadius,
+          hoverColor: hoverColor,
+          child: Padding(
+            padding: AppSpacing.insets8,
+            child: Icon(
+              Icons.close_rounded,
+              size: AppIconSize.sm,
+              color: iconColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Clear date button for the due date picker.
+class _ClearDateButton extends StatelessWidget {
+  const _ClearDateButton({
+    required this.isPlayful,
+    required this.onPressed,
+  });
+
+  final bool isPlayful;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor =
+        isPlayful ? PlayfulColors.textTertiary : CleanColors.textTertiary;
+
+    return Semantics(
+      button: true,
+      label: 'Clear date',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: AppRadius.fullRadius,
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.xxs),
+            child: Icon(
+              Icons.clear_rounded,
+              size: AppIconSize.xs,
+              color: iconColor,
             ),
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/utils/subject_colors.dart';
 import '../../../dashboard/domain/entities/lesson.dart';
 import '../../../dashboard/domain/entities/subject.dart';
@@ -42,10 +43,8 @@ DateTime? _parseDateString(String? dateStr) {
 }
 
 /// Exception thrown when schedule operations fail.
-class ScheduleException implements Exception {
-  const ScheduleException(this.message);
-
-  final String message;
+class ScheduleException extends RepositoryException {
+  const ScheduleException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'ScheduleException: $message';
@@ -361,7 +360,7 @@ class SupabaseScheduleRepository implements ScheduleRepository {
         final lessonDate = mondayOfWeek.add(Duration(days: dartWeekday - 1));
 
         final lesson = _rowToLesson(row, lessonDate);
-        weekLessons[dartWeekday]!.add(lesson);
+        weekLessons[dartWeekday]?.add(lesson);
       }
 
       return weekLessons;
@@ -443,7 +442,7 @@ class SupabaseScheduleRepository implements ScheduleRepository {
             : null;
 
         final lesson = _rowToLesson(row, lessonDate, stableLesson: stableLesson);
-        weekLessons[dartWeekday]!.add(lesson);
+        weekLessons[dartWeekday]?.add(lesson);
       }
 
       return weekLessons;
@@ -531,7 +530,11 @@ class SupabaseScheduleRepository implements ScheduleRepository {
           .from('lessons')
           .select(_lessonSelectQuery)
           .eq('id', lessonId)
-          .single();
+          .maybeSingle();
+
+      if (currentResponse == null) {
+        throw ScheduleException('Lesson not found with id $lessonId');
+      }
 
       final isStable = (currentResponse['is_stable'] as bool?) ?? false;
       if (isStable) {
@@ -556,7 +559,11 @@ class SupabaseScheduleRepository implements ScheduleRepository {
           .update(updateData)
           .eq('id', lessonId)
           .select(_lessonSelectQuery)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw ScheduleException('Failed to update lesson: lesson not found with id $lessonId');
+      }
 
       // Check if lesson is now different from stable
       final stableLessonId = response['stable_lesson_id'] as String?;
@@ -591,7 +598,11 @@ class SupabaseScheduleRepository implements ScheduleRepository {
           .from('lessons')
           .select(_lessonSelectQuery)
           .eq('id', lessonId)
-          .single();
+          .maybeSingle();
+
+      if (finalResponse == null) {
+        throw ScheduleException('Failed to fetch updated lesson: lesson not found with id $lessonId');
+      }
 
       // Get stable lesson for comparison
       Lesson? stableLesson;

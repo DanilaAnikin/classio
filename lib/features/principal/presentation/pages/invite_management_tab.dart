@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
+import 'package:classio/core/theme/spacing.dart';
+import 'package:classio/core/theme/app_radius.dart';
 import 'package:classio/features/admin_panel/domain/entities/invite_code.dart';
 import 'package:classio/features/auth/domain/entities/app_user.dart';
 import 'package:classio/shared/widgets/responsive_center.dart';
@@ -41,7 +44,7 @@ class InviteManagementTab extends ConsumerWidget {
 
           return ResponsiveCenterScrollView(
             maxWidth: 1000,
-            padding: EdgeInsets.all(isPlayful ? 20 : 16),
+            padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md),
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -53,7 +56,7 @@ class InviteManagementTab extends ConsumerWidget {
                   usedCount: inactiveInvites.length,
                   isPlayful: isPlayful,
                 ),
-                SizedBox(height: isPlayful ? 24 : 20),
+                SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
                 // Active Invites Section
                 if (activeInvites.isNotEmpty) ...[
@@ -63,9 +66,9 @@ class InviteManagementTab extends ConsumerWidget {
                     count: activeInvites.length,
                     isPlayful: isPlayful,
                   ),
-                  SizedBox(height: isPlayful ? 12 : 8),
+                  SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                   ...activeInvites.map((invite) => Padding(
-                        padding: EdgeInsets.only(bottom: isPlayful ? 10 : 8),
+                        padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.xs + 2 : AppSpacing.xs),
                         child: _InviteCodeCard(
                           invite: invite,
                           isPlayful: isPlayful,
@@ -74,7 +77,7 @@ class InviteManagementTab extends ConsumerWidget {
                               _confirmDeactivate(context, ref, invite),
                         ),
                       )),
-                  SizedBox(height: isPlayful ? 16 : 12),
+                  SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
                 ],
 
                 // Inactive Invites Section
@@ -85,9 +88,9 @@ class InviteManagementTab extends ConsumerWidget {
                     count: inactiveInvites.length,
                     isPlayful: isPlayful,
                   ),
-                  SizedBox(height: isPlayful ? 12 : 8),
+                  SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                   ...inactiveInvites.map((invite) => Padding(
-                        padding: EdgeInsets.only(bottom: isPlayful ? 10 : 8),
+                        padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.xs + 2 : AppSpacing.xs),
                         child: Opacity(
                           opacity: 0.6,
                           child: _InviteCodeCard(
@@ -100,7 +103,7 @@ class InviteManagementTab extends ConsumerWidget {
                       )),
                 ],
 
-                SizedBox(height: isPlayful ? 80 : 72), // Space for FAB
+                SizedBox(height: isPlayful ? AppSpacing.xxxl * 2 : AppSpacing.xxxl + AppSpacing.xxl), // Space for FAB
               ],
             ),
           );
@@ -116,12 +119,12 @@ class InviteManagementTab extends ConsumerWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: EdgeInsets.all(isPlayful ? 24 : 20),
+                padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.lg),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -132,7 +135,7 @@ class InviteManagementTab extends ConsumerWidget {
                   color: theme.colorScheme.primary.withValues(alpha: 0.6),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               Text(
                 'No Invite Codes Yet',
                 style: TextStyle(
@@ -141,7 +144,7 @@ class InviteManagementTab extends ConsumerWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 'Generate invite codes to add new users to your school.',
                 style: TextStyle(
@@ -167,7 +170,7 @@ class InviteManagementTab extends ConsumerWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -176,7 +179,7 @@ class InviteManagementTab extends ConsumerWidget {
                 size: 64,
                 color: theme.colorScheme.error.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 'Something went wrong',
                 style: TextStyle(
@@ -185,7 +188,7 @@ class InviteManagementTab extends ConsumerWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               Text(
                 error.toString(),
                 style: TextStyle(
@@ -194,7 +197,7 @@ class InviteManagementTab extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xl),
               ElevatedButton.icon(
                 onPressed: () {
                   ref.invalidate(principalInviteCodesProvider(schoolId));
@@ -288,9 +291,9 @@ class _InviteStatsCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 20 : 16),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppSpacing.lg : AppRadius.md),
         gradient: isPlayful
             ? LinearGradient(
                 begin: Alignment.topLeft,
@@ -325,7 +328,7 @@ class _InviteStatsCard extends StatelessWidget {
             height: isPlayful ? 56 : 48,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+              borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
             ),
             child: Icon(
               Icons.vpn_key_rounded,
@@ -333,7 +336,7 @@ class _InviteStatsCard extends StatelessWidget {
               color: theme.colorScheme.primary,
             ),
           ),
-          SizedBox(width: isPlayful ? 20 : 16),
+          SizedBox(width: isPlayful ? AppSpacing.lg : AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,7 +349,7 @@ class _InviteStatsCard extends StatelessWidget {
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   totalInvites.toString(),
                   style: TextStyle(
@@ -367,7 +370,7 @@ class _InviteStatsCard extends StatelessWidget {
                 color: Colors.green,
                 isPlayful: isPlayful,
               ),
-              SizedBox(height: isPlayful ? 6 : 4),
+              SizedBox(height: isPlayful ? AppSpacing.xxs + 2 : AppSpacing.xxs),
               _StatBadge(
                 label: 'Inactive',
                 count: usedCount,
@@ -446,7 +449,7 @@ class _SectionHeader extends StatelessWidget {
           size: isPlayful ? 22 : 20,
           color: theme.colorScheme.primary,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.xs),
         Text(
           title,
           style: TextStyle(
@@ -456,15 +459,15 @@ class _SectionHeader extends StatelessWidget {
             letterSpacing: isPlayful ? 0.3 : -0.3,
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.xs),
         Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isPlayful ? 10 : 8,
-            vertical: isPlayful ? 4 : 2,
+            horizontal: isPlayful ? AppSpacing.xs + 2 : AppSpacing.xs,
+            vertical: isPlayful ? AppSpacing.xxs : AppSpacing.xxs / 2,
           ),
           decoration: BoxDecoration(
             color: theme.colorScheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
           ),
           child: Text(
             count.toString(),
@@ -497,17 +500,17 @@ class _InviteCodeCard extends StatelessWidget {
   Color _getRoleColor(UserRole role) {
     switch (role) {
       case UserRole.superadmin:
-        return Colors.purple;
+        return isPlayful ? PlayfulColors.superadminRole : CleanColors.superadminRole;
       case UserRole.bigadmin:
-        return Colors.deepPurple;
+        return isPlayful ? PlayfulColors.principalRole : CleanColors.principalRole;
       case UserRole.admin:
-        return Colors.indigo;
+        return isPlayful ? PlayfulColors.deputyRole : CleanColors.deputyRole;
       case UserRole.teacher:
-        return Colors.blue;
+        return isPlayful ? PlayfulColors.teacherRole : CleanColors.teacherRole;
       case UserRole.student:
-        return Colors.green;
+        return isPlayful ? PlayfulColors.studentRole : CleanColors.studentRole;
       case UserRole.parent:
-        return Colors.orange;
+        return isPlayful ? PlayfulColors.parentRole : CleanColors.parentRole;
     }
   }
 
@@ -539,9 +542,9 @@ class _InviteCodeCard extends StatelessWidget {
     final roleColor = _getRoleColor(invite.role);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 14),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm + 2),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         color: theme.colorScheme.surface,
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.15),
@@ -563,10 +566,10 @@ class _InviteCodeCard extends StatelessWidget {
             children: [
               // Code icon
               Container(
-                padding: EdgeInsets.all(isPlayful ? 12 : 10),
+                padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs + 2),
                 decoration: BoxDecoration(
                   color: roleColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(isPlayful ? 12 : 10),
+                  borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppSpacing.xs + 2),
                 ),
                 child: Icon(
                   Icons.vpn_key_rounded,
@@ -574,7 +577,7 @@ class _InviteCodeCard extends StatelessWidget {
                   color: roleColor,
                 ),
               ),
-              SizedBox(width: isPlayful ? 14 : 12),
+              SizedBox(width: isPlayful ? AppSpacing.sm + 2 : AppSpacing.sm),
 
               // Code and role info
               Expanded(
@@ -593,15 +596,15 @@ class _InviteCodeCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
-                    SizedBox(height: isPlayful ? 4 : 2),
+                    SizedBox(height: isPlayful ? AppSpacing.xxs : AppSpacing.xxs / 2),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
+                        horizontal: AppSpacing.xs,
+                        vertical: AppSpacing.xxs / 2,
                       ),
                       decoration: BoxDecoration(
                         color: roleColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(6),
+                        borderRadius: BorderRadius.circular(AppRadius.xs + 2),
                       ),
                       child: Text(
                         _getRoleLabel(invite.role),
@@ -636,14 +639,14 @@ class _InviteCodeCard extends StatelessWidget {
               ],
             ],
           ),
-          SizedBox(height: isPlayful ? 12 : 10),
+          SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs + 2),
 
           // Usage and expiry info
           Container(
-            padding: EdgeInsets.all(isPlayful ? 12 : 10),
+            padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs + 2),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
+              borderRadius: BorderRadius.circular(isPlayful ? AppSpacing.xs + 2 : AppRadius.sm),
             ),
             child: Row(
               children: [
@@ -715,7 +718,7 @@ class _InfoItem extends StatelessWidget {
           size: isPlayful ? 18 : 16,
           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
         ),
-        SizedBox(height: isPlayful ? 4 : 2),
+        SizedBox(height: isPlayful ? AppSpacing.xxs : AppSpacing.xxs / 2),
         Text(
           value,
           style: TextStyle(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/subscription_status.dart';
 import '../providers/superadmin_provider.dart';
 
@@ -147,7 +148,7 @@ class _SubscriptionManagementDialogState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Subscription updated to ${_selectedStatus.displayName}'),
-            backgroundColor: Colors.green,
+            backgroundColor: CleanColors.success,
           ),
         );
       } else {
@@ -166,23 +167,24 @@ class _SubscriptionManagementDialogState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dateFormat = DateFormat('MMM d, yyyy');
+    final isPlayful = false; // Dialog uses clean theme styling
 
     return AlertDialog(
       title: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: theme.colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: AppRadius.getButtonRadius(isPlayful: isPlayful),
             ),
             child: Icon(
               Icons.credit_card_rounded,
               color: theme.colorScheme.primary,
-              size: 24,
+              size: AppIconSize.md,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSpacing.sm),
           const Expanded(
             child: Text('Manage Subscription'),
           ),
@@ -197,23 +199,23 @@ class _SubscriptionManagementDialogState
             children: [
             // School name
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(10),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: AppOpacity.heavy),
+                borderRadius: AppRadius.getButtonRadius(isPlayful: isPlayful),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.school_rounded,
-                    size: 20,
+                    size: AppIconSize.sm,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       widget.schoolName,
-                      style: TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -222,18 +224,17 @@ class _SubscriptionManagementDialogState
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
 
             // Subscription tier selection
             Text(
               'Subscription Tier',
-              style: TextStyle(
-                fontSize: 14,
+              style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
 
             // Tier options
             _buildTierOption(
@@ -241,93 +242,96 @@ class _SubscriptionManagementDialogState
               status: SubscriptionStatus.trial,
               icon: Icons.hourglass_empty_rounded,
               description: 'Free trial for school year (Sept 1 - July 1)',
-              color: Colors.orange,
+              color: CleanColors.subscriptionTrial,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.sm),
             _buildTierOption(
               context,
               status: SubscriptionStatus.pro,
               icon: Icons.star_rounded,
               description: 'Standard features with full access',
-              color: Colors.blue,
+              color: CleanColors.subscriptionBasic,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.sm),
             _buildTierOption(
               context,
               status: SubscriptionStatus.max,
               icon: Icons.diamond_rounded,
               description: 'Premium features with priority support',
-              color: Colors.purple,
+              color: CleanColors.subscriptionPro,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.sm),
             _buildTierOption(
               context,
               status: SubscriptionStatus.expired,
               icon: Icons.timer_off_rounded,
               description: 'Subscription has expired',
-              color: Colors.grey,
+              color: CleanColors.subscriptionInactive,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.sm),
             _buildTierOption(
               context,
               status: SubscriptionStatus.suspended,
               icon: Icons.block_rounded,
               description: 'School access suspended by administrator',
-              color: Colors.red,
+              color: CleanColors.subscriptionExpired,
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
 
             // Expiry date section
             Text(
               'Subscription Expiry',
-              style: TextStyle(
-                fontSize: 14,
+              style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
 
             // Expiry options based on tier
             if (_selectedStatus == SubscriptionStatus.trial) ...[
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: CleanColors.subscriptionTrial.withValues(alpha: AppOpacity.soft),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
-                    color: Colors.orange.withValues(alpha: 0.3),
+                    color: CleanColors.subscriptionTrial.withValues(alpha: AppOpacity.soft),
                   ),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.calendar_today_rounded,
-                      size: 20,
-                      color: Colors.orange.shade700,
+                      size: AppIconSize.sm,
+                      color: CleanColors.subscriptionTrial,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: Column(
+                      child: Builder(
+                        builder: (context) {
+                          final expiryDate = _expiryDate;
+                          return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Trial expires on ${_expiryDate != null ? dateFormat.format(_expiryDate!) : "N/A"}',
-                            style: TextStyle(
+                            'Trial expires on ${expiryDate != null ? dateFormat.format(expiryDate) : "N/A"}',
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: Colors.orange.shade800,
+                              color: CleanColors.subscriptionTrial,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          SizedBox(height: AppSpacing.xxs),
                           Text(
                             'Automatically set to end of school year',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.orange.shade700,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: CleanColors.subscriptionTrial.withValues(alpha: AppOpacity.dominant),
                             ),
                           ),
                         ],
+                      );
+                        },
                       ),
                     ),
                   ],
@@ -350,28 +354,33 @@ class _SubscriptionManagementDialogState
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
 
               // Custom date picker (only if not perpetual)
               if (!_noExpiry) ...[
-                const SizedBox(height: 12),
+                SizedBox(height: AppSpacing.sm),
                 OutlinedButton.icon(
                   onPressed: _selectExpiryDate,
                   icon: const Icon(Icons.calendar_month_rounded),
-                  label: Text(
-                    _expiryDate != null
-                        ? 'Expires: ${dateFormat.format(_expiryDate!)}'
-                        : 'Select expiry date',
+                  label: Builder(
+                    builder: (context) {
+                      final expiryDate = _expiryDate;
+                      return Text(
+                        expiryDate != null
+                            ? 'Expires: ${dateFormat.format(expiryDate)}'
+                            : 'Select expiry date',
+                      );
+                    },
                   ),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.md,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                   ),
                 ),
@@ -379,23 +388,23 @@ class _SubscriptionManagementDialogState
             ] else ...[
               // For expired/suspended status
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
+                  color: theme.colorScheme.errorContainer.withValues(alpha: AppOpacity.soft),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: Row(
                   children: [
                     Icon(
                       Icons.warning_rounded,
-                      size: 20,
+                      size: AppIconSize.sm,
                       color: theme.colorScheme.error,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         'This status cannot have an expiry date.',
-                        style: TextStyle(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.error,
                         ),
                       ),
@@ -417,8 +426,8 @@ class _SubscriptionManagementDialogState
           onPressed: _isSaving ? null : _saveSubscription,
           child: _isSaving
               ? SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: AppIconSize.sm,
+                  height: AppIconSize.sm,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: theme.colorScheme.onPrimary,
@@ -442,18 +451,18 @@ class _SubscriptionManagementDialogState
 
     return InkWell(
       onTap: () => _onStatusChanged(status),
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppRadius.md),
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withValues(alpha: 0.1)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(12),
+              ? color.withValues(alpha: AppOpacity.soft)
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: AppOpacity.soft),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
             color: isSelected
-                ? color.withValues(alpha: 0.5)
-                : theme.colorScheme.outline.withValues(alpha: 0.2),
+                ? color.withValues(alpha: AppOpacity.heavy)
+                : theme.colorScheme.outline.withValues(alpha: AppOpacity.medium),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -465,36 +474,35 @@ class _SubscriptionManagementDialogState
               onChanged: _onStatusChanged,
               activeColor: color,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: AppSpacing.sm),
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                color: color.withValues(alpha: AppOpacity.soft),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Icon(
                 icon,
-                size: 20,
+                size: AppIconSize.sm,
                 color: color,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     status.displayName,
-                    style: TextStyle(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: isSelected ? color : theme.colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                     ),
                   ),
                 ],

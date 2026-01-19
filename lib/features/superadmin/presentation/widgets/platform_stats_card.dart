@@ -1,91 +1,47 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/theme.dart';
+import '../../../../shared/widgets/app_card.dart';
 import '../../domain/entities/entities.dart';
 
-/// A card widget that displays platform-wide statistics for the superadmin dashboard.
+/// A premium card widget that displays platform-wide statistics for the superadmin dashboard.
 ///
 /// Shows aggregate metrics including total schools, users, students, teachers,
 /// classes, and subscription status breakdown (active, trial, expired, suspended).
+/// Uses design system tokens and the [AppCard] component for consistent styling.
 class PlatformStatsCard extends StatelessWidget {
   /// Creates a [PlatformStatsCard] widget.
   const PlatformStatsCard({
     super.key,
     required this.stats,
+    required this.isPlayful,
   });
 
   /// The platform statistics to display.
   final PlatformStats stats;
 
+  /// Whether the playful theme is active.
+  final bool isPlayful;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardRadius = AppRadius.card(isPlayful: isPlayful);
 
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primary.withValues(alpha: 0.15),
-            theme.colorScheme.secondary.withValues(alpha: 0.1),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.15),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+    return AppCard.elevated(
+      padding: AppSpacing.dialogInsets,
+      borderRadius: cardRadius,
+      boxShadow: AppShadows.cardHover(isPlayful: isPlayful),
+      backgroundColor: theme.colorScheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  Icons.analytics_rounded,
-                  size: 32,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Platform Overview',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'All schools and users across Classio',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          _HeaderSection(
+            theme: theme,
+            isPlayful: isPlayful,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppSpacing.xl),
 
           // Main Stats Row
           Row(
@@ -96,6 +52,7 @@ class PlatformStatsCard extends StatelessWidget {
                   value: stats.totalSchools.toString(),
                   icon: Icons.account_balance_rounded,
                   color: theme.colorScheme.primary,
+                  isPlayful: isPlayful,
                 ),
               ),
               Expanded(
@@ -103,7 +60,8 @@ class PlatformStatsCard extends StatelessWidget {
                   label: 'Users',
                   value: stats.totalUsers.toString(),
                   icon: Icons.people_rounded,
-                  color: Colors.blue,
+                  color: AppSemanticColors.getStatColor('blue', isPlayful: isPlayful),
+                  isPlayful: isPlayful,
                 ),
               ),
               Expanded(
@@ -111,12 +69,13 @@ class PlatformStatsCard extends StatelessWidget {
                   label: 'Classes',
                   value: stats.totalClasses.toString(),
                   icon: Icons.class_rounded,
-                  color: Colors.green,
+                  color: AppSemanticColors.getStatColor('green', isPlayful: isPlayful),
+                  isPlayful: isPlayful,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: AppSpacing.lg),
 
           // User Breakdown
           Row(
@@ -126,7 +85,8 @@ class PlatformStatsCard extends StatelessWidget {
                   label: 'Students',
                   value: stats.totalStudents.toString(),
                   icon: Icons.person_rounded,
-                  color: Colors.teal,
+                  color: AppSemanticColors.getStatColor('teal', isPlayful: isPlayful),
+                  isPlayful: isPlayful,
                 ),
               ),
               Expanded(
@@ -134,53 +94,20 @@ class PlatformStatsCard extends StatelessWidget {
                   label: 'Teachers',
                   value: stats.totalTeachers.toString(),
                   icon: Icons.school_rounded,
-                  color: Colors.purple,
+                  color: AppSemanticColors.getStatColor('purple', isPlayful: isPlayful),
+                  isPlayful: isPlayful,
                 ),
               ),
               const Expanded(child: SizedBox()),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: AppSpacing.xl),
 
           // Subscription Status Breakdown
-          Divider(
-            color: theme.colorScheme.outline.withValues(alpha: 0.2),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Subscription Status',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _SubscriptionBadge(
-                label: 'Active',
-                count: stats.activeSubscriptions,
-                color: Colors.green,
-              ),
-              _SubscriptionBadge(
-                label: 'Trial',
-                count: stats.trialSubscriptions,
-                color: Colors.blue,
-              ),
-              _SubscriptionBadge(
-                label: 'Expired',
-                count: stats.expiredSubscriptions,
-                color: Colors.orange,
-              ),
-              _SubscriptionBadge(
-                label: 'Suspended',
-                count: stats.suspendedSchools,
-                color: Colors.red,
-              ),
-            ],
+          _SubscriptionSection(
+            stats: stats,
+            theme: theme,
+            isPlayful: isPlayful,
           ),
         ],
       ),
@@ -188,19 +115,145 @@ class PlatformStatsCard extends StatelessWidget {
   }
 }
 
-/// Individual stat item widget.
+/// Header section with icon and title.
+class _HeaderSection extends StatelessWidget {
+  const _HeaderSection({
+    required this.theme,
+    required this.isPlayful,
+  });
+
+  final ThemeData theme;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: AppSpacing.xxxxl,
+          height: AppSpacing.xxxxl,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+                theme.colorScheme.secondary.withValues(alpha: AppOpacity.subtle),
+              ],
+            ),
+            borderRadius: AppRadius.button(isPlayful: isPlayful),
+          ),
+          child: Icon(
+            Icons.analytics_rounded,
+            size: AppIconSize.xl,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Platform Overview',
+                style: AppTypography.sectionTitle(isPlayful: isPlayful).copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              SizedBox(height: AppSpacing.xxs),
+              Text(
+                'All schools and users across Classio',
+                style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Subscription status section with badges.
+class _SubscriptionSection extends StatelessWidget {
+  const _SubscriptionSection({
+    required this.stats,
+    required this.theme,
+    required this.isPlayful,
+  });
+
+  final PlatformStats stats;
+  final ThemeData theme;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Divider(
+          color: theme.colorScheme.outline.withValues(alpha: AppOpacity.medium),
+        ),
+        SizedBox(height: AppSpacing.md),
+        Text(
+          'Subscription Status',
+          style: AppTypography.cardSubtitle(isPlayful: isPlayful).copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.almostOpaque),
+          ),
+        ),
+        SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.xs,
+          runSpacing: AppSpacing.xs,
+          children: [
+            _SubscriptionBadge(
+              label: 'Active',
+              count: stats.activeSubscriptions,
+              color: AppSemanticColors.success(isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+            _SubscriptionBadge(
+              label: 'Trial',
+              count: stats.trialSubscriptions,
+              color: AppSemanticColors.getSubscriptionColor('trial', isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+            _SubscriptionBadge(
+              label: 'Expired',
+              count: stats.expiredSubscriptions,
+              color: AppSemanticColors.warning(isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+            _SubscriptionBadge(
+              label: 'Suspended',
+              count: stats.suspendedSchools,
+              color: AppSemanticColors.error(isPlayful: isPlayful),
+              isPlayful: isPlayful,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Individual stat item widget with icon, label, and value.
 class _StatItem extends StatelessWidget {
   const _StatItem({
     required this.label,
     required this.value,
     required this.icon,
     required this.color,
+    required this.isPlayful,
   });
 
   final String label;
   final String value;
   final IconData icon;
   final Color color;
+  final bool isPlayful;
 
   @override
   Widget build(BuildContext context) {
@@ -213,25 +266,26 @@ class _StatItem extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 16,
+              size: AppIconSize.sm,
               color: color,
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text(
+                label,
+                style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: AppSpacing.xxs),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 24,
+          style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w800,
             color: color,
           ),
@@ -241,44 +295,49 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-/// Subscription status badge widget.
+/// Subscription status badge widget with pill design.
 class _SubscriptionBadge extends StatelessWidget {
   const _SubscriptionBadge({
     required this.label,
     required this.count,
     required this.color,
+    required this.isPlayful,
   });
 
   final String label;
   final int count;
   final Color color;
+  final bool isPlayful;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
+        color: color.withValues(alpha: AppOpacity.medium),
+        borderRadius: AppRadius.fullRadius,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             count.toString(),
-            style: TextStyle(
-              fontSize: 14,
+            style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
               color: color,
             ),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: AppSpacing.xs),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w500,
-              color: color.withValues(alpha: 0.8),
+              color: color.withValues(alpha: AppOpacity.almostOpaque),
             ),
           ),
         ],

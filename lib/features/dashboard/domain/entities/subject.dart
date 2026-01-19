@@ -8,6 +8,7 @@ class Subject {
     required this.name,
     required this.color,
     this.teacherName,
+    this.teacherId,
   });
 
   /// Unique identifier for the subject.
@@ -23,6 +24,9 @@ class Subject {
   /// Name of the teacher teaching this subject.
   final String? teacherName;
 
+  /// Unique identifier for the teacher teaching this subject.
+  final String? teacherId;
+
   /// Creates a copy of this [Subject] with the given fields replaced
   /// with new values.
   Subject copyWith({
@@ -30,12 +34,14 @@ class Subject {
     String? name,
     int? color,
     String? teacherName,
+    String? teacherId,
   }) {
     return Subject(
       id: id ?? this.id,
       name: name ?? this.name,
       color: color ?? this.color,
       teacherName: teacherName ?? this.teacherName,
+      teacherId: teacherId ?? this.teacherId,
     );
   }
 
@@ -47,13 +53,14 @@ class Subject {
         other.id == id &&
         other.name == name &&
         other.color == color &&
-        other.teacherName == teacherName;
+        other.teacherName == teacherName &&
+        other.teacherId == teacherId;
   }
 
   @override
-  int get hashCode => Object.hash(id, name, color, teacherName);
+  int get hashCode => Object.hash(id, name, color, teacherName, teacherId);
 
   @override
   String toString() =>
-      'Subject(id: $id, name: $name, color: $color, teacherName: $teacherName)';
+      'Subject(id: $id, name: $name, color: $color, teacherName: $teacherName, teacherId: $teacherId)';
 }

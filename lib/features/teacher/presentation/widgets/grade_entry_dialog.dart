@@ -2,11 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_input.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../domain/entities/teacher_grade_entity.dart';
 import '../providers/teacher_provider.dart';
 
 /// Dialog for adding or editing a grade.
+///
+/// Features premium design with theme-aware styling (Clean vs Playful).
 class GradeEntryDialog extends ConsumerStatefulWidget {
   const GradeEntryDialog({
     super.key,
@@ -23,6 +32,47 @@ class GradeEntryDialog extends ConsumerStatefulWidget {
   final AppUser? preselectedStudent;
   final String? preselectedGradeType;
 
+  /// Shows the dialog and returns true if a grade was successfully saved.
+  static Future<bool?> show(
+    BuildContext context, {
+    required String subjectId,
+    List<AppUser>? students,
+    TeacherGradeEntity? existingGrade,
+    AppUser? preselectedStudent,
+    String? preselectedGradeType,
+  }) {
+    return showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: AppDuration.medium,
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: AppCurves.modalEnter,
+          reverseCurve: AppCurves.modalExit,
+        );
+        return FadeTransition(
+          opacity: curvedAnimation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.95, end: 1.0).animate(curvedAnimation),
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return GradeEntryDialog(
+          subjectId: subjectId,
+          students: students,
+          existingGrade: existingGrade,
+          preselectedStudent: preselectedStudent,
+          preselectedGradeType: preselectedGradeType,
+        );
+      },
+    );
+  }
+
   @override
   ConsumerState<GradeEntryDialog> createState() => _GradeEntryDialogState();
 }
@@ -37,7 +87,7 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
   String _selectedGradeType = 'Quiz';
   bool _isLoading = false;
 
-  final List<String> _gradeTypes = [
+  static const List<String> _gradeTypes = [
     'Quiz',
     'Test',
     'Homework',
@@ -46,6 +96,11 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
     'Participation',
     'Other',
   ];
+
+  bool get _isPlayful {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.value == PlayfulColors.primary.value;
+  }
 
   @override
   void initState() {
@@ -66,7 +121,6 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
     final rawGradeType = widget.existingGrade?.gradeType ??
         widget.preselectedGradeType ??
         'Quiz';
-    // Only use the value if it exists in _gradeTypes, otherwise default to 'Quiz'
     _selectedGradeType = _gradeTypes.contains(rawGradeType) ? rawGradeType : 'Quiz';
   }
 
@@ -79,10 +133,13 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
   }
 
   Future<void> _saveGrade() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
     if (_selectedStudentId == null && widget.existingGrade == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a student')),
+        SnackBar(
+          content: const Text('Please select a student'),
+          backgroundColor: _isPlayful ? PlayfulColors.error : CleanColors.error,
+        ),
       );
       return;
     }
@@ -94,9 +151,10 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
       final weight = double.tryParse(_weightController.text) ?? 1.0;
 
       bool success;
-      if (widget.existingGrade != null) {
+      final existingGrade = widget.existingGrade;
+      if (existingGrade != null) {
         // Update existing grade
-        final updatedGrade = widget.existingGrade!.copyWith(
+        final updatedGrade = existingGrade.copyWith(
           score: score,
           weight: weight,
           gradeType: _selectedGradeType,
@@ -127,14 +185,16 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
               content: Text(widget.existingGrade != null
                   ? 'Grade updated successfully'
                   : 'Grade added successfully'),
-              backgroundColor: Colors.green,
+              backgroundColor:
+                  _isPlayful ? PlayfulColors.success : CleanColors.success,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to save grade. Please try again.'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Failed to save grade. Please try again.'),
+              backgroundColor:
+                  _isPlayful ? PlayfulColors.error : CleanColors.error,
             ),
           );
         }
@@ -144,7 +204,7 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: _isPlayful ? PlayfulColors.error : CleanColors.error,
           ),
         );
       }
@@ -157,51 +217,57 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
 
   Future<void> _deleteGrade() async {
     if (widget.existingGrade == null) return;
+    final isPlayful = _isPlayful;
 
-    final confirmed = await showDialog<bool>(
+    final confirmed = await showGeneralDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Grade'),
-        content: const Text(
-          'Are you sure you want to delete this grade? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: AppDuration.medium,
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: AppCurves.modalEnter,
+          reverseCurve: AppCurves.modalExit,
+        );
+        return FadeTransition(
+          opacity: curvedAnimation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.95, end: 1.0).animate(curvedAnimation),
+            child: child,
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return _DeleteConfirmationDialog(isPlayful: isPlayful);
+      },
     );
 
-    if (confirmed == true) {
+    final existingGrade = widget.existingGrade;
+    if (confirmed == true && existingGrade != null) {
       setState(() => _isLoading = true);
       try {
         final success = await ref.read(addGradeNotifierProvider.notifier).deleteGrade(
-              widget.existingGrade!.id,
+              existingGrade.id,
               widget.subjectId,
             );
         if (mounted) {
           if (success) {
             Navigator.of(context).pop(true);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Grade deleted successfully'),
-                backgroundColor: Colors.green,
+              SnackBar(
+                content: const Text('Grade deleted successfully'),
+                backgroundColor:
+                    _isPlayful ? PlayfulColors.success : CleanColors.success,
               ),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to delete grade. Please try again.'),
-                backgroundColor: Colors.red,
+              SnackBar(
+                content: const Text('Failed to delete grade. Please try again.'),
+                backgroundColor:
+                    _isPlayful ? PlayfulColors.error : CleanColors.error,
               ),
             );
           }
@@ -211,7 +277,7 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error: ${e.toString()}'),
-              backgroundColor: Colors.red,
+              backgroundColor: _isPlayful ? PlayfulColors.error : CleanColors.error,
             ),
           );
         }
@@ -225,236 +291,493 @@ class _GradeEntryDialogState extends ConsumerState<GradeEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isPlayful = _isPlayful;
     final isEditing = widget.existingGrade != null;
     final students = widget.students ?? [];
 
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 450, maxHeight: 600),
+    // Theme-aware colors
+    final surfaceColor =
+        isPlayful ? PlayfulColors.surfaceElevated : CleanColors.surfaceElevated;
+    final borderColor = isPlayful ? PlayfulColors.border : CleanColors.border;
+    final primaryColor = isPlayful ? PlayfulColors.primary : CleanColors.primary;
+    final textPrimary =
+        isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+    final textSecondary =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+
+    return Material(
+      color: Colors.transparent,
+      child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header (fixed at top)
-                Row(
+          padding: AppSpacing.pagePaddingMobile,
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 450, maxHeight: 600),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: AppRadius.dialog(isPlayful: isPlayful),
+                border: Border.all(
+                  color: borderColor.withValues(alpha: 0.5),
+                ),
+                boxShadow: AppShadows.modal(isPlayful: isPlayful),
+              ),
+              child: ClipRRect(
+                borderRadius: AppRadius.dialog(isPlayful: isPlayful),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      isEditing ? Icons.edit_rounded : Icons.add_rounded,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      isEditing ? 'Edit Grade' : 'Add Grade',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: theme.colorScheme.onSurface,
+                    // Fixed Header
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                      ),
+                      child: _buildHeader(
+                        isPlayful: isPlayful,
+                        isEditing: isEditing,
+                        primaryColor: primaryColor,
+                        textPrimary: textPrimary,
                       ),
                     ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded),
+
+                    // Scrollable Content
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.md,
+                        ),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Student Selector (only for new grades)
+                              if (!isEditing && students.isNotEmpty) ...[
+                                _buildStudentDropdown(
+                                  students: students,
+                                  isPlayful: isPlayful,
+                                  textSecondary: textSecondary,
+                                ),
+                                AppSpacing.gap16,
+                              ],
+
+                              // Grade Type Selector
+                              _buildGradeTypeDropdown(
+                                isPlayful: isPlayful,
+                                textSecondary: textSecondary,
+                              ),
+                              AppSpacing.gap16,
+
+                              // Score and Weight Row
+                              _buildScoreWeightRow(isPlayful: isPlayful),
+                              AppSpacing.gap16,
+
+                              // Comment Field
+                              AppInput.multiline(
+                                controller: _commentController,
+                                label: 'Comment (optional)',
+                                hint: 'Add a note about this grade...',
+                                prefixIcon: Icons.comment_rounded,
+                                maxLines: 2,
+                                minLines: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Fixed Actions
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                      ),
+                      child: _buildActions(
+                        isPlayful: isPlayful,
+                        isEditing: isEditing,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-                // Scrollable form content
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget _buildHeader({
+    required bool isPlayful,
+    required bool isEditing,
+    required Color primaryColor,
+    required Color textPrimary,
+  }) {
+    final iconBgColor =
+        isPlayful ? PlayfulColors.primarySubtle : CleanColors.primarySubtle;
+
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: iconBgColor,
+            borderRadius: AppRadius.button(isPlayful: isPlayful),
+          ),
+          child: Icon(
+            isEditing ? Icons.edit_rounded : Icons.add_rounded,
+            color: primaryColor,
+            size: AppIconSize.md,
+          ),
+        ),
+        SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            isEditing ? 'Edit Grade' : 'Add Grade',
+            style: AppTypography.sectionTitle(isPlayful: isPlayful).copyWith(
+              color: textPrimary,
+            ),
+          ),
+        ),
+        _CloseButton(isPlayful: isPlayful),
+      ],
+    );
+  }
+
+  Widget _buildStudentDropdown({
+    required List<AppUser> students,
+    required bool isPlayful,
+    required Color textSecondary,
+  }) {
+    final borderColor = isPlayful ? PlayfulColors.inputBorder : CleanColors.inputBorder;
+    final focusBorderColor =
+        isPlayful ? PlayfulColors.inputBorderFocus : CleanColors.inputBorderFocus;
+
+    return DropdownButtonFormField<String>(
+      value: students.any((s) => s.id == _selectedStudentId)
+          ? _selectedStudentId
+          : null,
+      decoration: InputDecoration(
+        labelText: 'Student',
+        labelStyle: AppTypography.inputLabel(isPlayful: isPlayful),
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: focusBorderColor, width: 2),
+        ),
+        prefixIcon: Icon(Icons.person_rounded, color: textSecondary),
+        contentPadding: AppSpacing.inputInsets,
+      ),
+      style: AppTypography.inputText(isPlayful: isPlayful),
+      isExpanded: true,
+      items: students.map((student) {
+        return DropdownMenuItem(
+          value: student.id,
+          child: Text(
+            _getStudentName(student),
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() => _selectedStudentId = value);
+      },
+      validator: (value) {
+        if (value == null) return 'Please select a student';
+        return null;
+      },
+    );
+  }
+
+  Widget _buildGradeTypeDropdown({
+    required bool isPlayful,
+    required Color textSecondary,
+  }) {
+    final borderColor = isPlayful ? PlayfulColors.inputBorder : CleanColors.inputBorder;
+    final focusBorderColor =
+        isPlayful ? PlayfulColors.inputBorderFocus : CleanColors.inputBorderFocus;
+
+    return DropdownButtonFormField<String>(
+      value: _selectedGradeType,
+      decoration: InputDecoration(
+        labelText: 'Grade Type',
+        labelStyle: AppTypography.inputLabel(isPlayful: isPlayful),
+        border: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadius.input(isPlayful: isPlayful),
+          borderSide: BorderSide(color: focusBorderColor, width: 2),
+        ),
+        prefixIcon: Icon(Icons.category_rounded, color: textSecondary),
+        contentPadding: AppSpacing.inputInsets,
+      ),
+      style: AppTypography.inputText(isPlayful: isPlayful),
+      isExpanded: true,
+      items: _gradeTypes.map((type) {
+        return DropdownMenuItem(
+          value: type,
+          child: Text(type),
+        );
+      }).toList(),
+      onChanged: (value) {
+        if (value != null) {
+          setState(() => _selectedGradeType = value);
+        }
+      },
+    );
+  }
+
+  Widget _buildScoreWeightRow({required bool isPlayful}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Score Field
+        Expanded(
+          flex: 2,
+          child: AppInput(
+            controller: _scoreController,
+            label: 'Score',
+            hint: '0-100',
+            prefixIcon: Icons.grade_rounded,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+            ],
+            validator: (value) {
+              if (value == null || value.isEmpty) return 'Required';
+              final score = double.tryParse(value);
+              if (score == null) return 'Invalid';
+              if (score < 0 || score > 100) return '0-100';
+              return null;
+            },
+          ),
+        ),
+        SizedBox(width: AppSpacing.sm),
+
+        // Weight Field
+        Expanded(
+          child: AppInput(
+            controller: _weightController,
+            label: 'Weight',
+            hint: '1.0',
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+            ],
+            validator: (value) {
+              if (value == null || value.isEmpty) return null; // Optional
+              final weight = double.tryParse(value);
+              if (weight == null || weight <= 0 || weight > 10) return '0.1-10';
+              return null;
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions({
+    required bool isPlayful,
+    required bool isEditing,
+  }) {
+    final errorColor = isPlayful ? PlayfulColors.error : CleanColors.error;
+
+    return Row(
+      children: [
+        if (isEditing)
+          AppButton.danger(
+            label: 'Delete',
+            icon: Icons.delete_outline_rounded,
+            onPressed: _isLoading ? null : _deleteGrade,
+            size: ButtonSize.medium,
+          ),
+        const Spacer(),
+        AppButton.secondary(
+          label: 'Cancel',
+          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+          size: ButtonSize.medium,
+        ),
+        SizedBox(width: AppSpacing.sm),
+        AppButton.primary(
+          label: isEditing ? 'Update' : 'Save',
+          icon: Icons.save_rounded,
+          onPressed: _isLoading ? null : _saveGrade,
+          isLoading: _isLoading,
+          size: ButtonSize.medium,
+        ),
+      ],
+    );
+  }
+
+  String _getStudentName(AppUser student) {
+    final parts = <String>[];
+    final firstName = student.firstName;
+    final lastName = student.lastName;
+    if (firstName != null && firstName.isNotEmpty) {
+      parts.add(firstName);
+    }
+    if (lastName != null && lastName.isNotEmpty) {
+      parts.add(lastName);
+    }
+    return parts.isEmpty ? (student.email ?? '') : parts.join(' ');
+  }
+}
+
+/// Close button for the dialog header.
+class _CloseButton extends StatelessWidget {
+  const _CloseButton({required this.isPlayful});
+
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor =
+        isPlayful ? PlayfulColors.textTertiary : CleanColors.textTertiary;
+    final hoverColor =
+        isPlayful ? PlayfulColors.surfaceHover : CleanColors.surfaceHover;
+
+    return Semantics(
+      button: true,
+      label: 'Close dialog',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.of(context).pop(),
+          borderRadius: AppRadius.fullRadius,
+          hoverColor: hoverColor,
+          child: Padding(
+            padding: AppSpacing.insets8,
+            child: Icon(
+              Icons.close_rounded,
+              size: AppIconSize.sm,
+              color: iconColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Confirmation dialog for deleting a grade.
+class _DeleteConfirmationDialog extends StatelessWidget {
+  const _DeleteConfirmationDialog({required this.isPlayful});
+
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final surfaceColor =
+        isPlayful ? PlayfulColors.surfaceElevated : CleanColors.surfaceElevated;
+    final borderColor = isPlayful ? PlayfulColors.border : CleanColors.border;
+    final errorColor = isPlayful ? PlayfulColors.error : CleanColors.error;
+    final textPrimary =
+        isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+    final textSecondary =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+    final errorSubtle =
+        isPlayful ? PlayfulColors.errorSubtle : CleanColors.errorSubtle;
+
+    return Material(
+      color: Colors.transparent,
+      child: SafeArea(
+        child: Padding(
+          padding: AppSpacing.pagePaddingMobile,
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: AppRadius.dialog(isPlayful: isPlayful),
+                border: Border.all(
+                  color: borderColor.withValues(alpha: 0.5),
+                ),
+                boxShadow: AppShadows.modal(isPlayful: isPlayful),
+              ),
+              child: Padding(
+                padding: AppSpacing.dialogInsets,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Icon and Title
+                    Row(
                       children: [
-                        // Student Selector (only for new grades)
-                        if (!isEditing && students.isNotEmpty) ...[
-                          DropdownButtonFormField<String>(
-                            initialValue: students.any((s) => s.id == _selectedStudentId)
-                                ? _selectedStudentId
-                                : null,
-                            decoration: InputDecoration(
-                              labelText: 'Student',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              prefixIcon: const Icon(Icons.person_rounded),
-                            ),
-                            isExpanded: true,
-                            items: students.map((student) {
-                              return DropdownMenuItem(
-                                value: student.id,
-                                child: Text(
-                                  student.fullName,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() => _selectedStudentId = value);
-                            },
-                            validator: (value) {
-                              if (value == null) return 'Please select a student';
-                              return null;
-                            },
+                        Container(
+                          padding: EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: errorSubtle,
+                            borderRadius: AppRadius.button(isPlayful: isPlayful),
                           ),
-                          const SizedBox(height: 16),
-                        ],
-
-                        // Grade Type Selector
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedGradeType,
-                          decoration: InputDecoration(
-                            labelText: 'Grade Type',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixIcon: const Icon(Icons.category_rounded),
+                          child: Icon(
+                            Icons.delete_outline_rounded,
+                            color: errorColor,
+                            size: AppIconSize.md,
                           ),
-                          isExpanded: true,
-                          items: _gradeTypes.map((type) {
-                            return DropdownMenuItem(
-                              value: type,
-                              child: Text(type),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _selectedGradeType = value);
-                            }
-                          },
                         ),
-                        const SizedBox(height: 16),
-
-                        // Score and Weight Row
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Score
-                            Expanded(
-                              flex: 2,
-                              child: TextFormField(
-                                controller: _scoreController,
-                                decoration: InputDecoration(
-                                  labelText: 'Score',
-                                  hintText: '0-100',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  prefixIcon: const Icon(Icons.grade_rounded),
-                                ),
-                                keyboardType: const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d*'),
-                                  ),
-                                ],
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Required';
-                                  }
-                                  final score = double.tryParse(value);
-                                  if (score == null) {
-                                    return 'Invalid number';
-                                  }
-                                  if (score < 0 || score > 100) {
-                                    return '0-100';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-
-                            // Weight
-                            Expanded(
-                              child: TextFormField(
-                                controller: _weightController,
-                                decoration: InputDecoration(
-                                  labelText: 'Weight',
-                                  hintText: '1.0',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                keyboardType: const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d*'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Comment
-                        TextFormField(
-                          controller: _commentController,
-                          decoration: InputDecoration(
-                            labelText: 'Comment (optional)',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixIcon: const Icon(Icons.comment_rounded),
+                        SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            'Delete Grade',
+                            style: AppTypography.sectionTitle(isPlayful: isPlayful)
+                                .copyWith(color: textPrimary),
                           ),
-                          maxLines: 2,
                         ),
                       ],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 24),
+                    AppSpacing.gap16,
 
-                // Actions (fixed at bottom)
-                Row(
-                  children: [
-                    if (isEditing)
-                      TextButton.icon(
-                        onPressed: _isLoading ? null : _deleteGrade,
-                        icon: Icon(
-                          Icons.delete_outline_rounded,
-                          color: theme.colorScheme.error,
-                        ),
-                        label: Text(
-                          'Delete',
-                          style: TextStyle(color: theme.colorScheme.error),
-                        ),
-                      ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed:
-                          _isLoading ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                    // Message
+                    Text(
+                      'Are you sure you want to delete this grade? This action cannot be undone.',
+                      style: AppTypography.secondaryText(isPlayful: isPlayful)
+                          .copyWith(color: textSecondary),
                     ),
-                    const SizedBox(width: 8),
-                    FilledButton.icon(
-                      onPressed: _isLoading ? null : _saveGrade,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.save_rounded, size: 18),
-                      label: Text(isEditing ? 'Update' : 'Save'),
+                    AppSpacing.gap24,
+
+                    // Actions
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AppButton.secondary(
+                          label: 'Cancel',
+                          onPressed: () => Navigator.of(context).pop(false),
+                          size: ButtonSize.medium,
+                        ),
+                        SizedBox(width: AppSpacing.sm),
+                        AppButton.danger(
+                          label: 'Delete',
+                          icon: Icons.delete_outline_rounded,
+                          onPressed: () => Navigator.of(context).pop(true),
+                          size: ButtonSize.medium,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

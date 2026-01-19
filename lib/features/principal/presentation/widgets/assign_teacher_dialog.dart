@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/class_with_details.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../providers/principal_providers.dart';
@@ -58,7 +58,8 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
       final notifier = ref.read(principalNotifierProvider.notifier);
 
       bool success;
-      if (_selectedTeacherId == null) {
+      final selectedTeacherId = _selectedTeacherId;
+      if (selectedTeacherId == null) {
         success = await notifier.removeHeadTeacher(
           widget.classDetails.id,
           widget.schoolId,
@@ -66,7 +67,7 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
       } else {
         success = await notifier.assignHeadTeacher(
           widget.classDetails.id,
-          _selectedTeacherId!,
+          selectedTeacherId,
           widget.schoolId,
         );
       }
@@ -100,17 +101,18 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final teachersAsync =
         ref.watch(schoolTeachersProvider(widget.schoolId));
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 450),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.dialogInsets,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,34 +121,32 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: CleanColors.info.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
+                      color: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.person_add_outlined,
-                      color: CleanColors.info,
+                      color: theme.colorScheme.primary,
+                      size: AppIconSize.md,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Assign Head Teacher',
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: CleanColors.textPrimary,
                           ),
                         ),
                         Text(
                           widget.classDetails.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: CleanColors.textSecondary,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -158,64 +158,70 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
 
               // Current head teacher info
-              if (widget.classDetails.headTeacher != null) ...[
+              if (widget.classDetails.headTeacher case final headTeacher?) ...[
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: CleanColors.infoLight,
-                    borderRadius: BorderRadius.circular(8),
+                    color: CleanColors.info.withValues(alpha: AppOpacity.soft),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline,
-                          color: CleanColors.info, size: 20),
-                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.info_outline,
+                        color: CleanColors.info,
+                        size: AppIconSize.sm,
+                      ),
+                      SizedBox(width: AppSpacing.xs),
                       Expanded(
                         child: Text(
-                          'Current head teacher: ${widget.classDetails.headTeacher!.fullName}',
-                          style: const TextStyle(
+                          'Current head teacher: ${headTeacher.fullName}',
+                          style: theme.textTheme.bodySmall?.copyWith(
                             color: CleanColors.info,
-                            fontSize: 14,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
               ],
 
               // Teacher selection
-              const Text(
+              Text(
                 'Select Teacher',
-                style: TextStyle(
+                style: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: CleanColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
 
               teachersAsync.when(
                 data: (teachers) {
                   if (teachers.isEmpty) {
                     return Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: CleanColors.warningLight,
-                        borderRadius: BorderRadius.circular(8),
+                        color: CleanColors.warning.withValues(alpha: AppOpacity.soft),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.warning_outlined,
-                              color: CleanColors.warning),
-                          SizedBox(width: 8),
+                          Icon(
+                            Icons.warning_outlined,
+                            color: CleanColors.warning,
+                            size: AppIconSize.md,
+                          ),
+                          SizedBox(width: AppSpacing.xs),
                           Expanded(
                             child: Text(
                               'No teachers available. Invite teachers first.',
-                              style: TextStyle(color: CleanColors.warning),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: CleanColors.warning,
+                              ),
                             ),
                           ),
                         ],
@@ -226,8 +232,10 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
                   return Container(
                     constraints: const BoxConstraints(maxHeight: 300),
                     decoration: BoxDecoration(
-                      border: Border.all(color: CleanColors.border),
-                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withValues(alpha: AppOpacity.medium),
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: ListView(
                       shrinkWrap: true,
@@ -236,11 +244,11 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
                         RadioListTile<String?>(
                           value: null,
                           groupValue: _selectedTeacherId,
-                          title: const Text(
+                          title: Text(
                             'No head teacher',
-                            style: TextStyle(
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               fontStyle: FontStyle.italic,
-                              color: CleanColors.textSecondary,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                           onChanged: (value) {
@@ -254,15 +262,15 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
                               title: Text(teacher.fullName),
                               subtitle: Text(
                                 teacher.email ?? '',
-                                style: const TextStyle(fontSize: 12),
+                                style: theme.textTheme.labelSmall,
                               ),
                               secondary: CircleAvatar(
                                 backgroundColor:
-                                    CleanColors.primary.withValues(alpha: 0.1),
+                                    theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
                                 child: Text(
                                   _getInitials(teacher),
-                                  style: const TextStyle(
-                                    color: CleanColors.primary,
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -275,31 +283,37 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
                     ),
                   );
                 },
-                loading: () => const Center(
+                loading: () => Center(
                   child: Padding(
-                    padding: EdgeInsets.all(24),
-                    child: CircularProgressIndicator(),
+                    padding: EdgeInsets.all(AppSpacing.xl),
+                    child: const CircularProgressIndicator(),
                   ),
                 ),
                 error: (_, _) => Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: CleanColors.errorLight,
-                    borderRadius: BorderRadius.circular(8),
+                    color: CleanColors.error.withValues(alpha: AppOpacity.soft),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.error_outline, color: CleanColors.error),
-                      SizedBox(width: 8),
+                      Icon(
+                        Icons.error_outline,
+                        color: CleanColors.error,
+                        size: AppIconSize.md,
+                      ),
+                      SizedBox(width: AppSpacing.xs),
                       Text(
                         'Failed to load teachers',
-                        style: TextStyle(color: CleanColors.error),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: CleanColors.error,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
 
               // Actions
               Row(
@@ -309,16 +323,16 @@ class _AssignTeacherDialogState extends ConsumerState<AssignTeacherDialog> {
                     onPressed: _isLoading ? null : () => Navigator.pop(context),
                     child: const Text('Cancel'),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: AppSpacing.sm),
                   FilledButton(
                     onPressed: _isLoading ? null : _submit,
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
+                        ? SizedBox(
+                            width: AppIconSize.sm,
+                            height: AppIconSize.sm,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: CleanColors.onPrimary,
+                              color: theme.colorScheme.onPrimary,
                             ),
                           )
                         : const Text('Save'),

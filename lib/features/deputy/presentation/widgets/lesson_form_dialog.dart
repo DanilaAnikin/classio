@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/spacing.dart';
+import 'package:classio/core/theme/app_radius.dart';
 import '../../../dashboard/domain/entities/subject.dart';
 import '../../../schedule/presentation/widgets/week_selector.dart';
 import '../../domain/entities/entities.dart';
@@ -104,18 +106,18 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                 color: theme.colorScheme.primary,
                 size: 24,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppSpacing.sm),
               Text(_isEditing ? 'Edit Lesson' : 'Add Lesson'),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xxs),
             decoration: BoxDecoration(
               color: isEditingStable
                   ? theme.colorScheme.secondary.withValues(alpha: 0.1)
                   : theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(AppRadius.sm - 2),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -127,7 +129,7 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                       ? theme.colorScheme.secondary
                       : theme.colorScheme.primary,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: AppSpacing.xxs),
                 Text(
                   isEditingStable
                       ? 'Editing Stable Timetable'
@@ -156,7 +158,7 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
               children: [
                 // Subject Dropdown
                 _buildLabel('Subject', theme),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 DropdownButtonFormField<String>(
                   decoration: _inputDecoration(isPlayful),
                   initialValue: _selectedSubjectId,
@@ -173,10 +175,10 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                             height: 12,
                             decoration: BoxDecoration(
                               color: Color(subject.color),
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(AppRadius.xs - 1),
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: AppSpacing.xs),
                           Expanded(
                             child: Text(
                               subject.teacherName != null
@@ -189,11 +191,13 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                       ),
                     );
                   }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedSubjectId = value;
-                  });
-                },
+                onChanged: _isLoading
+                    ? null
+                    : (value) {
+                        setState(() {
+                          _selectedSubjectId = value;
+                        });
+                      },
                 validator: (value) {
                   if (value == null) {
                     return 'Please select a subject';
@@ -201,11 +205,11 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSpacing.lg),
 
               // Day of Week Selector
               _buildLabel('Day', theme),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               _DaySelector(
                 selectedDay: _selectedDayOfWeek,
                 onDaySelected: (day) {
@@ -215,7 +219,7 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                 },
                 isPlayful: isPlayful,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSpacing.lg),
 
               // Time Pickers Row
               Row(
@@ -225,7 +229,7 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildLabel('Start Time', theme),
-                        const SizedBox(height: 8),
+                        SizedBox(height: AppSpacing.xs),
                         _TimePicker(
                           time: _startTime,
                           onTimeChanged: (time) {
@@ -244,13 +248,13 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildLabel('End Time', theme),
-                        const SizedBox(height: 8),
+                        SizedBox(height: AppSpacing.xs),
                         _TimePicker(
                           time: _endTime,
                           onTimeChanged: (time) {
@@ -265,17 +269,25 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: AppSpacing.lg),
 
               // Room Field
               _buildLabel('Room (optional)', theme),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               TextFormField(
                 controller: _roomController,
+                enabled: !_isLoading,
                 decoration: _inputDecoration(isPlayful).copyWith(
                   hintText: 'e.g., A101, Gym',
                   prefixIcon: const Icon(Icons.room_outlined),
                 ),
+                validator: (value) {
+                  // Optional field, but if provided it should not be just whitespace
+                  if (value != null && value.isNotEmpty && value.trim().isEmpty) {
+                    return 'Room cannot be only whitespace';
+                  }
+                  return null;
+                },
               ),
             ],
           ),
@@ -315,17 +327,17 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
   InputDecoration _inputDecoration(bool isPlayful) {
     return InputDecoration(
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+        borderRadius: isPlayful ? AppRadius.cardBorderRadius : AppRadius.buttonBorderRadius,
       ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 12,
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
     );
   }
 
   Future<void> _saveLesson() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
 
     setState(() {
       _isLoading = true;
@@ -344,9 +356,10 @@ class _LessonFormDialogState extends ConsumerState<LessonFormDialog> {
       // Determine if creating stable or week-specific lesson
       final isStable = weekView == WeekViewType.stable;
 
-      if (_isEditing) {
+      final existingLesson = widget.existingLesson;
+      if (_isEditing && existingLesson != null) {
         await repository.updateLesson(
-          lessonId: widget.existingLesson!.id,
+          lessonId: existingLesson.id,
           subjectId: _selectedSubjectId,
           dayOfWeek: _selectedDayOfWeek,
           startTime: startTimeStr,
@@ -409,8 +422,8 @@ class _DaySelector extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
       children: List.generate(5, (index) {
         final day = index + 1; // 1=Monday to 5=Friday
         final isSelected = selectedDay == day;
@@ -419,18 +432,18 @@ class _DaySelector extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () => onDaySelected(day),
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            borderRadius: isPlayful ? AppRadius.cardBorderRadius : AppRadius.buttonBorderRadius,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
                 vertical: 10,
               ),
               decoration: BoxDecoration(
                 color: isSelected
                     ? theme.colorScheme.primary
                     : theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                borderRadius: isPlayful ? AppRadius.cardBorderRadius : AppRadius.buttonBorderRadius,
                 border: Border.all(
                   color: isSelected
                       ? theme.colorScheme.primary
@@ -492,14 +505,14 @@ class _TimePicker extends StatelessWidget {
             onTimeChanged(picked);
           }
         },
-        borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+        borderRadius: isPlayful ? AppRadius.cardBorderRadius : AppRadius.buttonBorderRadius,
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
             vertical: 14,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+            borderRadius: isPlayful ? AppRadius.cardBorderRadius : AppRadius.buttonBorderRadius,
             border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.5),
               width: 1,
@@ -512,7 +525,7 @@ class _TimePicker extends StatelessWidget {
                 size: 20,
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: AppSpacing.xs),
               Text(
                 ScheduleConfig.formatTime(time),
                 style: TextStyle(

@@ -748,10 +748,9 @@ GRANT ALL ON profiles TO postgres;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- =============================================================================
--- STEP 11: Reset GENESIS-KEY for testing (if exists)
+-- NOTE: Hardcoded GENESIS-KEY token removed for security.
+-- Use SELECT * FROM generate_genesis_token(); for bootstrap (see migration 20260118000001)
 -- =============================================================================
-
-UPDATE invite_tokens SET is_used = false WHERE token = 'GENESIS-KEY';
 
 -- =============================================================================
 -- END OF MIGRATION

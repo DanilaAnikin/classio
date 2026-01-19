@@ -1,10 +1,33 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_avatar.dart';
+import '../../../../shared/widgets/app_card.dart';
 import '../../../auth/domain/entities/app_user.dart';
+
+// =============================================================================
+// STAFF CARD - Principal Dashboard Staff Display
+// =============================================================================
+// A premium card component for displaying staff member information with
+// proper visual hierarchy, role-based coloring, and interactive actions.
+//
+// Features:
+// - Uses AppCard.interactive for consistent card styling
+// - AppAvatar for staff avatars with proper fallbacks
+// - AppTypography for all text styles
+// - AppSpacing for all margins/padding
+// - Role-based color coding
+// - Theme-aware styling (Clean vs Playful)
+// =============================================================================
 
 /// A card widget displaying a staff member's information.
 ///
 /// Shows the staff member's name, email, role, and provides action buttons.
+/// Uses design system tokens for consistent styling across themes.
 class StaffCard extends StatelessWidget {
   /// Creates a [StaffCard].
   const StaffCard({
@@ -12,7 +35,6 @@ class StaffCard extends StatelessWidget {
     required this.staff,
     this.onViewProfile,
     this.onRemove,
-    this.isPlayful = false,
   });
 
   /// The staff member to display.
@@ -24,185 +46,192 @@ class StaffCard extends StatelessWidget {
   /// Callback when the remove action is triggered.
   final VoidCallback? onRemove;
 
-  /// Whether to use playful styling.
+  /// Detects if the current theme is playful.
+  bool _isPlayful(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.toARGB32() == PlayfulColors.primary.toARGB32() ||
+        (primaryColor.r * 255 > 100 && primaryColor.b * 255 > 200);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPlayful = _isPlayful(context);
+    final roleColor = _getRoleColor(isPlayful);
+
+    return AppCard.interactive(
+      onTap: onViewProfile,
+      semanticLabel: 'Staff member ${staff.fullName}',
+      child: Row(
+        children: [
+          // Avatar
+          _StaffAvatar(
+            staff: staff,
+            roleColor: roleColor,
+            isPlayful: isPlayful,
+          ),
+          SizedBox(width: AppSpacing.md),
+          // Staff info
+          Expanded(
+            child: _StaffInfo(
+              staff: staff,
+              roleColor: roleColor,
+              isPlayful: isPlayful,
+            ),
+          ),
+          // Actions menu
+          _ActionsMenu(
+            isPlayful: isPlayful,
+            onViewProfile: onViewProfile,
+            onRemove: onRemove,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Returns the appropriate color for the staff member's role.
+  Color _getRoleColor(bool isPlayful) {
+    switch (staff.role) {
+      case UserRole.superadmin:
+        return isPlayful
+            ? PlayfulColors.superadminRole
+            : CleanColors.superadminRole;
+      case UserRole.bigadmin:
+        return isPlayful
+            ? PlayfulColors.principalRole
+            : CleanColors.principalRole;
+      case UserRole.admin:
+        return isPlayful ? PlayfulColors.deputyRole : CleanColors.deputyRole;
+      case UserRole.teacher:
+        return isPlayful ? PlayfulColors.teacherRole : CleanColors.teacherRole;
+      case UserRole.student:
+        return isPlayful ? PlayfulColors.studentRole : CleanColors.studentRole;
+      case UserRole.parent:
+        return isPlayful ? PlayfulColors.parentRole : CleanColors.parentRole;
+    }
+  }
+}
+
+// =============================================================================
+// SUBCOMPONENTS
+// =============================================================================
+
+/// Staff avatar with image or initials fallback.
+class _StaffAvatar extends StatelessWidget {
+  const _StaffAvatar({
+    required this.staff,
+    required this.roleColor,
+    required this.isPlayful,
+  });
+
+  final AppUser staff;
+  final Color roleColor;
   final bool isPlayful;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final roleColor = _getRoleColor(theme);
+    final avatarUrl = staff.avatarUrl;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        color: theme.colorScheme.surface,
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.15),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isPlayful
-                ? roleColor.withValues(alpha: 0.1)
-                : Colors.black.withValues(alpha: 0.03),
-            blurRadius: isPlayful ? 10 : 4,
-            offset: Offset(0, isPlayful ? 3 : 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        child: InkWell(
-          onTap: onViewProfile,
-          borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-          child: Padding(
-            padding: EdgeInsets.all(isPlayful ? 16 : 14),
-            child: Row(
-              children: [
-                // Avatar
-                _buildAvatar(theme, roleColor),
-                SizedBox(width: isPlayful ? 16 : 14),
-                // Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        staff.fullName,
-                        style: TextStyle(
-                          fontSize: isPlayful ? 17 : 16,
-                          fontWeight:
-                              isPlayful ? FontWeight.w700 : FontWeight.w600,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        staff.email ?? '',
-                        style: TextStyle(
-                          fontSize: isPlayful ? 14 : 13,
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: isPlayful ? 10 : 8),
-                      _buildRoleBadge(theme, roleColor),
-                    ],
-                  ),
-                ),
-                // Actions
-                PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.more_vert,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
-                  ),
-                  itemBuilder: (context) => [
-                    PopupMenuItem<String>(
-                      value: 'view',
-                      child: Row(
-                        children: [
-                          Icon(Icons.person_outline,
-                              size: 20, color: theme.colorScheme.onSurface),
-                          const SizedBox(width: 12),
-                          const Text('View Profile'),
-                        ],
-                      ),
-                    ),
-                    const PopupMenuDivider(),
-                    PopupMenuItem<String>(
-                      value: 'remove',
-                      child: Row(
-                        children: [
-                          Icon(Icons.person_remove_outlined,
-                              size: 20, color: theme.colorScheme.error),
-                          const SizedBox(width: 12),
-                          Text('Remove from School',
-                              style: TextStyle(color: theme.colorScheme.error)),
-                        ],
-                      ),
-                    ),
-                  ],
-                  onSelected: (value) {
-                    switch (value) {
-                      case 'view':
-                        onViewProfile?.call();
-                        break;
-                      case 'remove':
-                        onRemove?.call();
-                        break;
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAvatar(ThemeData theme, Color roleColor) {
-    if (staff.avatarUrl != null && staff.avatarUrl!.isNotEmpty) {
-      return CircleAvatar(
-        radius: isPlayful ? 28 : 26,
-        backgroundImage: NetworkImage(staff.avatarUrl!),
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
+      return AppAvatar(
+        imageUrl: avatarUrl,
+        fallbackName: staff.fullName,
+        size: isPlayful ? AvatarSize.lg : AvatarSize.md,
+        showShadow: true,
       );
     }
 
-    return CircleAvatar(
-      radius: isPlayful ? 28 : 26,
-      backgroundColor: roleColor.withValues(alpha: 0.15),
-      child: Text(
-        _getInitials(),
-        style: TextStyle(
-          fontSize: isPlayful ? 18 : 16,
-          fontWeight: FontWeight.w700,
-          color: roleColor,
-        ),
-      ),
+    return AppAvatar.initials(
+      name: staff.fullName,
+      size: isPlayful ? AvatarSize.lg : AvatarSize.md,
+      backgroundColor: roleColor.withValues(alpha: AppOpacity.medium),
+      foregroundColor: roleColor,
+      showShadow: true,
     );
   }
+}
 
-  String _getInitials() {
-    if (staff.firstName != null && staff.lastName != null) {
-      return '${staff.firstName![0]}${staff.lastName![0]}'.toUpperCase();
-    } else if (staff.firstName != null) {
-      return staff.firstName![0].toUpperCase();
-    }
-    return (staff.email ?? 'U')[0].toUpperCase();
+/// Staff information section showing name, email, and role badge.
+class _StaffInfo extends StatelessWidget {
+  const _StaffInfo({
+    required this.staff,
+    required this.roleColor,
+    required this.isPlayful,
+  });
+
+  final AppUser staff;
+  final Color roleColor;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Staff name
+        Text(
+          staff.fullName,
+          style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+            fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: AppSpacing.xxs),
+        // Email
+        Text(
+          staff.email ?? '',
+          style: AppTypography.secondaryText(isPlayful: isPlayful),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: AppSpacing.sm),
+        // Role badge
+        _RoleBadge(
+          role: staff.role,
+          roleColor: roleColor,
+          isPlayful: isPlayful,
+        ),
+      ],
+    );
   }
+}
 
-  Widget _buildRoleBadge(ThemeData theme, Color roleColor) {
+/// Role badge showing the staff member's role with icon.
+class _RoleBadge extends StatelessWidget {
+  const _RoleBadge({
+    required this.role,
+    required this.roleColor,
+    required this.isPlayful,
+  });
+
+  final UserRole role;
+  final Color roleColor;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 12 : 10,
-        vertical: isPlayful ? 5 : 4,
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: roleColor.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
+        color: roleColor.withValues(alpha: AppOpacity.medium),
+        borderRadius: AppRadius.button(isPlayful: isPlayful),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             _getRoleIcon(),
-            size: isPlayful ? 15 : 14,
+            size: AppIconSize.xs,
             color: roleColor,
           ),
-          SizedBox(width: isPlayful ? 6 : 4),
+          SizedBox(width: AppSpacing.xs),
           Text(
             _getRoleDisplayName(),
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
               fontWeight: FontWeight.w600,
               color: roleColor,
             ),
@@ -212,25 +241,8 @@ class StaffCard extends StatelessWidget {
     );
   }
 
-  Color _getRoleColor(ThemeData theme) {
-    switch (staff.role) {
-      case UserRole.superadmin:
-        return Colors.purple;
-      case UserRole.bigadmin:
-        return theme.colorScheme.primary;
-      case UserRole.admin:
-        return Colors.indigo;
-      case UserRole.teacher:
-        return Colors.blue;
-      case UserRole.student:
-        return Colors.green;
-      case UserRole.parent:
-        return Colors.orange;
-    }
-  }
-
   IconData _getRoleIcon() {
-    switch (staff.role) {
+    switch (role) {
       case UserRole.superadmin:
         return Icons.admin_panel_settings;
       case UserRole.bigadmin:
@@ -247,7 +259,7 @@ class StaffCard extends StatelessWidget {
   }
 
   String _getRoleDisplayName() {
-    switch (staff.role) {
+    switch (role) {
       case UserRole.superadmin:
         return 'Super Admin';
       case UserRole.bigadmin:
@@ -261,5 +273,79 @@ class StaffCard extends StatelessWidget {
       case UserRole.parent:
         return 'Parent';
     }
+  }
+}
+
+/// Popup menu with staff actions.
+class _ActionsMenu extends StatelessWidget {
+  const _ActionsMenu({
+    required this.isPlayful,
+    this.onViewProfile,
+    this.onRemove,
+  });
+
+  final bool isPlayful;
+  final VoidCallback? onViewProfile;
+  final VoidCallback? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+    final errorColor = isPlayful ? PlayfulColors.error : CleanColors.error;
+    final textColor =
+        isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+
+    return PopupMenuButton<String>(
+      icon: Icon(
+        Icons.more_vert,
+        color: iconColor,
+        size: AppIconSize.md,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+      ),
+      elevation: isPlayful ? AppElevation.md : AppElevation.sm,
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
+          value: 'view',
+          child: Row(
+            children: [
+              Icon(Icons.person_outline, size: AppIconSize.sm, color: textColor),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                'View Profile',
+                style: AppTypography.secondaryText(isPlayful: isPlayful)
+                    .copyWith(color: textColor),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        PopupMenuItem<String>(
+          value: 'remove',
+          child: Row(
+            children: [
+              Icon(Icons.person_remove_outlined,
+                  size: AppIconSize.sm, color: errorColor),
+              SizedBox(width: AppSpacing.sm),
+              Text(
+                'Remove from School',
+                style: AppTypography.secondaryText(isPlayful: isPlayful)
+                    .copyWith(color: errorColor),
+              ),
+            ],
+          ),
+        ),
+      ],
+      onSelected: (value) {
+        switch (value) {
+          case 'view':
+            onViewProfile?.call();
+          case 'remove':
+            onRemove?.call();
+        }
+      },
+    );
   }
 }

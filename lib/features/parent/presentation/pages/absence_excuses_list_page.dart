@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/router/routes.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../attendance/domain/entities/absence_excuse.dart';
 import '../../../attendance/presentation/providers/absence_excuse_provider.dart';
@@ -80,7 +80,7 @@ class AbsenceExcusesListPage extends ConsumerWidget {
 
             return ResponsiveCenterScrollView(
               maxWidth: 800,
-              padding: EdgeInsets.all(isPlayful ? 16 : 12),
+              padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +92,7 @@ class AbsenceExcusesListPage extends ConsumerWidget {
                     declinedCount: declinedExcuses.length,
                     isPlayful: isPlayful,
                   ),
-                  SizedBox(height: isPlayful ? 24 : 20),
+                  SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
                   // Pending Section
                   if (pendingExcuses.isNotEmpty) ...[
@@ -102,16 +102,16 @@ class AbsenceExcusesListPage extends ConsumerWidget {
                       color: Colors.orange,
                       isPlayful: isPlayful,
                     ),
-                    SizedBox(height: isPlayful ? 12 : 8),
+                    SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                     ...pendingExcuses.map((excuse) => Padding(
-                          padding: EdgeInsets.only(bottom: isPlayful ? 12 : 8),
+                          padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                           child: _ExcuseCard(
                             excuse: excuse,
                             isPlayful: isPlayful,
                             childrenAsync: childrenAsync,
                           ),
                         )),
-                    SizedBox(height: isPlayful ? 16 : 12),
+                    SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
                   ],
 
                   // Approved Section
@@ -122,16 +122,16 @@ class AbsenceExcusesListPage extends ConsumerWidget {
                       color: Colors.green,
                       isPlayful: isPlayful,
                     ),
-                    SizedBox(height: isPlayful ? 12 : 8),
+                    SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                     ...approvedExcuses.map((excuse) => Padding(
-                          padding: EdgeInsets.only(bottom: isPlayful ? 12 : 8),
+                          padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                           child: _ExcuseCard(
                             excuse: excuse,
                             isPlayful: isPlayful,
                             childrenAsync: childrenAsync,
                           ),
                         )),
-                    SizedBox(height: isPlayful ? 16 : 12),
+                    SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
                   ],
 
                   // Declined Section
@@ -142,9 +142,9 @@ class AbsenceExcusesListPage extends ConsumerWidget {
                       color: Colors.red,
                       isPlayful: isPlayful,
                     ),
-                    SizedBox(height: isPlayful ? 12 : 8),
+                    SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                     ...declinedExcuses.map((excuse) => Padding(
-                          padding: EdgeInsets.only(bottom: isPlayful ? 12 : 8),
+                          padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.sm : AppSpacing.xs),
                           child: _ExcuseCard(
                             excuse: excuse,
                             isPlayful: isPlayful,
@@ -153,7 +153,7 @@ class AbsenceExcusesListPage extends ConsumerWidget {
                         )),
                   ],
 
-                  const SizedBox(height: 80),
+                  const SizedBox(height: AppSpacing.xxxl * 2),
                 ],
               ),
             );
@@ -168,12 +168,12 @@ class AbsenceExcusesListPage extends ConsumerWidget {
                   size: 48,
                   color: theme.colorScheme.error,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
                 Text(
                   'Error loading excuses',
                   style: theme.textTheme.titleMedium,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Text(
                   e.toString(),
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -181,7 +181,7 @@ class AbsenceExcusesListPage extends ConsumerWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
                 FilledButton.icon(
                   onPressed: () {
                     if (childId != null) {
@@ -214,23 +214,23 @@ class _EmptyState extends StatelessWidget {
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 32 : 24),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xxl : AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.inbox_outlined,
-              size: isPlayful ? 72 : 64,
-              color: theme.colorScheme.outline.withValues(alpha: 0.5),
+              size: isPlayful ? AppIconSize.hero + 8 : AppIconSize.hero,
+              color: theme.colorScheme.outline.withValues(alpha: AppOpacity.heavy),
             ),
-            SizedBox(height: isPlayful ? 24 : 16),
+            SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.md),
             Text(
               'No Excuse Submissions',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(height: isPlayful ? 12 : 8),
+            SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
             Text(
               'You haven\'t submitted any absence excuses yet.\nSubmit excuses from the attendance page.',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -272,7 +272,7 @@ class _SummaryRow extends StatelessWidget {
             isPlayful: isPlayful,
           ),
         ),
-        SizedBox(width: isPlayful ? 12 : 8),
+        SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
         Expanded(
           child: _SummaryCard(
             label: 'Approved',
@@ -282,7 +282,7 @@ class _SummaryRow extends StatelessWidget {
             isPlayful: isPlayful,
           ),
         ),
-        SizedBox(width: isPlayful ? 12 : 8),
+        SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
         Expanded(
           child: _SummaryCard(
             label: 'Declined',
@@ -316,14 +316,15 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        color: color.withValues(alpha: 0.1),
+        borderRadius: cardRadius,
+        color: color.withValues(alpha: AppOpacity.soft - 0.02),
         border: Border.all(
-          color: color.withValues(alpha: 0.3),
+          color: color.withValues(alpha: AppOpacity.medium + 0.14),
         ),
       ),
       child: Column(
@@ -331,22 +332,20 @@ class _SummaryCard extends StatelessWidget {
           Icon(
             icon,
             color: color,
-            size: isPlayful ? 28 : 24,
+            size: isPlayful ? AppIconSize.lg : AppIconSize.md,
           ),
-          SizedBox(height: isPlayful ? 8 : 6),
+          SizedBox(height: isPlayful ? AppSpacing.xs : 6),
           Text(
             count.toString(),
-            style: TextStyle(
-              fontSize: isPlayful ? 24 : 20,
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
               color: color,
             ),
           ),
-          SizedBox(height: isPlayful ? 4 : 2),
+          SizedBox(height: isPlayful ? AppSpacing.xxs : 2),
           Text(
             label,
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
+            style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
@@ -377,36 +376,34 @@ class _SectionHeader extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 4,
-          height: isPlayful ? 24 : 20,
+          width: AppSpacing.xxs,
+          height: isPlayful ? AppSpacing.xl : AppSpacing.lg,
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: AppSpacing.sm),
         Text(
           title,
-          style: TextStyle(
-            fontSize: isPlayful ? 18 : 16,
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.xs),
         Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isPlayful ? 10 : 8,
-            vertical: isPlayful ? 4 : 2,
+            horizontal: isPlayful ? AppSpacing.xs + 2 : AppSpacing.xs,
+            vertical: isPlayful ? AppSpacing.xxs : 2,
           ),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(isPlayful ? 10 : 6),
+            color: color.withValues(alpha: AppOpacity.soft + 0.03),
+            borderRadius: BorderRadius.circular(isPlayful ? AppRadius.xs + 2 : AppRadius.xs - 2),
           ),
           child: Text(
             count.toString(),
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -432,25 +429,20 @@ class _ExcuseCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final statusColor = _getStatusColor(excuse.status);
+    final statusColor = _getStatusColor(excuse.status, isPlayful);
+    final cardRadius = AppRadius.getCardRadius(isPlayful: isPlayful);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 14),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.md - 2),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: cardRadius,
         color: theme.colorScheme.surface,
         border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
+          color: statusColor.withValues(alpha: AppOpacity.medium + 0.14),
           width: isPlayful ? 2 : 1,
         ),
         boxShadow: isPlayful
-            ? [
-                BoxShadow(
-                  color: statusColor.withValues(alpha: 0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
+            ? AppShadows.card(isPlayful: isPlayful)
             : null,
       ),
       child: Column(
@@ -467,46 +459,43 @@ class _ExcuseCard extends ConsumerWidget {
                     if (excuse.studentName != null)
                       Text(
                         excuse.studentName!,
-                        style: TextStyle(
-                          fontSize: isPlayful ? 16 : 15,
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: AppSpacing.xxs),
                     Row(
                       children: [
                         Icon(
                           Icons.calendar_today_outlined,
                           size: isPlayful ? 14 : 12,
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                         ),
-                        const SizedBox(width: 6),
+                        SizedBox(width: AppSpacing.xs - 2),
                         Text(
                           excuse.attendanceDate != null
                               ? DateFormat('MMMM d, yyyy')
                                   .format(excuse.attendanceDate!)
                               : 'Unknown date',
-                          style: TextStyle(
-                            fontSize: isPlayful ? 13 : 12,
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
                     ),
                     if (excuse.subjectName != null) ...[
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppSpacing.xxs),
                       Row(
                         children: [
                           Icon(
                             Icons.book_outlined,
                             size: isPlayful ? 14 : 12,
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
                           ),
-                          const SizedBox(width: 6),
+                          SizedBox(width: AppSpacing.xs - 2),
                           Text(
                             excuse.subjectName!,
-                            style: TextStyle(
-                              fontSize: isPlayful ? 13 : 12,
+                            style: theme.textTheme.labelSmall?.copyWith(
                               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
@@ -524,30 +513,28 @@ class _ExcuseCard extends ConsumerWidget {
           ),
 
           // Reason
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.sm),
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(isPlayful ? 12 : 10),
+            padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs + 2),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
+              borderRadius: BorderRadius.circular(isPlayful ? AppRadius.xs + 2 : AppRadius.sm),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Reason:',
-                  style: TextStyle(
-                    fontSize: isPlayful ? 12 : 11,
+                  style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Text(
                   excuse.reason,
-                  style: TextStyle(
-                    fontSize: isPlayful ? 14 : 13,
+                  style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
@@ -557,15 +544,15 @@ class _ExcuseCard extends ConsumerWidget {
 
           // Teacher response if declined
           if (excuse.isDeclined && excuse.teacherResponse != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(isPlayful ? 12 : 10),
+              padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs + 2),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
+                color: (isPlayful ? PlayfulColors.error : CleanColors.error).withValues(alpha: AppOpacity.subtle + 0.04),
+                borderRadius: BorderRadius.circular(isPlayful ? AppRadius.xs + 2 : AppRadius.sm),
                 border: Border.all(
-                  color: Colors.red.withValues(alpha: 0.2),
+                  color: (isPlayful ? PlayfulColors.error : CleanColors.error).withValues(alpha: AppOpacity.medium + 0.04),
                 ),
               ),
               child: Column(
@@ -575,25 +562,23 @@ class _ExcuseCard extends ConsumerWidget {
                     children: [
                       Icon(
                         Icons.reply_rounded,
-                        size: isPlayful ? 16 : 14,
-                        color: Colors.red,
+                        size: isPlayful ? AppIconSize.xs : 14,
+                        color: isPlayful ? PlayfulColors.error : CleanColors.error,
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: AppSpacing.xs - 2),
                       Text(
                         'Teacher Response:',
-                        style: TextStyle(
-                          fontSize: isPlayful ? 12 : 11,
+                        style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: Colors.red,
+                          color: isPlayful ? PlayfulColors.error : CleanColors.error,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: AppSpacing.xs - 2),
                   Text(
                     excuse.teacherResponse!,
-                    style: TextStyle(
-                      fontSize: isPlayful ? 14 : 13,
+                    style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurface,
                       fontStyle: FontStyle.italic,
                     ),
@@ -604,12 +589,12 @@ class _ExcuseCard extends ConsumerWidget {
           ],
 
           // Submitted date
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.sm),
           Text(
             'Submitted ${DateFormat('MMM d, yyyy HH:mm').format(excuse.createdAt)}',
-            style: TextStyle(
+            style: theme.textTheme.labelSmall?.copyWith(
               fontSize: isPlayful ? 11 : 10,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy - 0.08),
             ),
           ),
         ],
@@ -617,14 +602,14 @@ class _ExcuseCard extends ConsumerWidget {
     );
   }
 
-  Color _getStatusColor(AbsenceExcuseStatus status) {
+  Color _getStatusColor(AbsenceExcuseStatus status, bool isPlayful) {
     switch (status) {
       case AbsenceExcuseStatus.pending:
-        return Colors.orange;
+        return isPlayful ? PlayfulColors.warning : CleanColors.warning;
       case AbsenceExcuseStatus.approved:
-        return Colors.green;
+        return isPlayful ? PlayfulColors.success : CleanColors.success;
       case AbsenceExcuseStatus.declined:
-        return Colors.red;
+        return isPlayful ? PlayfulColors.error : CleanColors.error;
     }
   }
 }
@@ -641,30 +626,30 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final color = _getStatusColor(status);
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 12 : 10,
-        vertical: isPlayful ? 6 : 4,
+        horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs + 2,
+        vertical: isPlayful ? AppSpacing.xs - 2 : AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(isPlayful ? 10 : 6),
+        color: color.withValues(alpha: AppOpacity.soft + 0.03),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.xs + 2 : AppRadius.xs - 2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             _getStatusIcon(status),
-            size: isPlayful ? 16 : 14,
+            size: isPlayful ? AppIconSize.xs : 14,
             color: color,
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: AppSpacing.xs - 2),
           Text(
             status.label,
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -677,11 +662,11 @@ class _StatusBadge extends StatelessWidget {
   Color _getStatusColor(AbsenceExcuseStatus status) {
     switch (status) {
       case AbsenceExcuseStatus.pending:
-        return Colors.orange;
+        return isPlayful ? PlayfulColors.warning : CleanColors.warning;
       case AbsenceExcuseStatus.approved:
-        return Colors.green;
+        return isPlayful ? PlayfulColors.success : CleanColors.success;
       case AbsenceExcuseStatus.declined:
-        return Colors.red;
+        return isPlayful ? PlayfulColors.error : CleanColors.error;
     }
   }
 

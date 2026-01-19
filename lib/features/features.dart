@@ -38,8 +38,8 @@ export 'profile/profile.dart';
 // Schedule feature
 export 'schedule/schedule.dart';
 
-// Student feature (hide conflicts with teacher)
-export 'student/student.dart' hide AttendanceStatus, ExcuseStatus, AttendanceEntity;
+// Student feature (hide conflicts with teacher and principal)
+export 'student/student.dart' hide AttendanceStatus, ExcuseStatus, AttendanceEntity, OverviewTab, ScheduleLessonCard;
 
 // Subject detail feature
 export 'subject_detail/subject_detail.dart';

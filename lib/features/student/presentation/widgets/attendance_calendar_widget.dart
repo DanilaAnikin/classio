@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/theme.dart';
 import '../../domain/entities/entities.dart';
 
 /// Calendar widget displaying attendance status for each day.
@@ -11,6 +12,7 @@ import '../../domain/entities/entities.dart';
 /// - Monthly view with color-coded days
 /// - Navigation between months
 /// - Legend explaining color meanings
+/// - Theme-aware styling (Clean vs Playful)
 class AttendanceCalendarWidget extends ConsumerWidget {
   const AttendanceCalendarWidget({
     super.key,
@@ -42,23 +44,16 @@ class AttendanceCalendarWidget extends ConsumerWidget {
     final isPlayful = ref.watch(themeNotifierProvider) == ThemeType.playful;
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 20 : 16),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.lg : AppSpacing.md),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
         color: theme.colorScheme.surface,
         border: isPlayful
             ? null
             : Border.all(
-                color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                width: 1,
+                color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
               ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isPlayful ? 0.08 : 0.05),
-            blurRadius: isPlayful ? 16 : 8,
-            offset: Offset(0, isPlayful ? 6 : 3),
-          ),
-        ],
+        boxShadow: AppShadows.card(isPlayful: isPlayful),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,11 +65,11 @@ class AttendanceCalendarWidget extends ConsumerWidget {
             onMonthChanged: onMonthChanged,
             isPlayful: isPlayful,
           ),
-          SizedBox(height: isPlayful ? 20 : 16),
+          SizedBox(height: isPlayful ? AppSpacing.lg : AppSpacing.md),
 
           // Weekday headers
           _WeekdayHeaders(isPlayful: isPlayful),
-          SizedBox(height: isPlayful ? 12 : 8),
+          SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
 
           // Calendar grid
           _CalendarGrid(
@@ -84,7 +79,7 @@ class AttendanceCalendarWidget extends ConsumerWidget {
             onDayTap: onDayTap,
             isPlayful: isPlayful,
           ),
-          SizedBox(height: isPlayful ? 20 : 16),
+          SizedBox(height: isPlayful ? AppSpacing.lg : AppSpacing.md),
 
           // Legend
           _Legend(isPlayful: isPlayful),
@@ -117,43 +112,62 @@ class _MonthNavigationHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(
+        _NavigationButton(
+          icon: Icons.chevron_left_rounded,
           onPressed: () {
             final newDate = DateTime(year, month - 1, 1);
             onMonthChanged(newDate.month, newDate.year);
           },
-          icon: Icon(
-            Icons.chevron_left_rounded,
-            size: isPlayful ? 28 : 24,
-            color: theme.colorScheme.primary,
-          ),
-          style: IconButton.styleFrom(
-            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-          ),
+          isPlayful: isPlayful,
         ),
         Text(
           monthName,
-          style: TextStyle(
-            fontSize: isPlayful ? 18 : 16,
-            fontWeight: isPlayful ? FontWeight.w700 : FontWeight.w600,
+          style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
             color: theme.colorScheme.onSurface,
           ),
         ),
-        IconButton(
+        _NavigationButton(
+          icon: Icons.chevron_right_rounded,
           onPressed: () {
             final newDate = DateTime(year, month + 1, 1);
             onMonthChanged(newDate.month, newDate.year);
           },
-          icon: Icon(
-            Icons.chevron_right_rounded,
-            size: isPlayful ? 28 : 24,
-            color: theme.colorScheme.primary,
-          ),
-          style: IconButton.styleFrom(
-            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-          ),
+          isPlayful: isPlayful,
         ),
       ],
+    );
+  }
+}
+
+/// Navigation button for month switching.
+class _NavigationButton extends StatelessWidget {
+  const _NavigationButton({
+    required this.icon,
+    required this.onPressed,
+    required this.isPlayful,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(
+        icon,
+        size: isPlayful ? AppIconSize.lg : AppIconSize.md,
+        color: theme.colorScheme.primary,
+      ),
+      style: IconButton.styleFrom(
+        backgroundColor: theme.colorScheme.primary.withValues(alpha: AppOpacity.soft),
+        shape: RoundedRectangleBorder(
+          borderRadius: AppRadius.button(isPlayful: isPlayful),
+        ),
+      ),
     );
   }
 }
@@ -176,12 +190,11 @@ class _WeekdayHeaders extends StatelessWidget {
           child: Center(
             child: Text(
               day,
-              style: TextStyle(
-                fontSize: isPlayful ? 13 : 12,
+              style: AppTypography.caption(isPlayful: isPlayful).copyWith(
                 fontWeight: FontWeight.w600,
                 color: isWeekend
-                    ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ? theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy)
+                    : theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
               ),
             ),
           ),
@@ -228,7 +241,7 @@ class _CalendarGrid extends StatelessWidget {
     return Column(
       children: List.generate(rowCount, (rowIndex) {
         return Padding(
-          padding: EdgeInsets.only(bottom: isPlayful ? 8 : 6),
+          padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.xs : AppSpacing.xxs),
           child: Row(
             children: List.generate(7, (colIndex) {
               final cellIndex = rowIndex * 7 + colIndex;
@@ -280,49 +293,85 @@ class _DayCell extends StatelessWidget {
   final bool isPlayful;
   final VoidCallback? onTap;
 
+  Color _getStatusColor() {
+    if (status == null) return Colors.transparent;
+    switch (status!) {
+      case DailyAttendanceStatus.allPresent:
+        return isPlayful
+            ? PlayfulColors.attendancePresent
+            : CleanColors.attendancePresent;
+      case DailyAttendanceStatus.partialAbsent:
+        return isPlayful
+            ? PlayfulColors.attendanceLate
+            : CleanColors.attendanceLate;
+      case DailyAttendanceStatus.allAbsent:
+        return isPlayful
+            ? PlayfulColors.attendanceAbsent
+            : CleanColors.attendanceAbsent;
+      case DailyAttendanceStatus.wasLate:
+        return isPlayful
+            ? PlayfulColors.attendanceExcused
+            : CleanColors.attendanceExcused;
+      case DailyAttendanceStatus.noData:
+        return isPlayful
+            ? PlayfulColors.attendanceUnknown
+            : CleanColors.attendanceUnknown;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = isPlayful ? 36.0 : 32.0;
+    final size = isPlayful ? AppSpacing.xxxl : AppSpacing.xxl;
+    final statusColor = _getStatusColor();
 
     Color backgroundColor;
     Color textColor;
     BoxBorder? border;
 
-    if (status != null) {
-      backgroundColor = status!.color.withValues(alpha: isPlayful ? 0.8 : 0.7);
+    if (status != null && status != DailyAttendanceStatus.noData) {
+      // Status day - show status color
+      backgroundColor = statusColor.withValues(
+        alpha: isPlayful ? AppOpacity.dominant : AppOpacity.heavy,
+      );
       textColor = Colors.white;
     } else if (isWeekend) {
+      // Weekend - lighter appearance
       backgroundColor = Colors.transparent;
-      textColor = theme.colorScheme.onSurface.withValues(alpha: 0.3);
+      textColor = theme.colorScheme.onSurface.withValues(alpha: AppOpacity.strong);
     } else {
-      backgroundColor = theme.colorScheme.outline.withValues(alpha: 0.05);
-      textColor = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+      // Regular day - subtle background
+      backgroundColor = theme.colorScheme.outline.withValues(alpha: AppOpacity.subtle);
+      textColor = theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant);
     }
 
     if (isToday) {
       border = Border.all(
         color: theme.colorScheme.primary,
-        width: 2,
+        width: isPlayful ? AppSpacing.space2 : 1.5,
       );
     }
 
     return GestureDetector(
       onTap: onTap,
       child: Center(
-        child: Container(
+        child: AnimatedContainer(
+          duration: AppDuration.fast,
+          curve: AppCurves.standard,
           width: size,
           height: size,
           decoration: BoxDecoration(
             color: backgroundColor,
             shape: BoxShape.circle,
             border: border,
-            boxShadow: status != null && isPlayful
+            boxShadow: status != null &&
+                    status != DailyAttendanceStatus.noData &&
+                    isPlayful
                 ? [
                     BoxShadow(
-                      color: status!.color.withValues(alpha: 0.3),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
+                      color: statusColor.withValues(alpha: AppOpacity.semi),
+                      blurRadius: AppSpacing.xs,
+                      offset: const Offset(0, AppSpacing.space2),
                     ),
                   ]
                 : null,
@@ -330,11 +379,9 @@ class _DayCell extends StatelessWidget {
           child: Center(
             child: Text(
               day.toString(),
-              style: TextStyle(
-                fontSize: isPlayful ? 14 : 13,
-                fontWeight: isToday || status != null
-                    ? FontWeight.w700
-                    : FontWeight.w500,
+              style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                fontWeight:
+                    isToday || status != null ? FontWeight.w700 : FontWeight.w500,
                 color: textColor,
               ),
             ),
@@ -354,26 +401,26 @@ class _Legend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: isPlayful ? 16 : 12,
-      runSpacing: isPlayful ? 8 : 6,
+      spacing: isPlayful ? AppSpacing.md : AppSpacing.sm,
+      runSpacing: isPlayful ? AppSpacing.xs : AppSpacing.xxs,
       children: [
         _LegendItem(
-          color: DailyAttendanceStatus.allPresent.color,
+          status: DailyAttendanceStatus.allPresent,
           label: 'Present',
           isPlayful: isPlayful,
         ),
         _LegendItem(
-          color: DailyAttendanceStatus.wasLate.color,
+          status: DailyAttendanceStatus.wasLate,
           label: 'Late',
           isPlayful: isPlayful,
         ),
         _LegendItem(
-          color: DailyAttendanceStatus.partialAbsent.color,
+          status: DailyAttendanceStatus.partialAbsent,
           label: 'Partial',
           isPlayful: isPlayful,
         ),
         _LegendItem(
-          color: DailyAttendanceStatus.allAbsent.color,
+          status: DailyAttendanceStatus.allAbsent,
           label: 'Absent',
           isPlayful: isPlayful,
         ),
@@ -382,39 +429,66 @@ class _Legend extends StatelessWidget {
   }
 }
 
+/// Individual legend item.
 class _LegendItem extends StatelessWidget {
   const _LegendItem({
-    required this.color,
+    required this.status,
     required this.label,
     required this.isPlayful,
   });
 
-  final Color color;
+  final DailyAttendanceStatus status;
   final String label;
   final bool isPlayful;
+
+  Color _getStatusColor() {
+    switch (status) {
+      case DailyAttendanceStatus.allPresent:
+        return isPlayful
+            ? PlayfulColors.attendancePresent
+            : CleanColors.attendancePresent;
+      case DailyAttendanceStatus.partialAbsent:
+        return isPlayful
+            ? PlayfulColors.attendanceLate
+            : CleanColors.attendanceLate;
+      case DailyAttendanceStatus.allAbsent:
+        return isPlayful
+            ? PlayfulColors.attendanceAbsent
+            : CleanColors.attendanceAbsent;
+      case DailyAttendanceStatus.wasLate:
+        return isPlayful
+            ? PlayfulColors.attendanceExcused
+            : CleanColors.attendanceExcused;
+      case DailyAttendanceStatus.noData:
+        return isPlayful
+            ? PlayfulColors.attendanceUnknown
+            : CleanColors.attendanceUnknown;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final color = _getStatusColor();
+    final dotSize = isPlayful ? AppSpacing.sm : AppSpacing.xs;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: isPlayful ? 14 : 12,
-          height: isPlayful ? 14 : 12,
+          width: dotSize,
+          height: dotSize,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        SizedBox(width: isPlayful ? 6 : 4),
+        SizedBox(width: isPlayful ? AppSpacing.xxs : AppSpacing.space2),
         Text(
           label,
-          style: TextStyle(
-            fontSize: isPlayful ? 12 : 11,
+          style: AppTypography.caption(isPlayful: isPlayful).copyWith(
             fontWeight: FontWeight.w500,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
           ),
         ),
       ],

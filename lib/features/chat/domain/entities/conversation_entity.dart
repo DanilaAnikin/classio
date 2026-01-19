@@ -99,8 +99,9 @@ class ConversationEntity {
 
   /// Returns a preview of the last message content.
   String get lastMessagePreview {
-    if (lastMessage == null) return '';
-    final content = lastMessage!.content;
+    final message = lastMessage;
+    if (message == null) return '';
+    final content = message.content;
     if (content.length > 50) {
       return '${content.substring(0, 50)}...';
     }

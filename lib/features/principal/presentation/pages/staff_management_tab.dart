@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/router/routes.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../providers/principal_providers.dart';
@@ -147,7 +148,6 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                             ),
                             child: StaffCard(
                               staff: staffMember,
-                              isPlayful: widget.isPlayful,
                               onViewProfile: () => _viewProfile(staffMember),
                               onRemove: () => _confirmRemoveStaff(
                                 context,
@@ -216,7 +216,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
-            padding: const EdgeInsets.all(32),
+            padding: EdgeInsets.all(AppSpacing.xxl),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -225,7 +225,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                   size: widget.isPlayful ? 64 : 56,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
                 Text(
                   'No staff found',
                   style: TextStyle(
@@ -235,14 +235,14 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: AppSpacing.xs),
                 Text(
                   'Try adjusting your search or filters',
                   style: TextStyle(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
                 TextButton(
                   onPressed: () {
                     _searchController.clear();
@@ -264,7 +264,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: EdgeInsets.all(AppSpacing.xxl),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -280,7 +280,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                   color: theme.colorScheme.primary.withValues(alpha: 0.6),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
               Text(
                 'No staff members yet',
                 style: TextStyle(
@@ -290,7 +290,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Invite admins and teachers to get started',
                 style: TextStyle(
@@ -311,7 +311,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.dialogInsets,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -320,7 +320,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                 size: 64,
                 color: theme.colorScheme.error.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               Text(
                 'Something went wrong',
                 style: TextStyle(
@@ -329,7 +329,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 error.toString(),
                 style: TextStyle(
@@ -338,7 +338,7 @@ class _StaffManagementTabState extends ConsumerState<StaffManagementTab> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
               ElevatedButton.icon(
                 onPressed: () {
                   ref.invalidate(schoolStaffProvider(widget.schoolId));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../admin_panel/domain/entities/class_info.dart';
 import '../../../dashboard/domain/entities/lesson.dart';
@@ -9,10 +10,8 @@ import '../../../dashboard/domain/entities/subject.dart';
 import '../../domain/domain.dart';
 
 /// Exception thrown when teacher operations fail.
-class TeacherException implements Exception {
-  const TeacherException(this.message);
-
-  final String message;
+class TeacherException extends RepositoryException {
+  const TeacherException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'TeacherException: $message';
@@ -96,25 +95,15 @@ class SupabaseTeacherRepository implements TeacherRepository {
     }
 
     try {
-      // Get subject IDs where teacher teaches
+      // Get class_id directly from subjects where teacher teaches
+      // This finds all classes where the teacher is assigned to at least one subject
       final subjectsResponse = await _supabase
           .from('subjects')
-          .select('id')
+          .select('class_id')
           .eq('teacher_id', userId);
 
-      final subjectIds =
-          subjectsResponse.map((s) => s['id'] as String).toList();
-
-      if (subjectIds.isEmpty) return [];
-
-      // Get class IDs from lessons table (lessons have both subject_id and class_id)
-      final lessonsResponse = await _supabase
-          .from('lessons')
-          .select('class_id')
-          .inFilter('subject_id', subjectIds);
-
-      final classIds = lessonsResponse
-          .map((l) => l['class_id'] as String?)
+      final classIds = subjectsResponse
+          .map((s) => s['class_id'] as String?)
           .where((id) => id != null)
           .cast<String>()
           .toSet()
@@ -122,6 +111,7 @@ class SupabaseTeacherRepository implements TeacherRepository {
 
       if (classIds.isEmpty) return [];
 
+      // Get full class information
       final classesResponse = await _supabase
           .from('classes')
           .select('id, school_id, name, grade_level, academic_year, created_at')
@@ -829,7 +819,11 @@ class SupabaseTeacherRepository implements TeacherRepository {
           .from('lessons')
           .select('subject_id, subjects(class_id)')
           .eq('id', lessonId)
-          .single();
+          .maybeSingle();
+
+      if (lessonResponse == null) {
+        throw TeacherException('Lesson not found with id $lessonId');
+      }
 
       final subjectData = lessonResponse['subjects'] as Map<String, dynamic>?;
       final classId = subjectData?['class_id'] as String?;

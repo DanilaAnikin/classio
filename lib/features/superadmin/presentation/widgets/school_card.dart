@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/theme.dart';
+import '../../../../shared/widgets/app_card.dart';
 import '../../domain/entities/entities.dart';
 
-/// A card widget displaying school information with statistics.
+/// A premium card widget displaying school information with statistics.
 ///
 /// Shows school name, subscription status, and user/class counts.
-/// Tapping the card triggers the [onTap] callback.
+/// Tapping the card triggers the [onTap] callback. Uses design system
+/// tokens and the [AppCard] component for consistent styling.
 class SchoolCard extends StatelessWidget {
   const SchoolCard({
     super.key,
     required this.school,
     required this.onTap,
+    this.isPlayful = false,
   });
 
   /// The school with statistics to display.
@@ -20,19 +24,14 @@ class SchoolCard extends StatelessWidget {
   /// Callback when the card is tapped.
   final VoidCallback onTap;
 
+  /// Whether to use playful theme styling.
+  final bool isPlayful;
+
   Color _getStatusColor(SubscriptionStatus status) {
-    switch (status) {
-      case SubscriptionStatus.trial:
-        return Colors.orange;
-      case SubscriptionStatus.pro:
-        return Colors.blue;
-      case SubscriptionStatus.max:
-        return Colors.purple;
-      case SubscriptionStatus.expired:
-        return Colors.grey;
-      case SubscriptionStatus.suspended:
-        return Colors.red;
-    }
+    return AppSemanticColors.getSubscriptionColor(
+      status.name,
+      isPlayful: isPlayful,
+    );
   }
 
   String _formatDate(DateTime date) {
@@ -44,179 +43,233 @@ class SchoolCard extends StatelessWidget {
     final theme = Theme.of(context);
     final statusColor = _getStatusColor(school.subscriptionStatus);
 
-    return InkWell(
+    return AppCard.interactive(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: theme.colorScheme.surface,
-          border: Border.all(
-            color: theme.colorScheme.outline.withValues(alpha: 0.15),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: statusColor.withValues(alpha: 0.08),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Row
-            Row(
-              children: [
-                // School Icon
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    Icons.school_rounded,
-                    size: 28,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-                const SizedBox(width: 14),
+      semanticLabel: 'School: ${school.name}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          Row(
+            children: [
+              // School Icon Badge
+              _SchoolIconBadge(
+                color: theme.colorScheme.primary,
+                backgroundColor: theme.colorScheme.primaryContainer,
+                isPlayful: isPlayful,
+              ),
+              SizedBox(width: AppSpacing.md),
 
-                // School Name and Status
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        school.name,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+              // School Name and Status
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      school.name,
+                      style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+                        color: theme.colorScheme.onSurface,
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                school.subscriptionStatus.displayName,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: statusColor,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: AppSpacing.xxs),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: _SubscriptionStatusBadge(
+                            status: school.subscriptionStatus,
+                            statusColor: statusColor,
+                            isPlayful: isPlayful,
                           ),
-                          if (school.createdAt != null) ...[
-                            const SizedBox(width: 10),
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 12,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                _formatDate(school.createdAt!),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                          ],
+                        ),
+                        if (school.createdAt case final createdAt?) ...[
+                          SizedBox(width: AppSpacing.sm),
+                          _DateBadge(
+                            date: _formatDate(createdAt),
+                            isPlayful: isPlayful,
+                          ),
                         ],
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
+              ),
 
-                // Arrow
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                  size: 28,
-                ),
-              ],
-            ),
+              // Navigation Arrow
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.onSurfaceVariant,
+                size: AppIconSize.lg,
+              ),
+            ],
+          ),
 
-            const SizedBox(height: 16),
-            Divider(
-              height: 1,
-              color: theme.colorScheme.outline.withValues(alpha: 0.1),
-            ),
-            const SizedBox(height: 14),
+          SizedBox(height: AppSpacing.md),
+          Divider(
+            height: 1,
+            color: theme.colorScheme.outline.withValues(alpha: AppOpacity.soft),
+          ),
+          SizedBox(height: AppSpacing.md),
 
-            // Stats Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _StatItem(
-                  icon: Icons.groups_rounded,
-                  label: 'Users',
-                  value: school.totalUsers.toString(),
-                  color: theme.colorScheme.primary,
-                ),
-                _StatItem(
-                  icon: Icons.person_rounded,
-                  label: 'Students',
-                  value: school.totalStudents.toString(),
-                  color: Colors.green,
-                ),
-                _StatItem(
-                  icon: Icons.school_rounded,
-                  label: 'Teachers',
-                  value: school.totalTeachers.toString(),
-                  color: Colors.blue,
-                ),
-                _StatItem(
-                  icon: Icons.class_rounded,
-                  label: 'Classes',
-                  value: school.totalClasses.toString(),
-                  color: Colors.orange,
-                ),
-              ],
-            ),
-          ],
-        ),
+          // Stats Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatItem(
+                icon: Icons.groups_rounded,
+                label: 'Users',
+                value: school.totalUsers.toString(),
+                color: theme.colorScheme.primary,
+                isPlayful: isPlayful,
+              ),
+              _StatItem(
+                icon: Icons.person_rounded,
+                label: 'Students',
+                value: school.totalStudents.toString(),
+                color: AppSemanticColors.getStatColor('green', isPlayful: isPlayful),
+                isPlayful: isPlayful,
+              ),
+              _StatItem(
+                icon: Icons.school_rounded,
+                label: 'Teachers',
+                value: school.totalTeachers.toString(),
+                color: AppSemanticColors.getStatColor('blue', isPlayful: isPlayful),
+                isPlayful: isPlayful,
+              ),
+              _StatItem(
+                icon: Icons.class_rounded,
+                label: 'Classes',
+                value: school.totalClasses.toString(),
+                color: AppSemanticColors.getStatColor('orange', isPlayful: isPlayful),
+                isPlayful: isPlayful,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
+/// School icon badge with themed background.
+class _SchoolIconBadge extends StatelessWidget {
+  const _SchoolIconBadge({
+    required this.color,
+    required this.backgroundColor,
+    required this.isPlayful,
+  });
+
+  final Color color;
+  final Color backgroundColor;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: AppSpacing.xxxxl,
+      height: AppSpacing.xxxxl,
+      decoration: BoxDecoration(
+        color: backgroundColor.withValues(alpha: AppOpacity.heavy),
+        borderRadius: AppRadius.button(isPlayful: isPlayful),
+      ),
+      child: Icon(
+        Icons.school_rounded,
+        size: AppIconSize.lg,
+        color: color,
+      ),
+    );
+  }
+}
+
+/// Subscription status badge pill.
+class _SubscriptionStatusBadge extends StatelessWidget {
+  const _SubscriptionStatusBadge({
+    required this.status,
+    required this.statusColor,
+    required this.isPlayful,
+  });
+
+  final SubscriptionStatus status;
+  final Color statusColor;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: AppOpacity.medium),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+      ),
+      child: Text(
+        status.displayName,
+        style: AppTypography.badge(isPlayful: isPlayful).copyWith(
+          color: statusColor,
+        ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+    );
+  }
+}
+
+/// Date badge with calendar icon.
+class _DateBadge extends StatelessWidget {
+  const _DateBadge({
+    required this.date,
+    required this.isPlayful,
+  });
+
+  final String date;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          Icons.calendar_today_rounded,
+          size: AppIconSize.xs,
+          color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.heavy),
+        ),
+        SizedBox(width: AppSpacing.xxs),
+        Flexible(
+          child: Text(
+            date,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Individual statistic item with icon, value, and label.
 class _StatItem extends StatelessWidget {
   const _StatItem({
     required this.icon,
     required this.label,
     required this.value,
     required this.color,
+    required this.isPlayful,
   });
 
   final IconData icon;
   final String label;
   final String value;
   final Color color;
+  final bool isPlayful;
 
   @override
   Widget build(BuildContext context) {
@@ -225,33 +278,32 @@ class _StatItem extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: AppSpacing.xxxl,
+          height: AppSpacing.xxxl,
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(10),
+            color: color.withValues(alpha: AppOpacity.soft),
+            borderRadius: AppRadius.button(isPlayful: isPlayful),
           ),
           child: Icon(
             icon,
-            size: 20,
+            size: AppIconSize.md,
             color: color,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: AppSpacing.xs),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 16,
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w800,
             color: theme.colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: AppSpacing.xxs),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 11,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.colorScheme.onSurface.withValues(alpha: AppOpacity.dominant),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

@@ -411,11 +411,11 @@ class _SubjectCard extends StatelessWidget {
                     ),
 
                     // Description (if available)
-                    if (subject.description != null &&
-                        subject.description!.isNotEmpty) ...[
+                    if (subject.description case final description?
+                        when description.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
-                        subject.description!,
+                        description,
                         style: TextStyle(
                           fontSize: isPlayful ? 14 : 13,
                           color: theme.colorScheme.onSurfaceVariant,

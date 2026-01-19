@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../grades/domain/entities/entities.dart';
 import '../providers/parent_provider.dart';
@@ -194,7 +195,7 @@ class _OverallAverageCard extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Text(
                   _getGradeDescription(average),
                   style: TextStyle(
@@ -320,7 +321,7 @@ class _SubjectGradeExpandableCardState
                               theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: AppSpacing.xxs),
                       Icon(
                         _isExpanded
                             ? Icons.keyboard_arrow_up
@@ -513,7 +514,7 @@ class _ErrorCard extends StatelessWidget {
               size: 48,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -562,7 +563,7 @@ class _EmptyCard extends StatelessWidget {
               size: 48,
               color: theme.colorScheme.primary.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(

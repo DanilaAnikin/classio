@@ -181,9 +181,9 @@ CREATE POLICY "parent_select_profiles" ON profiles
 GRANT ALL ON profiles TO service_role;
 
 -- =============================================================================
--- Step 5: Reset GENESIS-KEY for testing
+-- NOTE: Hardcoded GENESIS-KEY token removed for security.
+-- Use SELECT * FROM generate_genesis_token(); for bootstrap (see migration 20260118000001)
 -- =============================================================================
-UPDATE invite_tokens SET is_used = false WHERE token = 'GENESIS-KEY';
 
 -- =============================================================================
 -- END OF MIGRATION

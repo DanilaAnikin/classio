@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../../core/utils/subject_colors.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../dashboard/domain/entities/subject.dart';
@@ -11,10 +12,8 @@ import '../../domain/entities/entities.dart';
 import '../../domain/repositories/deputy_repository.dart';
 
 /// Exception thrown when deputy operations fail.
-class DeputyException implements Exception {
-  const DeputyException(this.message);
-
-  final String message;
+class DeputyException extends RepositoryException {
+  const DeputyException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'DeputyException: $message';
@@ -128,7 +127,7 @@ class SupabaseDeputyRepository implements DeputyRepository {
             .order('start_time', ascending: true);
       }
 
-      return (response as List).map((json) {
+      return response.map((json) {
         final lesson = ScheduleLesson.fromJson(json as Map<String, dynamic>);
         // Add color to lesson
         return lesson.copyWith(
@@ -248,7 +247,11 @@ class SupabaseDeputyRepository implements DeputyRepository {
           .from('lessons')
           .insert(insertData)
           .select(_lessonSelectQuery)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const DeputyException('Failed to create lesson: no data returned');
+      }
 
       final lesson = ScheduleLesson.fromJson(response);
       return lesson.copyWith(subjectColor: SubjectColors.getColorForId(lesson.subjectId));
@@ -343,7 +346,11 @@ class SupabaseDeputyRepository implements DeputyRepository {
           .update(updateData)
           .eq('id', lessonId)
           .select(_lessonSelectQuery)
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw DeputyException('Failed to update lesson: lesson not found with id $lessonId');
+      }
 
       final lesson = ScheduleLesson.fromJson(response);
       return lesson.copyWith(subjectColor: SubjectColors.getColorForId(lesson.subjectId));
@@ -574,7 +581,11 @@ class SupabaseDeputyRepository implements DeputyRepository {
               last_name
             )
           ''')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const DeputyException('Failed to generate parent invite: no data returned');
+      }
 
       return ParentInvite.fromJson(response);
     } on PostgrestException catch (e) {
@@ -805,6 +816,7 @@ class SupabaseDeputyRepository implements DeputyRepository {
           name: data['name'] as String? ?? 'Unknown',
           color: SubjectColors.getColorForId(subjectId),
           teacherName: teacherName,
+          teacherId: data['teacher_id'] as String?,
         );
       }).toList();
     } on PostgrestException catch (e) {
@@ -994,6 +1006,7 @@ class SupabaseDeputyRepository implements DeputyRepository {
           .from('subjects')
           .insert({
             'class_id': classId,
+            'school_id': schoolId,
             'name': name,
             'description': description,
             'teacher_id': teacherId,
@@ -1008,7 +1021,11 @@ class SupabaseDeputyRepository implements DeputyRepository {
               last_name
             )
           ''')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw const DeputyException('Failed to create subject: no data returned');
+      }
 
       final subjectId = response['id'] as String;
 
@@ -1095,7 +1112,11 @@ class SupabaseDeputyRepository implements DeputyRepository {
               last_name
             )
           ''')
-          .single();
+          .maybeSingle();
+
+      if (response == null) {
+        throw DeputyException('Failed to update subject: subject not found with id $subjectId');
+      }
 
       final id = response['id'] as String;
 

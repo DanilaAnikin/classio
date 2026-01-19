@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:classio/core/localization/generated/app_localizations.dart';
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/spacing.dart';
+import 'package:classio/core/theme/app_radius.dart';
 import 'package:classio/features/auth/presentation/providers/auth_provider.dart';
 import 'package:classio/shared/widgets/theme_toggle.dart';
 import 'package:classio/shared/widgets/language_selector.dart';
@@ -30,7 +32,7 @@ class ProfilePage extends ConsumerWidget {
       ),
       body: ResponsiveCenterScrollView(
         maxWidth: 800,
-        padding: const EdgeInsets.all(16),
+        padding: AppSpacing.pageInsets,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -40,7 +42,7 @@ class ProfilePage extends ConsumerWidget {
                 email: currentUser.email ?? '',
                 isPlayful: isPlayful,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
             ],
 
             // Appearance Section
@@ -48,26 +50,26 @@ class ProfilePage extends ConsumerWidget {
               title: 'Appearance',
               icon: Icons.palette_outlined,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             _SettingsCard(
               children: [
                 const ThemeSelector(),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
 
             // Language Section
             _SectionHeader(
               title: l10n.language,
               icon: Icons.translate_rounded,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             _SettingsCard(
               children: [
                 const LanguageSelector(),
               ],
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: AppSpacing.xxl),
 
             // Logout Button
             _LogoutButton(
@@ -78,7 +80,7 @@ class ProfilePage extends ConsumerWidget {
                 }
               },
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
@@ -140,7 +142,7 @@ class _UserInfoCard extends StatelessWidget {
     final initials = _getInitials(email);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -150,7 +152,7 @@ class _UserInfoCard extends StatelessWidget {
             theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
           ],
         ),
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 16),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         border: Border.all(
           color: theme.colorScheme.primary.withValues(alpha: 0.2),
         ),
@@ -159,8 +161,8 @@ class _UserInfoCard extends StatelessWidget {
         children: [
           // Avatar
           Container(
-            width: 64,
-            height: 64,
+            width: AppIconSize.xxl + AppSpacing.md,
+            height: AppIconSize.xxl + AppSpacing.md,
             decoration: BoxDecoration(
               color: theme.colorScheme.primary,
               shape: BoxShape.circle,
@@ -169,14 +171,14 @@ class _UserInfoCard extends StatelessWidget {
               child: Text(
                 initials,
                 style: TextStyle(
-                  fontSize: isPlayful ? 24 : 22,
+                  fontSize: isPlayful ? AppSpacing.xl : 22,
                   fontWeight: FontWeight.bold,
                   color: theme.colorScheme.onPrimary,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: AppSpacing.md),
           // Info
           Expanded(
             child: Column(
@@ -189,7 +191,7 @@ class _UserInfoCard extends StatelessWidget {
                     color: theme.colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xxs),
                 Text(
                   email,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -220,15 +222,15 @@ class _SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs, vertical: AppSpacing.xs),
       child: Row(
         children: [
           Icon(
             icon,
-            size: 20,
+            size: AppIconSize.sm,
             color: theme.colorScheme.primary,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: AppSpacing.xs),
           Text(
             title,
             style: theme.textTheme.titleSmall?.copyWith(
@@ -258,7 +260,7 @@ class _SettingsCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.largeBorderRadius,
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
@@ -271,7 +273,7 @@ class _SettingsCard extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.largeBorderRadius,
         child: Column(
           children: children,
         ),
@@ -302,9 +304,9 @@ class _LogoutButton extends StatelessWidget {
           side: BorderSide(
             color: theme.colorScheme.error.withValues(alpha: 0.5),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: AppRadius.mediumBorderRadius,
           ),
         ),
         icon: const Icon(Icons.logout_rounded),

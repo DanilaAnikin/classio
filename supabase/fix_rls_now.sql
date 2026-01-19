@@ -89,30 +89,22 @@ FROM information_schema.role_table_grants
 WHERE table_name = 'invite_tokens' AND table_schema = 'public'
 ORDER BY grantee;
 
--- 5d. Check if GENESIS-KEY token exists and is valid
-SELECT
-  token,
-  role,
-  is_used,
-  expires_at,
-  CASE
-    WHEN is_used = true THEN 'USED - Create a new token'
-    WHEN expires_at IS NOT NULL AND expires_at <= now() THEN 'EXPIRED - Create a new token'
-    ELSE 'VALID'
-  END as status
-FROM invite_tokens
-WHERE token = 'GENESIS-KEY';
+-- 5d. Check bootstrap status
+-- Use the secure function to check if bootstrap is needed
+SELECT * FROM check_bootstrap_status();
 
 -- ============================================================================
--- STEP 6: CREATE GENESIS TOKEN IF IT DOESN'T EXIST
+-- STEP 6: GENERATE SECURE BOOTSTRAP TOKEN (if needed)
 -- ============================================================================
--- Uncomment and run this if you need to create a fresh GENESIS-KEY token
-
--- INSERT INTO invite_tokens (token, role, school_id, created_by_user_id, is_used, expires_at)
--- VALUES ('GENESIS-KEY', 'superadmin', NULL, NULL, false, NULL)
--- ON CONFLICT (token) DO UPDATE SET
---   is_used = false,
---   expires_at = NULL;
+-- SECURITY: Hardcoded tokens have been removed. Use the secure bootstrap function:
+--
+-- To generate a new bootstrap token (only works if no superadmin exists):
+--   SELECT * FROM generate_genesis_token();
+--
+-- Or with custom expiration (hours, max 168):
+--   SELECT * FROM generate_genesis_token(48);
+--
+-- See migration: 20260118000001_secure_genesis_token.sql for details
 
 -- ============================================================================
 -- SUCCESS!
@@ -121,9 +113,9 @@ WHERE token = 'GENESIS-KEY';
 --   - RLS Enabled = true
 --   - Policy "Anyone can validate invite tokens" exists with roles {anon,authenticated}
 --   - anon has SELECT privilege
---   - GENESIS-KEY status = VALID
+--   - Bootstrap status shows system state
 --
 -- Then the fix has been applied successfully!
 --
--- Test by trying to register again with the GENESIS-KEY invite code.
+-- If bootstrap is needed, run: SELECT * FROM generate_genesis_token();
 -- ============================================================================

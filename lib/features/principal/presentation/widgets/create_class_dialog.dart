@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme.dart';
 import '../../../admin_panel/domain/entities/class_info.dart';
 import '../providers/principal_providers.dart';
 
@@ -94,7 +94,8 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) return;
 
     setState(() => _isLoading = true);
 
@@ -104,8 +105,12 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
       final bool success;
       if (widget.isEditing) {
         // Update existing class
+        final classId = widget.classId;
+        if (classId == null) {
+          throw StateError('Class ID is required for editing');
+        }
         final classInfo = ClassInfo(
-          id: widget.classId!,
+          id: classId,
           schoolId: widget.schoolId,
           name: _nameController.text.trim(),
           gradeLevel: _gradeLevelController.text.trim().isNotEmpty
@@ -143,7 +148,7 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
             content: Text(widget.isEditing
                 ? 'Class updated successfully'
                 : 'Class created successfully'),
-            backgroundColor: CleanColors.success,
+            backgroundColor: Theme.of(context).colorScheme.primary,
           ),
         );
       }
@@ -152,7 +157,7 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: $e'),
-            backgroundColor: CleanColors.error,
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -169,12 +174,12 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 450),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Form(
             key: _formKey,
             child: Column(
@@ -185,17 +190,17 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(AppSpacing.xs + 2),
                       decoration: BoxDecoration(
                         color: CleanColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.sm + 2),
                       ),
                       child: const Icon(
                         Icons.class_outlined,
                         color: CleanColors.primary,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         widget.isEditing ? 'Edit Class' : 'Create New Class',
@@ -212,17 +217,19 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Name field
                 TextFormField(
                   controller: _nameController,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  enabled: !_isLoading,
                   decoration: InputDecoration(
                     labelText: 'Class Name',
                     hintText: 'e.g., Class 1A, Section B',
                     prefixIcon: const Icon(Icons.label_outline),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadius.sm + 2),
                     ),
                   ),
                   validator: (value) {
@@ -232,7 +239,7 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
                 // Grade level and Academic year in a row
                 Row(
@@ -240,34 +247,59 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                     Expanded(
                       child: TextFormField(
                         controller: _gradeLevelController,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
                         keyboardType: TextInputType.number,
+                        enabled: !_isLoading,
                         decoration: InputDecoration(
                           labelText: 'Grade Level',
                           hintText: 'e.g., 1, 2, 10',
                           prefixIcon: const Icon(Icons.stairs_outlined),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppRadius.sm + 2),
                           ),
                         ),
+                        validator: (value) {
+                          if (value != null && value.trim().isNotEmpty) {
+                            final parsed = int.tryParse(value.trim());
+                            if (parsed == null) {
+                              return 'Must be a number';
+                            }
+                            if (parsed < 1 || parsed > 12) {
+                              return 'Must be between 1 and 12';
+                            }
+                          }
+                          return null;
+                        },
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: TextFormField(
                         controller: _academicYearController,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        enabled: !_isLoading,
                         decoration: InputDecoration(
                           labelText: 'Academic Year',
-                          hintText: 'e.g., 2024-2025',
+                          hintText: 'e.g., 2024/2025',
                           prefixIcon: const Icon(Icons.calendar_today_outlined),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(AppRadius.sm + 2),
                           ),
                         ),
+                        validator: (value) {
+                          if (value != null && value.trim().isNotEmpty) {
+                            final regex = RegExp(r'^\d{4}/\d{4}$');
+                            if (!regex.hasMatch(value.trim())) {
+                              return 'Use YYYY/YYYY format';
+                            }
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
                 // Head teacher dropdown
                 teachersAsync.when(
@@ -277,7 +309,7 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                       labelText: 'Head Teacher (Optional)',
                       prefixIcon: const Icon(Icons.school_outlined),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(AppRadius.sm + 2),
                       ),
                     ),
                     isExpanded: true,
@@ -295,9 +327,11 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                             ),
                           )),
                     ],
-                    onChanged: (value) {
-                      setState(() => _selectedTeacherId = value);
-                    },
+                    onChanged: _isLoading
+                        ? null
+                        : (value) {
+                            setState(() => _selectedTeacherId = value);
+                          },
                   ),
                   loading: () => const LinearProgressIndicator(),
                   error: (_, __) => const Text(
@@ -305,7 +339,7 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                     style: TextStyle(color: CleanColors.error),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.xl),
 
                 // Actions
                 Row(
@@ -315,7 +349,7 @@ class _CreateClassDialogState extends ConsumerState<CreateClassDialog> {
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
                       child: const Text('Cancel'),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Flexible(
                       child: FilledButton(
                         onPressed: _isLoading ? null : _submit,

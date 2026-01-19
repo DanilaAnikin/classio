@@ -6,6 +6,30 @@ part of 'dashboard_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+String _$dashboardRepositoryHash() =>
+    r'69e7d397cf2439b8619428de06916547081ba024';
+
+/// Provider for the DashboardRepository instance.
+///
+/// Provides the Supabase implementation for production use.
+/// Can be overridden in tests to provide a mock implementation.
+///
+/// Copied from [dashboardRepository].
+@ProviderFor(dashboardRepository)
+final dashboardRepositoryProvider =
+    AutoDisposeProvider<DashboardRepository>.internal(
+      dashboardRepository,
+      name: r'dashboardRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$dashboardRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef DashboardRepositoryRef = AutoDisposeProviderRef<DashboardRepository>;
 String _$dashboardDataHash() => r'f28dbb50666acf84ff2199c5eb9a030621b5ac7b';
 
 /// Provider that returns the current dashboard data or null.
@@ -103,7 +127,7 @@ final nextLessonProvider = AutoDisposeProvider<Lesson?>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef NextLessonRef = AutoDisposeProviderRef<Lesson?>;
-String _$dashboardNotifierHash() => r'c1155170e7d83c7a0e6ca93939713914f73a015e';
+String _$dashboardNotifierHash() => r'b793e401f41517a4b886ae63c3a736b1c59e26aa';
 
 /// Riverpod notifier for managing dashboard state.
 ///

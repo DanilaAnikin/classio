@@ -1,14 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../domain/entities/absence_excuse.dart';
 import '../../domain/repositories/absence_excuse_repository.dart';
+import '../dtos/absence_excuse_dto.dart';
 
 /// Exception thrown when absence excuse operations fail.
-class AbsenceExcuseException implements Exception {
-  const AbsenceExcuseException(this.message);
-
-  final String message;
+class AbsenceExcuseException extends RepositoryException {
+  const AbsenceExcuseException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'AbsenceExcuseException: $message';
@@ -66,6 +67,56 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
     )
   ''';
 
+  /// Parses a single excuse JSON to an AbsenceExcuse entity using DTO.
+  ///
+  /// Logs validation errors if the data is invalid.
+  /// Throws if the excuse cannot be parsed.
+  AbsenceExcuse _parseExcuse(Map<String, dynamic> json) {
+    final dto = AbsenceExcuseDTO.fromJson(json);
+
+    if (!dto.isValid) {
+      debugPrint('Warning: Invalid absence excuse data received:');
+      for (final error in dto.validationErrors) {
+        debugPrint('  - $error');
+      }
+      debugPrint('  Raw data: $json');
+      throw AbsenceExcuseException(
+        'Invalid absence excuse data: ${dto.validationErrors.join(', ')}',
+      );
+    }
+
+    return dto.toEntity();
+  }
+
+  /// Parses a list of excuse JSON to AbsenceExcuse entities using DTOs.
+  ///
+  /// Logs warnings for invalid excuses and filters them out.
+  List<AbsenceExcuse> _parseExcuses(List<Map<String, dynamic>> jsonList) {
+    final excuses = <AbsenceExcuse>[];
+    var invalidCount = 0;
+
+    for (final json in jsonList) {
+      final dto = AbsenceExcuseDTO.fromJson(json);
+      if (dto.isValid) {
+        excuses.add(dto.toEntity());
+      } else {
+        invalidCount++;
+        debugPrint('Warning: Invalid absence excuse data:');
+        for (final error in dto.validationErrors) {
+          debugPrint('  - $error');
+        }
+      }
+    }
+
+    if (invalidCount > 0) {
+      debugPrint(
+        'Warning: $invalidCount invalid excuse(s) were skipped during parsing',
+      );
+    }
+
+    return excuses;
+  }
+
   // ============== Parent Operations ==============
 
   @override
@@ -101,9 +152,13 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .from('absence_excuses')
           .select(_selectQuery)
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
-      return AbsenceExcuse.fromJson(response);
+      if (response == null) {
+        throw const AbsenceExcuseException('Failed to create excuse: no data returned');
+      }
+
+      return _parseExcuse(response);
     } on PostgrestException catch (e) {
       if (e.code == '23505') {
         throw const AbsenceExcuseException(
@@ -129,9 +184,8 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .eq('parent_id', userId)
           .order('created_at', ascending: false);
 
-      return response
-          .map<AbsenceExcuse>((json) => AbsenceExcuse.fromJson(json))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseExcuses(List<Map<String, dynamic>>.from(response));
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to fetch excuses: ${e.message}');
     }
@@ -151,9 +205,8 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .eq('parent_id', userId)
           .order('created_at', ascending: false);
 
-      return response
-          .map<AbsenceExcuse>((json) => AbsenceExcuse.fromJson(json))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseExcuses(List<Map<String, dynamic>>.from(response));
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to fetch excuses: ${e.message}');
     }
@@ -175,9 +228,8 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .eq('status', 'pending')
           .order('created_at', ascending: false);
 
-      return response
-          .map<AbsenceExcuse>((json) => AbsenceExcuse.fromJson(json))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseExcuses(List<Map<String, dynamic>>.from(response));
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException(
         'Failed to fetch pending excuses: ${e.message}',
@@ -195,7 +247,7 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .maybeSingle();
 
       if (response == null) return null;
-      return AbsenceExcuse.fromJson(response);
+      return _parseExcuse(response);
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to fetch excuse: ${e.message}');
     }
@@ -251,9 +303,8 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .eq('status', 'pending')
           .order('created_at', ascending: false);
 
-      return response
-          .map<AbsenceExcuse>((json) => AbsenceExcuse.fromJson(json))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseExcuses(List<Map<String, dynamic>>.from(response));
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException(
         'Failed to fetch pending excuses: ${e.message}',
@@ -308,9 +359,8 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .inFilter('attendance_id', attendanceIds)
           .order('created_at', ascending: false);
 
-      return response
-          .map<AbsenceExcuse>((json) => AbsenceExcuse.fromJson(json))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseExcuses(List<Map<String, dynamic>>.from(response));
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to fetch excuses: ${e.message}');
     }
@@ -349,9 +399,13 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .from('absence_excuses')
           .select(_selectQuery)
           .eq('id', excuseId)
-          .single();
+          .maybeSingle();
 
-      return AbsenceExcuse.fromJson(response);
+      if (response == null) {
+        throw AbsenceExcuseException('Excuse not found: $excuseId');
+      }
+
+      return _parseExcuse(response);
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to approve excuse: ${e.message}');
     }
@@ -390,9 +444,13 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .from('absence_excuses')
           .select(_selectQuery)
           .eq('id', excuseId)
-          .single();
+          .maybeSingle();
 
-      return AbsenceExcuse.fromJson(result);
+      if (result == null) {
+        throw AbsenceExcuseException('Excuse not found: $excuseId');
+      }
+
+      return _parseExcuse(result);
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to decline excuse: ${e.message}');
     }
@@ -414,9 +472,8 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .eq('student_id', userId)
           .order('created_at', ascending: false);
 
-      return response
-          .map<AbsenceExcuse>((json) => AbsenceExcuse.fromJson(json))
-          .toList();
+      // Use DTO-based parsing with validation logging
+      return _parseExcuses(List<Map<String, dynamic>>.from(response));
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to fetch excuses: ${e.message}');
     }
@@ -432,7 +489,7 @@ class SupabaseAbsenceExcuseRepository implements AbsenceExcuseRepository {
           .maybeSingle();
 
       if (response == null) return null;
-      return AbsenceExcuse.fromJson(response);
+      return _parseExcuse(response);
     } on PostgrestException catch (e) {
       throw AbsenceExcuseException('Failed to fetch excuse: ${e.message}');
     }

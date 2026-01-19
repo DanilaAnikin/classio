@@ -189,9 +189,9 @@ GRANT EXECUTE ON FUNCTION auth_user_school_id() TO authenticated;
 GRANT EXECUTE ON FUNCTION auth_is_superadmin() TO authenticated;
 
 -- =============================================================================
--- Step 5: Reset GENESIS-KEY for testing
+-- NOTE: Hardcoded GENESIS-KEY token removed for security.
+-- Use SELECT * FROM generate_genesis_token(); for bootstrap (see migration 20260118000001)
 -- =============================================================================
-UPDATE invite_tokens SET is_used = false WHERE token = 'GENESIS-KEY';
 
 -- =============================================================================
 -- END OF MIGRATION

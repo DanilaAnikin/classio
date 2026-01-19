@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_input.dart';
 import '../../domain/entities/assignment_entity.dart';
 import '../providers/teacher_provider.dart';
 
 /// Dialog for grading an assignment submission.
+///
+/// Features premium design with theme-aware styling (Clean vs Playful).
 class GradeSubmissionDialog extends ConsumerStatefulWidget {
   const GradeSubmissionDialog({
     super.key,
@@ -15,6 +24,41 @@ class GradeSubmissionDialog extends ConsumerStatefulWidget {
 
   final SubmissionEntity submission;
   final int maxScore;
+
+  /// Shows the dialog and returns true if a grade was successfully submitted.
+  static Future<bool?> show(
+    BuildContext context, {
+    required SubmissionEntity submission,
+    required int maxScore,
+  }) {
+    return showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black54,
+      transitionDuration: AppDuration.medium,
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curvedAnimation = CurvedAnimation(
+          parent: animation,
+          curve: AppCurves.modalEnter,
+          reverseCurve: AppCurves.modalExit,
+        );
+        return FadeTransition(
+          opacity: curvedAnimation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.95, end: 1.0).animate(curvedAnimation),
+            child: child,
+          ),
+        );
+      },
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return GradeSubmissionDialog(
+          submission: submission,
+          maxScore: maxScore,
+        );
+      },
+    );
+  }
 
   @override
   ConsumerState<GradeSubmissionDialog> createState() =>
@@ -26,6 +70,11 @@ class _GradeSubmissionDialogState extends ConsumerState<GradeSubmissionDialog> {
   late final TextEditingController _gradeController;
   final _commentController = TextEditingController();
   bool _isLoading = false;
+
+  bool get _isPlayful {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.value == PlayfulColors.primary.value;
+  }
 
   @override
   void initState() {
@@ -45,7 +94,7 @@ class _GradeSubmissionDialogState extends ConsumerState<GradeSubmissionDialog> {
   }
 
   Future<void> _submitGrade() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState?.validate() != true) return;
 
     setState(() => _isLoading = true);
 
@@ -68,9 +117,10 @@ class _GradeSubmissionDialogState extends ConsumerState<GradeSubmissionDialog> {
         if (success) {
           Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Grade submitted successfully'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('Grade submitted successfully'),
+              backgroundColor:
+                  _isPlayful ? PlayfulColors.success : CleanColors.success,
             ),
           );
         }
@@ -80,7 +130,7 @@ class _GradeSubmissionDialogState extends ConsumerState<GradeSubmissionDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: _isPlayful ? PlayfulColors.error : CleanColors.error,
           ),
         );
       }
@@ -91,261 +141,343 @@ class _GradeSubmissionDialogState extends ConsumerState<GradeSubmissionDialog> {
     }
   }
 
+  void _setQuickGrade(double percentage) {
+    _gradeController.text = (widget.maxScore * percentage).round().toString();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isPlayful = _isPlayful;
     final isEditing = widget.submission.isGraded;
 
-    return Dialog(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 450),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        isEditing ? Icons.edit_rounded : Icons.grade_rounded,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isEditing ? 'Edit Grade' : 'Grade Submission',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                          ),
-                          Text(
-                            widget.submission.studentName ?? 'Student',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+    // Theme-aware colors
+    final surfaceColor =
+        isPlayful ? PlayfulColors.surfaceElevated : CleanColors.surfaceElevated;
+    final borderColor = isPlayful ? PlayfulColors.border : CleanColors.border;
+    final primaryColor = isPlayful ? PlayfulColors.primary : CleanColors.primary;
+    final textPrimary =
+        isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+    final textSecondary =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
 
-                // Submission Info Card
-                if (widget.submission.content != null &&
-                    widget.submission.content!.isNotEmpty) ...[
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+    return Material(
+      color: Colors.transparent,
+      child: SafeArea(
+        child: Padding(
+          padding: AppSpacing.pagePaddingMobile,
+          child: Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 450),
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: AppRadius.dialog(isPlayful: isPlayful),
+                border: Border.all(
+                  color: borderColor.withValues(alpha: 0.5),
+                ),
+                boxShadow: AppShadows.modal(isPlayful: isPlayful),
+              ),
+              child: ClipRRect(
+                borderRadius: AppRadius.dialog(isPlayful: isPlayful),
+                child: SingleChildScrollView(
+                  padding: AppSpacing.dialogInsets,
+                  child: Form(
+                    key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.description_rounded,
-                              size: 16,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Submission Content',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
+                        // Header
+                        _buildHeader(
+                          isPlayful: isPlayful,
+                          isEditing: isEditing,
+                          primaryColor: primaryColor,
+                          textPrimary: textPrimary,
+                          textSecondary: textSecondary,
+                        ),
+                        AppSpacing.gap24,
+
+                        // Submission Info Card
+                        if (widget.submission.content?.isNotEmpty ?? false) ...[
+                          _buildSubmissionCard(isPlayful: isPlayful),
+                          AppSpacing.gap16,
+                        ],
+
+                        // Grade Input
+                        AppInput(
+                          controller: _gradeController,
+                          label: 'Grade',
+                          hint: '0 - ${widget.maxScore}',
+                          helperText: 'Maximum score: ${widget.maxScore}',
+                          prefixIcon: Icons.score_rounded,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
                             ),
                           ],
+                          autofocus: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a grade';
+                            }
+                            final grade = double.tryParse(value);
+                            if (grade == null) {
+                              return 'Please enter a valid number';
+                            }
+                            if (grade < 0) {
+                              return 'Grade cannot be negative';
+                            }
+                            if (grade > widget.maxScore) {
+                              return 'Grade cannot exceed ${widget.maxScore}';
+                            }
+                            return null;
+                          },
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.submission.content!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: theme.colorScheme.onSurface,
-                          ),
+                        AppSpacing.gap16,
+
+                        // Feedback Input
+                        AppInput.multiline(
+                          controller: _commentController,
+                          label: 'Feedback (optional)',
+                          hint: 'Add feedback for the student...',
+                          prefixIcon: Icons.comment_rounded,
+                          maxLines: 3,
+                          minLines: 2,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                        AppSpacing.gap20,
+
+                        // Quick Grade Section
+                        _buildQuickGradeSection(isPlayful: isPlayful),
+                        AppSpacing.gap24,
+
+                        // Actions
+                        _buildActions(
+                          isPlayful: isPlayful,
+                          isEditing: isEditing,
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-                // Grade Input
-                TextFormField(
-                  controller: _gradeController,
-                  decoration: InputDecoration(
-                    labelText: 'Grade',
-                    hintText: '0 - ${widget.maxScore}',
-                    helperText: 'Maximum score: ${widget.maxScore}',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.score_rounded),
-                    suffixText: '/ ${widget.maxScore}',
-                  ),
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d*'),
-                    ),
-                  ],
-                  autofocus: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a grade';
-                    }
-                    final grade = double.tryParse(value);
-                    if (grade == null) {
-                      return 'Please enter a valid number';
-                    }
-                    if (grade < 0) {
-                      return 'Grade cannot be negative';
-                    }
-                    if (grade > widget.maxScore) {
-                      return 'Grade cannot exceed ${widget.maxScore}';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+  Widget _buildHeader({
+    required bool isPlayful,
+    required bool isEditing,
+    required Color primaryColor,
+    required Color textPrimary,
+    required Color textSecondary,
+  }) {
+    final iconBgColor =
+        isPlayful ? PlayfulColors.primarySubtle : CleanColors.primarySubtle;
 
-                // Comment Input
-                TextFormField(
-                  controller: _commentController,
-                  decoration: InputDecoration(
-                    labelText: 'Feedback (optional)',
-                    hintText: 'Add feedback for the student...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: const Icon(Icons.comment_rounded),
-                    alignLabelWithHint: true,
-                  ),
-                  maxLines: 3,
-                  textCapitalization: TextCapitalization.sentences,
+    return Row(
+      children: [
+        Container(
+          padding: EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: iconBgColor,
+            borderRadius: AppRadius.button(isPlayful: isPlayful),
+          ),
+          child: Icon(
+            isEditing ? Icons.edit_rounded : Icons.grade_rounded,
+            color: primaryColor,
+            size: AppIconSize.md,
+          ),
+        ),
+        SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isEditing ? 'Edit Grade' : 'Grade Submission',
+                style: AppTypography.sectionTitle(isPlayful: isPlayful).copyWith(
+                  color: textPrimary,
                 ),
-                const SizedBox(height: 24),
+              ),
+              Text(
+                widget.submission.studentName ?? 'Student',
+                style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+                  color: textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        _CloseButton(isPlayful: isPlayful),
+      ],
+    );
+  }
 
-                // Quick Grade Buttons
-                Text(
-                  'Quick Grade',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    _QuickGradeChip(
-                      label: '100%',
-                      value: widget.maxScore.toDouble(),
-                      color: Colors.green,
-                      onTap: () => _gradeController.text =
-                          widget.maxScore.toString(),
-                    ),
-                    _QuickGradeChip(
-                      label: '90%',
-                      value: (widget.maxScore * 0.9).roundToDouble(),
-                      color: Colors.lightGreen,
-                      onTap: () => _gradeController.text =
-                          (widget.maxScore * 0.9).round().toString(),
-                    ),
-                    _QuickGradeChip(
-                      label: '80%',
-                      value: (widget.maxScore * 0.8).roundToDouble(),
-                      color: Colors.amber,
-                      onTap: () => _gradeController.text =
-                          (widget.maxScore * 0.8).round().toString(),
-                    ),
-                    _QuickGradeChip(
-                      label: '70%',
-                      value: (widget.maxScore * 0.7).roundToDouble(),
-                      color: Colors.orange,
-                      onTap: () => _gradeController.text =
-                          (widget.maxScore * 0.7).round().toString(),
-                    ),
-                    _QuickGradeChip(
-                      label: '60%',
-                      value: (widget.maxScore * 0.6).roundToDouble(),
-                      color: Colors.deepOrange,
-                      onTap: () => _gradeController.text =
-                          (widget.maxScore * 0.6).round().toString(),
-                    ),
-                    _QuickGradeChip(
-                      label: '50%',
-                      value: (widget.maxScore * 0.5).roundToDouble(),
-                      color: Colors.red,
-                      onTap: () => _gradeController.text =
-                          (widget.maxScore * 0.5).round().toString(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+  Widget _buildSubmissionCard({required bool isPlayful}) {
+    final cardBgColor =
+        isPlayful ? PlayfulColors.surfaceSecondary : CleanColors.surfaceSecondary;
+    final textSecondary =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
 
-                // Actions
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed:
-                          _isLoading ? null : () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: 8),
-                    FilledButton.icon(
-                      onPressed: _isLoading ? null : _submitGrade,
-                      icon: _isLoading
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : Icon(
-                              isEditing
-                                  ? Icons.save_rounded
-                                  : Icons.check_rounded,
-                              size: 18,
-                            ),
-                      label: Text(isEditing ? 'Update Grade' : 'Submit Grade'),
-                    ),
-                  ],
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: cardBgColor,
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.description_rounded,
+                size: AppIconSize.xs,
+                color: textSecondary,
+              ),
+              SizedBox(width: AppSpacing.xs),
+              Text(
+                'Submission Content',
+                style: AppTypography.labelText(isPlayful: isPlayful).copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: textSecondary,
                 ),
-              ],
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            widget.submission.content ?? '',
+            style: AppTypography.secondaryText(isPlayful: isPlayful),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickGradeSection({required bool isPlayful}) {
+    final textSecondary =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+    final successColor = isPlayful ? PlayfulColors.success : CleanColors.success;
+    final warningColor = isPlayful ? PlayfulColors.warning : CleanColors.warning;
+    final errorColor = isPlayful ? PlayfulColors.error : CleanColors.error;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quick Grade',
+          style: AppTypography.labelText(isPlayful: isPlayful).copyWith(
+            fontWeight: FontWeight.w600,
+            color: textSecondary,
+          ),
+        ),
+        SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.xs,
+          runSpacing: AppSpacing.xs,
+          children: [
+            _QuickGradeChip(
+              label: '100%',
+              color: successColor,
+              isPlayful: isPlayful,
+              onTap: () => _setQuickGrade(1.0),
+            ),
+            _QuickGradeChip(
+              label: '90%',
+              color: successColor.withValues(alpha: 0.7),
+              isPlayful: isPlayful,
+              onTap: () => _setQuickGrade(0.9),
+            ),
+            _QuickGradeChip(
+              label: '80%',
+              color: warningColor,
+              isPlayful: isPlayful,
+              onTap: () => _setQuickGrade(0.8),
+            ),
+            _QuickGradeChip(
+              label: '70%',
+              color: warningColor.withValues(alpha: 0.8),
+              isPlayful: isPlayful,
+              onTap: () => _setQuickGrade(0.7),
+            ),
+            _QuickGradeChip(
+              label: '60%',
+              color: errorColor.withValues(alpha: 0.7),
+              isPlayful: isPlayful,
+              onTap: () => _setQuickGrade(0.6),
+            ),
+            _QuickGradeChip(
+              label: '50%',
+              color: errorColor,
+              isPlayful: isPlayful,
+              onTap: () => _setQuickGrade(0.5),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions({
+    required bool isPlayful,
+    required bool isEditing,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        AppButton.secondary(
+          label: 'Cancel',
+          onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
+          size: ButtonSize.medium,
+        ),
+        SizedBox(width: AppSpacing.sm),
+        AppButton.primary(
+          label: isEditing ? 'Update Grade' : 'Submit Grade',
+          icon: isEditing ? Icons.save_rounded : Icons.check_rounded,
+          onPressed: _isLoading ? null : _submitGrade,
+          isLoading: _isLoading,
+          size: ButtonSize.medium,
+        ),
+      ],
+    );
+  }
+}
+
+/// Close button for the dialog header.
+class _CloseButton extends StatelessWidget {
+  const _CloseButton({required this.isPlayful});
+
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor =
+        isPlayful ? PlayfulColors.textTertiary : CleanColors.textTertiary;
+    final hoverColor =
+        isPlayful ? PlayfulColors.surfaceHover : CleanColors.surfaceHover;
+
+    return Semantics(
+      button: true,
+      label: 'Close dialog',
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.of(context).pop(),
+          borderRadius: AppRadius.fullRadius,
+          hoverColor: hoverColor,
+          child: Padding(
+            padding: AppSpacing.insets8,
+            child: Icon(
+              Icons.close_rounded,
+              size: AppIconSize.sm,
+              color: iconColor,
             ),
           ),
         ),
@@ -354,17 +486,18 @@ class _GradeSubmissionDialogState extends ConsumerState<GradeSubmissionDialog> {
   }
 }
 
+/// Quick grade chip for percentage-based grading.
 class _QuickGradeChip extends StatelessWidget {
   const _QuickGradeChip({
     required this.label,
-    required this.value,
     required this.color,
+    required this.isPlayful,
     required this.onTap,
   });
 
   final String label;
-  final double value;
   final Color color;
+  final bool isPlayful;
   final VoidCallback onTap;
 
   @override
@@ -372,14 +505,16 @@ class _QuickGradeChip extends StatelessWidget {
     return ActionChip(
       label: Text(
         label,
-        style: TextStyle(
-          fontSize: 12,
+        style: AppTypography.labelText(isPlayful: isPlayful).copyWith(
           fontWeight: FontWeight.w600,
           color: color,
         ),
       ),
       side: BorderSide(color: color.withValues(alpha: 0.5)),
       backgroundColor: color.withValues(alpha: 0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.chip(isPlayful: isPlayful),
+      ),
       onPressed: onTap,
     );
   }

@@ -1,5 +1,22 @@
 -- =====================================================
--- CLASSIO DATABASE SCHEMA
+-- DEPRECATED: This schema file is no longer in use
+-- Deprecated on: 2026-01-18
+-- Reason: Conflicts with ultimate_schema.sql and app code
+--
+-- The correct schema is defined by:
+--   1. migrations/20260111200000_ultimate_schema.sql
+--   2. Subsequent migration files in migrations/
+--   3. migrations/20260118000000_unify_schema.sql (unifies all)
+--
+-- Key conflicts that were resolved:
+--   - subjects: Uses class_id (not just school_id)
+--   - invite system: Uses invite_tokens (not invite_codes)
+--   - lessons: Has class_id (for teacher repo compatibility)
+--   - submissions: Both tables exist (different purposes)
+-- =====================================================
+
+-- =====================================================
+-- CLASSIO DATABASE SCHEMA (DEPRECATED)
 -- Educational Management System
 -- =====================================================
 

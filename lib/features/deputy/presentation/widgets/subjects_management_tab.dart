@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:classio/core/theme/spacing.dart';
 import '../../../dashboard/domain/entities/subject.dart';
 import '../providers/deputy_provider.dart';
 
@@ -52,9 +53,9 @@ class SubjectsManagementTab extends ConsumerWidget {
                     size: 48,
                     color: theme.colorScheme.error,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppSpacing.md),
                   Text('Error loading subjects: $error'),
-                  const SizedBox(height: 16),
+                  SizedBox(height: AppSpacing.md),
                   ElevatedButton(
                     onPressed: () =>
                         ref.invalidate(schoolSubjectsProvider(schoolId)),
@@ -121,7 +122,7 @@ class _EmptySubjectsState extends StatelessWidget {
                   color: theme.colorScheme.primary.withValues(alpha: 0.6),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
               Text(
                 'No Subjects Yet',
                 style: TextStyle(
@@ -130,7 +131,7 @@ class _EmptySubjectsState extends StatelessWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Create your first subject to start\nbuilding your school curriculum.',
                 style: TextStyle(
@@ -263,33 +264,33 @@ class _SubjectCard extends ConsumerWidget {
                 ),
                 onSelected: (action) => _handleAction(context, ref, action),
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(Icons.edit_outlined),
-                        SizedBox(width: 8),
-                        Text('Edit'),
+                        const Icon(Icons.edit_outlined),
+                        SizedBox(width: AppSpacing.xs),
+                        const Text('Edit'),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'assign',
                     child: Row(
                       children: [
-                        Icon(Icons.class_outlined),
-                        SizedBox(width: 8),
-                        Text('Assign to Class'),
+                        const Icon(Icons.class_outlined),
+                        SizedBox(width: AppSpacing.xs),
+                        const Text('Assign to Class'),
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete_outlined, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: Colors.red)),
+                        const Icon(Icons.delete_outlined, color: Colors.red),
+                        SizedBox(width: AppSpacing.xs),
+                        const Text('Delete', style: TextStyle(color: Colors.red)),
                       ],
                     ),
                   ),
@@ -440,6 +441,7 @@ class _SubjectFormDialogState extends ConsumerState<SubjectFormDialog> {
     _nameController =
         TextEditingController(text: widget.existingSubject?.name ?? '');
     _descriptionController = TextEditingController();
+    _selectedTeacherId = widget.existingSubject?.teacherId;
   }
 
   @override
@@ -471,7 +473,7 @@ class _SubjectFormDialogState extends ConsumerState<SubjectFormDialog> {
               ),
               autofocus: true,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             TextField(
               controller: _descriptionController,
               decoration: const InputDecoration(
@@ -481,7 +483,7 @@ class _SubjectFormDialogState extends ConsumerState<SubjectFormDialog> {
               ),
               maxLines: 2,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             teachersAsync.when(
               data: (teachers) => DropdownButtonFormField<String>(
                 initialValue: _selectedTeacherId,
@@ -541,6 +543,14 @@ class _SubjectFormDialogState extends ConsumerState<SubjectFormDialog> {
   }
 
   Future<void> _save() async {
+    // Validate schoolId before attempting to create/update
+    if (widget.schoolId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('School ID is missing. Cannot create subject.')),
+      );
+      return;
+    }
+
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -555,9 +565,10 @@ class _SubjectFormDialogState extends ConsumerState<SubjectFormDialog> {
       final notifier = ref.read(deputyNotifierProvider.notifier);
       bool success;
 
-      if (widget.existingSubject != null) {
+      final existingSubject = widget.existingSubject;
+      if (existingSubject != null) {
         success = await notifier.updateSubject(
-          subjectId: widget.existingSubject!.id,
+          subjectId: existingSubject.id,
           name: name,
           description: _descriptionController.text.trim().isEmpty
               ? null
@@ -631,7 +642,7 @@ class _AssignSubjectToClassDialogState
             'Assign "${widget.subjectName}" to a class:',
             style: theme.textTheme.bodyMedium,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
           classesAsync.when(
             data: (classes) => DropdownButtonFormField<String>(
               initialValue: _selectedClassId,

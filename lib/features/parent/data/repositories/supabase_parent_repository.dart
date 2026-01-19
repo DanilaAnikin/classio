@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/exceptions/app_exception.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../dashboard/domain/entities/entities.dart';
 import '../../../grades/domain/entities/entities.dart';
@@ -8,10 +9,8 @@ import '../../../student/domain/entities/entities.dart';
 import '../../domain/repositories/parent_repository.dart';
 
 /// Exception thrown when parent operations fail.
-class ParentException implements Exception {
-  const ParentException(this.message);
-
-  final String message;
+class ParentException extends RepositoryException {
+  const ParentException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'ParentException: $message';
@@ -93,8 +92,9 @@ class SupabaseParentRepository implements ParentRepository {
       throw const ParentException('User not authenticated');
     }
 
-    if (_cachedChildren != null) {
-      return _cachedChildren!;
+    final cached = _cachedChildren;
+    if (cached != null) {
+      return cached;
     }
 
     try {
@@ -284,7 +284,7 @@ class SupabaseParentRepository implements ParentRepository {
 
         if (status != null) {
           dateStatuses.putIfAbsent(normalizedDate, () => []);
-          dateStatuses[normalizedDate]!.add(status);
+          dateStatuses[normalizedDate]?.add(status);
         }
       }
 
@@ -445,7 +445,7 @@ class SupabaseParentRepository implements ParentRepository {
         final subjectName = subjects['name'] as String;
 
         gradesBySubject.putIfAbsent(subjectId, () => []);
-        gradesBySubject[subjectId]!.add(gradeData);
+        gradesBySubject[subjectId]?.add(gradeData);
         subjectNames[subjectId] = subjectName;
       }
 
@@ -618,7 +618,7 @@ class SupabaseParentRepository implements ParentRepository {
         final dbDayOfWeek = row['day_of_week'] as int;
         final dartWeekday = dbDayOfWeek == 0 ? 7 : dbDayOfWeek;
         final date = monday.add(Duration(days: dartWeekday - 1));
-        weekLessons[dartWeekday]!.add(_mapToLesson(row, date));
+        weekLessons[dartWeekday]?.add(_mapToLesson(row, date));
       }
 
       return weekLessons;
@@ -684,7 +684,7 @@ class SupabaseParentRepository implements ParentRepository {
         final dbDayOfWeek = row['day_of_week'] as int;
         final dartWeekday = dbDayOfWeek == 0 ? 7 : dbDayOfWeek;
         final date = monday.add(Duration(days: dartWeekday - 1));
-        weekLessons[dartWeekday]!.add(_mapToLesson(row, date));
+        weekLessons[dartWeekday]?.add(_mapToLesson(row, date));
       }
 
       return weekLessons;
@@ -891,7 +891,11 @@ class SupabaseParentRepository implements ParentRepository {
           .from('attendance')
           .select('student_id')
           .eq('id', attendanceId)
-          .single();
+          .maybeSingle();
+
+      if (attendance == null) {
+        throw ParentException('Attendance record not found with id $attendanceId');
+      }
 
       final studentId = attendance['student_id'] as String;
       await _verifyParentChild(studentId);

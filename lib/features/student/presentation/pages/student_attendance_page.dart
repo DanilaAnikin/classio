@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
+import 'package:classio/core/theme/app_radius.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/student_provider.dart';
@@ -46,7 +49,7 @@ class StudentAttendancePage extends ConsumerWidget {
         },
         child: ResponsiveCenterScrollView(
           maxWidth: 800,
-          padding: EdgeInsets.all(isPlayful ? 16 : 12),
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -63,7 +66,7 @@ class StudentAttendancePage extends ConsumerWidget {
                   isPlayful: isPlayful,
                 ),
               ),
-              SizedBox(height: isPlayful ? 24 : 20),
+              SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
               // Calendar Section
               Text(
@@ -72,7 +75,7 @@ class StudentAttendancePage extends ConsumerWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: isPlayful ? 12 : 8),
+              SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
               attendanceCalendar.when(
                 data: (calendarData) => AttendanceCalendarWidget(
                   month: selectedMonth.month,
@@ -91,7 +94,7 @@ class StudentAttendancePage extends ConsumerWidget {
                   isPlayful: isPlayful,
                 ),
               ),
-              SizedBox(height: isPlayful ? 24 : 20),
+              SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
 
               // Recent Issues Section
               Text(
@@ -100,7 +103,7 @@ class StudentAttendancePage extends ConsumerWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: isPlayful ? 12 : 8),
+              SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.xs),
               recentIssues.when(
                 data: (issues) => issues.isEmpty
                     ? _EmptyCard(
@@ -141,7 +144,7 @@ class StudentAttendancePage extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
+        padding: AppSpacing.dialogInsets,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,7 +155,7 @@ class StudentAttendancePage extends ConsumerWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Row(
               children: [
                 Container(
@@ -163,14 +166,14 @@ class StudentAttendancePage extends ConsumerWidget {
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: AppSpacing.sm),
                 Text(
                   status.label,
                   style: theme.textTheme.bodyLarge,
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
@@ -201,16 +204,16 @@ class _AttendanceIssueCard extends StatelessWidget {
 
     return Card(
       elevation: isPlayful ? 2 : 0,
-      margin: EdgeInsets.only(bottom: isPlayful ? 12 : 8),
+      margin: EdgeInsets.only(bottom: isPlayful ? AppSpacing.sm : AppSpacing.xs),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 16 : 12),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
         child: Row(
           children: [
             Container(
@@ -218,7 +221,7 @@ class _AttendanceIssueCard extends StatelessWidget {
               height: isPlayful ? 48 : 40,
               decoration: BoxDecoration(
                 color: attendance.status.color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(isPlayful ? 12 : 10),
+                borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm + 2),
               ),
               child: Icon(
                 _getStatusIcon(attendance.status),
@@ -226,7 +229,7 @@ class _AttendanceIssueCard extends StatelessWidget {
                 color: attendance.status.color,
               ),
             ),
-            SizedBox(width: isPlayful ? 16 : 12),
+            SizedBox(width: isPlayful ? AppSpacing.md : AppSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,17 +242,17 @@ class _AttendanceIssueCard extends StatelessWidget {
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppSpacing.xxs),
                   Row(
                     children: [
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isPlayful ? 8 : 6,
+                          horizontal: isPlayful ? AppSpacing.xs : AppSpacing.xs - 2,
                           vertical: isPlayful ? 3 : 2,
                         ),
                         decoration: BoxDecoration(
                           color: attendance.status.color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(isPlayful ? 8 : 6),
+                          borderRadius: BorderRadius.circular(isPlayful ? AppRadius.sm : AppRadius.xs + 2),
                         ),
                         child: Text(
                           attendance.status.label,
@@ -260,7 +263,7 @@ class _AttendanceIssueCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(width: isPlayful ? 8 : 6),
+                      SizedBox(width: isPlayful ? AppSpacing.xs : AppSpacing.xs - 2),
                       Text(
                         DateFormat('MMM d, y').format(attendance.date),
                         style: TextStyle(
@@ -271,7 +274,7 @@ class _AttendanceIssueCard extends StatelessWidget {
                     ],
                   ),
                   if (attendance.excuseNote != null) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: AppSpacing.xxs),
                     Row(
                       children: [
                         Icon(
@@ -279,7 +282,7 @@ class _AttendanceIssueCard extends StatelessWidget {
                           size: isPlayful ? 14 : 12,
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: AppSpacing.xxs),
                         Expanded(
                           child: Text(
                             attendance.excuseNote!,
@@ -298,7 +301,7 @@ class _AttendanceIssueCard extends StatelessWidget {
               ),
             ),
             if (attendance.excuseStatus != ExcuseStatus.none) ...[
-              SizedBox(width: isPlayful ? 12 : 8),
+              SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.xs),
               _ExcuseStatusBadge(
                 status: attendance.excuseStatus,
                 isPlayful: isPlayful,
@@ -343,28 +346,28 @@ class _ExcuseStatusBadge extends StatelessWidget {
 
     switch (status) {
       case ExcuseStatus.none:
-        color = Colors.grey;
+        color = isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
         icon = Icons.remove_circle_outline;
         break;
       case ExcuseStatus.pending:
-        color = Colors.orange;
+        color = isPlayful ? PlayfulColors.attendanceLate : CleanColors.attendanceLate;
         icon = Icons.hourglass_empty;
         break;
       case ExcuseStatus.approved:
-        color = Colors.green;
+        color = isPlayful ? PlayfulColors.attendancePresent : CleanColors.attendancePresent;
         icon = Icons.check_circle;
         break;
       case ExcuseStatus.rejected:
-        color = Colors.red;
+        color = isPlayful ? PlayfulColors.attendanceAbsent : CleanColors.attendanceAbsent;
         icon = Icons.cancel;
         break;
     }
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 8 : 6),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.xs : AppSpacing.xs - 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(isPlayful ? 10 : 8),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.sm + 2 : AppRadius.sm),
       ),
       child: Icon(
         icon,
@@ -388,14 +391,14 @@ class _LoadingCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 32 : 24),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xxl : AppSpacing.xl),
         child: const Center(child: CircularProgressIndicator()),
       ),
     );
@@ -415,7 +418,7 @@ class _CalendarLoadingCard extends StatelessWidget {
     return Container(
       height: isPlayful ? 400 : 350,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 20 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg + AppRadius.xs : AppRadius.md),
         color: theme.colorScheme.surface,
         border: isPlayful
             ? null
@@ -445,14 +448,14 @@ class _ErrorCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 24 : 16),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.md),
         child: Column(
           children: [
             Icon(
@@ -460,7 +463,7 @@ class _ErrorCard extends StatelessWidget {
               size: 48,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -494,14 +497,14 @@ class _EmptyCard extends StatelessWidget {
     return Card(
       elevation: isPlayful ? 2 : 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         side: isPlayful
             ? BorderSide.none
             : BorderSide(
                 color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 24 : 16),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.md),
         child: Column(
           children: [
             Icon(
@@ -509,7 +512,7 @@ class _EmptyCard extends StatelessWidget {
               size: 48,
               color: theme.colorScheme.primary.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               message,
               style: theme.textTheme.bodyLarge?.copyWith(

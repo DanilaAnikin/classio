@@ -1,9 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/theme.dart';
+import '../../../../shared/widgets/app_avatar.dart';
+import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_card.dart';
 import '../../domain/entities/attendance_entity.dart';
 
-/// A card widget displaying a pending excuse request.
+/// A premium card widget displaying a pending excuse request.
+///
+/// Features:
+/// - Student avatar with initials fallback
+/// - Date and status information
+/// - Excuse note preview
+/// - Approve/Reject action buttons
+/// - Fully theme-aware (Clean vs Playful)
+///
+/// Example:
+/// ```dart
+/// ExcuseCard(
+///   attendance: attendanceEntity,
+///   isPlayful: false,
+///   onApprove: () => approveExcuse(attendance.id),
+///   onReject: () => rejectExcuse(attendance.id),
+/// )
+/// ```
 class ExcuseCard extends StatelessWidget {
   const ExcuseCard({
     super.key,
@@ -13,191 +34,266 @@ class ExcuseCard extends StatelessWidget {
     required this.onReject,
   });
 
+  /// The attendance entity containing excuse information.
   final AttendanceEntity attendance;
+
+  /// Whether the playful theme is active.
   final bool isPlayful;
+
+  /// Callback when the approve button is pressed.
   final VoidCallback onApprove;
+
+  /// Callback when the reject button is pressed.
   final VoidCallback onReject;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final warningColor = isPlayful ? PlayfulColors.warning : CleanColors.warning;
 
-    return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        color: theme.colorScheme.surface,
-        border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.3),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.08),
-            blurRadius: isPlayful ? 12 : 6,
-            offset: Offset(0, isPlayful ? 4 : 2),
-          ),
-        ],
-      ),
+    return AppCard(
+      padding: AppSpacing.cardInsets,
+      borderColor: warningColor.withValues(alpha: AppOpacity.medium),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Row
-          Row(
-            children: [
-              CircleAvatar(
-                radius: isPlayful ? 22 : 20,
-                backgroundColor: theme.colorScheme.primaryContainer,
-                backgroundImage: attendance.studentAvatarUrl != null
-                    ? NetworkImage(attendance.studentAvatarUrl!)
-                    : null,
-                child: attendance.studentAvatarUrl == null
-                    ? Text(
-                        attendance.studentName?.isNotEmpty == true
-                            ? attendance.studentName![0].toUpperCase()
-                            : '?',
-                        style: TextStyle(
-                          fontSize: isPlayful ? 18 : 16,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      attendance.studentName ?? 'Unknown Student',
-                      style: TextStyle(
-                        fontSize: isPlayful ? 16 : 15,
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      DateFormat('EEEE, MMMM d').format(attendance.date),
-                      style: TextStyle(
-                        fontSize: isPlayful ? 13 : 12,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Status Badge
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(attendance.status).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  attendance.status.displayName,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: _getStatusColor(attendance.status),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildHeader(theme),
 
-          // Excuse Note
-          if (attendance.excuseNote != null &&
-              attendance.excuseNote!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(isPlayful ? 14 : 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.note_alt_outlined,
-                        size: 16,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Excuse Note',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    attendance.excuseNote!,
-                    style: TextStyle(
-                      fontSize: isPlayful ? 14 : 13,
-                      color: theme.colorScheme.onSurface,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          // Excuse Note (if available)
+          if (attendance.excuseNote?.isNotEmpty ?? false) ...[
+            AppSpacing.gapSm,
+            _buildExcuseNote(theme),
           ],
 
           // Action Buttons
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              OutlinedButton.icon(
-                onPressed: onReject,
-                icon: const Icon(Icons.close_rounded, size: 18),
-                label: const Text('Reject'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.error,
-                  side: BorderSide(
-                    color: theme.colorScheme.error.withValues(alpha: 0.5),
-                  ),
-                ),
+          AppSpacing.gapMd,
+          _buildActionButtons(theme),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the header row with avatar, name, date, and status.
+  Widget _buildHeader(ThemeData theme) {
+    return Row(
+      children: [
+        // Avatar
+        _buildAvatar(theme),
+        AppSpacing.gapH12,
+
+        // Name and date
+        Expanded(
+          child: _buildStudentInfo(theme),
+        ),
+
+        // Status badge
+        _buildStatusBadge(theme),
+      ],
+    );
+  }
+
+  /// Builds the student avatar with fallback.
+  Widget _buildAvatar(ThemeData theme) {
+    if (attendance.studentAvatarUrl != null &&
+        attendance.studentAvatarUrl!.isNotEmpty) {
+      return AppAvatar(
+        imageUrl: attendance.studentAvatarUrl!,
+        fallbackName: attendance.studentName ?? '?',
+        size: isPlayful ? AvatarSize.lg : AvatarSize.md,
+        showShadow: true,
+      );
+    }
+
+    return AppAvatar.initials(
+      name: attendance.studentName?.isNotEmpty == true
+          ? attendance.studentName!
+          : '?',
+      size: isPlayful ? AvatarSize.lg : AvatarSize.md,
+      showShadow: true,
+    );
+  }
+
+  /// Builds the student name and date column.
+  Widget _buildStudentInfo(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Student name
+        Text(
+          attendance.studentName ?? 'Unknown Student',
+          style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        AppSpacing.gap4,
+
+        // Date
+        Row(
+          children: [
+            Icon(
+              Icons.calendar_today_outlined,
+              size: AppIconSize.xs,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            SizedBox(width: AppSpacing.xxs),
+            Text(
+              DateFormat('EEEE, MMMM d').format(attendance.date),
+              style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-              const SizedBox(width: 8),
-              FilledButton.icon(
-                onPressed: onApprove,
-                icon: const Icon(Icons.check_rounded, size: 18),
-                label: const Text('Approve'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: Colors.green,
-                ),
-              ),
-            ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Builds the status badge.
+  Widget _buildStatusBadge(ThemeData theme) {
+    final statusColor = _getStatusColor(attendance.status);
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: AppOpacity.soft),
+        borderRadius: AppRadius.badge(isPlayful: isPlayful),
+        border: Border.all(
+          color: statusColor.withValues(alpha: AppOpacity.medium),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            _getStatusIcon(attendance.status),
+            size: AppIconSize.xs,
+            color: statusColor,
+          ),
+          SizedBox(width: AppSpacing.xxs),
+          Text(
+            attendance.status.displayName,
+            style: TextStyle(
+              fontSize: AppFontSize.labelSmall,
+              fontWeight: FontWeight.w600,
+              color: statusColor,
+            ),
           ),
         ],
       ),
     );
   }
 
+  /// Builds the excuse note section.
+  Widget _buildExcuseNote(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: AppSpacing.insets12,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+        border: Border.all(
+          color: (isPlayful ? PlayfulColors.border : CleanColors.border)
+              .withValues(alpha: AppOpacity.soft),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              Icon(
+                Icons.note_alt_outlined,
+                size: AppIconSize.xs,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              SizedBox(width: AppSpacing.xxs),
+              Text(
+                'Excuse Note',
+                style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          AppSpacing.gapSm,
+
+          // Note content
+          Text(
+            attendance.excuseNote!,
+            style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+              height: AppLineHeight.body,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the action buttons row.
+  Widget _buildActionButtons(ThemeData theme) {
+    final successColor = isPlayful ? PlayfulColors.success : CleanColors.success;
+    final errorColor = isPlayful ? PlayfulColors.error : CleanColors.error;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Reject button
+        AppButton.secondary(
+          label: 'Reject',
+          icon: Icons.close_rounded,
+          onPressed: onReject,
+          size: ButtonSize.small,
+          foregroundColor: errorColor,
+        ),
+        AppSpacing.gapH8,
+
+        // Approve button
+        AppButton.primary(
+          label: 'Approve',
+          icon: Icons.check_rounded,
+          onPressed: onApprove,
+          size: ButtonSize.small,
+          backgroundColor: successColor,
+        ),
+      ],
+    );
+  }
+
+  /// Returns the appropriate color for the attendance status.
   Color _getStatusColor(AttendanceStatus status) {
     switch (status) {
       case AttendanceStatus.present:
-        return Colors.green;
+        return isPlayful ? PlayfulColors.success : CleanColors.success;
       case AttendanceStatus.absent:
-        return Colors.red;
+        return isPlayful ? PlayfulColors.error : CleanColors.error;
       case AttendanceStatus.late:
-        return Colors.orange;
+        return isPlayful ? PlayfulColors.warning : CleanColors.warning;
       case AttendanceStatus.excused:
-        return Colors.blue;
+        return isPlayful ? PlayfulColors.info : CleanColors.info;
+    }
+  }
+
+  /// Returns the appropriate icon for the attendance status.
+  IconData _getStatusIcon(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.present:
+        return Icons.check_circle_outline;
+      case AttendanceStatus.absent:
+        return Icons.cancel_outlined;
+      case AttendanceStatus.late:
+        return Icons.schedule_outlined;
+      case AttendanceStatus.excused:
+        return Icons.verified_outlined;
     }
   }
 }

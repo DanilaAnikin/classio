@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 import '../../../auth/domain/entities/app_user.dart';
@@ -69,28 +70,29 @@ class _SchoolUsersPageState extends ConsumerState<SchoolUsersPage> {
     }
   }
 
-  Color _getRoleColor(UserRole role) {
+  Color _getRoleColor(UserRole role, {bool isPlayful = false}) {
     switch (role) {
       case UserRole.superadmin:
-        return Colors.purple;
+        return isPlayful ? PlayfulColors.superadminRole : CleanColors.superadminRole;
       case UserRole.bigadmin:
-        return Colors.blue;
+        return isPlayful ? PlayfulColors.principalRole : CleanColors.principalRole;
       case UserRole.admin:
-        return Colors.teal;
+        return isPlayful ? PlayfulColors.deputyRole : CleanColors.deputyRole;
       case UserRole.teacher:
-        return Colors.green;
+        return isPlayful ? PlayfulColors.teacherRole : CleanColors.teacherRole;
       case UserRole.student:
-        return Colors.orange;
+        return isPlayful ? PlayfulColors.studentRole : CleanColors.studentRole;
       case UserRole.parent:
-        return Colors.pink;
+        return isPlayful ? PlayfulColors.parentRole : CleanColors.parentRole;
     }
   }
 
   List<AppUser> _filterUsers(List<AppUser> users) {
     return users.where((user) {
       // Filter by role
-      if (_selectedRole != null && _selectedRole != 'All') {
-        final roleValue = _getRoleValue(_selectedRole!);
+      final selectedRole = _selectedRole;
+      if (selectedRole != null && selectedRole != 'All') {
+        final roleValue = _getRoleValue(selectedRole);
         if (user.role.name != roleValue) {
           return false;
         }
@@ -298,7 +300,7 @@ class _SchoolUsersPageState extends ConsumerState<SchoolUsersPage> {
 
   Widget _buildUserCard(BuildContext context, AppUser user, bool isPlayful) {
     final theme = Theme.of(context);
-    final roleColor = _getRoleColor(user.role);
+    final roleColor = _getRoleColor(user.role, isPlayful: isPlayful);
 
     return Card(
       margin: EdgeInsets.only(bottom: isPlayful ? 12 : 8),
@@ -316,10 +318,10 @@ class _SchoolUsersPageState extends ConsumerState<SchoolUsersPage> {
         ),
         leading: CircleAvatar(
           backgroundColor: roleColor.withValues(alpha: 0.2),
-          child: user.avatarUrl != null
-              ? ClipOval(
+          child: switch (user.avatarUrl) {
+            final avatarUrl? => ClipOval(
                   child: Image.network(
-                    user.avatarUrl!,
+                    avatarUrl,
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,
@@ -328,11 +330,12 @@ class _SchoolUsersPageState extends ConsumerState<SchoolUsersPage> {
                       color: roleColor,
                     ),
                   ),
-                )
-              : Icon(
+                ),
+            null => Icon(
                   Icons.person,
                   color: roleColor,
                 ),
+          },
         ),
         title: Text(
           user.fullName.isNotEmpty ? user.fullName : 'No Name',

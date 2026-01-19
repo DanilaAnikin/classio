@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:classio/core/theme/spacing.dart';
 import 'package:classio/shared/widgets/responsive_center.dart';
 import '../../domain/entities/entities.dart';
 import '../providers/principal_providers.dart';
@@ -40,8 +41,8 @@ class ClassManagementTab extends ConsumerWidget {
           final groupedClasses = <int, List<ClassWithDetails>>{};
           for (final schoolClass in classes) {
             final gradeLevel = schoolClass.gradeLevel ?? 0;
-            groupedClasses.putIfAbsent(gradeLevel, () => []);
-            groupedClasses[gradeLevel]!.add(schoolClass);
+            final classList = groupedClasses.putIfAbsent(gradeLevel, () => []);
+            classList.add(schoolClass);
           }
 
           // Sort grade levels
@@ -65,19 +66,20 @@ class ClassManagementTab extends ConsumerWidget {
                 SizedBox(height: isPlayful ? 24 : 20),
 
                 // Classes by Grade
-                ...sortedGrades.expand((grade) => [
+                ...sortedGrades.expand((grade) {
+                      final gradeClasses = groupedClasses[grade] ?? [];
+                      return [
                       _SectionHeader(
                         title: grade == 0 ? 'Ungraded' : 'Grade $grade',
                         icon: Icons.school_outlined,
-                        count: groupedClasses[grade]!.length,
+                        count: gradeClasses.length,
                         isPlayful: isPlayful,
                       ),
                       SizedBox(height: isPlayful ? 12 : 8),
-                      ...groupedClasses[grade]!.map((schoolClass) => Padding(
+                      ...gradeClasses.map((schoolClass) => Padding(
                             padding: EdgeInsets.only(bottom: isPlayful ? 10 : 8),
                             child: ClassCard(
                               classDetails: schoolClass,
-                              isPlayful: isPlayful,
                               onEdit: () =>
                                   _showEditClassDialog(context, ref, schoolClass),
                               onAssignTeacher: () =>
@@ -89,7 +91,8 @@ class ClassManagementTab extends ConsumerWidget {
                             ),
                           )),
                       SizedBox(height: isPlayful ? 16 : 12),
-                    ]),
+                    ];
+                    }),
 
                 SizedBox(height: isPlayful ? 80 : 72), // Space for FAB
               ],
@@ -107,7 +110,7 @@ class ClassManagementTab extends ConsumerWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(32),
+          padding: EdgeInsets.all(AppSpacing.xxl),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -123,7 +126,7 @@ class ClassManagementTab extends ConsumerWidget {
                   color: theme.colorScheme.primary.withValues(alpha: 0.6),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
               Text(
                 'No Classes Yet',
                 style: TextStyle(
@@ -132,7 +135,7 @@ class ClassManagementTab extends ConsumerWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 'Create classes to organize your students.',
                 style: TextStyle(
@@ -158,7 +161,7 @@ class ClassManagementTab extends ConsumerWidget {
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.dialogInsets,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -167,7 +170,7 @@ class ClassManagementTab extends ConsumerWidget {
                 size: 64,
                 color: theme.colorScheme.error.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               Text(
                 'Something went wrong',
                 style: TextStyle(
@@ -176,7 +179,7 @@ class ClassManagementTab extends ConsumerWidget {
                   color: theme.colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: AppSpacing.xs),
               Text(
                 error.toString(),
                 style: TextStyle(
@@ -185,7 +188,7 @@ class ClassManagementTab extends ConsumerWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: AppSpacing.xl),
               ElevatedButton.icon(
                 onPressed: () {
                   ref.invalidate(principalSchoolClassesProvider(schoolId));
@@ -477,7 +480,7 @@ class _SectionHeader extends StatelessWidget {
           size: isPlayful ? 22 : 20,
           color: theme.colorScheme.primary,
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.xs),
         Text(
           title,
           style: TextStyle(
@@ -487,7 +490,7 @@ class _SectionHeader extends StatelessWidget {
             letterSpacing: isPlayful ? 0.3 : -0.3,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: AppSpacing.xs),
         Container(
           padding: EdgeInsets.symmetric(
             horizontal: isPlayful ? 10 : 8,

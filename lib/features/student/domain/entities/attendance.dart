@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
+
 /// Represents the status of an attendance record.
 enum AttendanceStatus {
   /// Student was present for the lesson.
@@ -43,18 +45,19 @@ enum AttendanceStatus {
   }
 
   /// Returns the color associated with this status.
+  /// Uses CleanColors as default theme colors.
   Color get color {
     switch (this) {
       case AttendanceStatus.present:
-        return Colors.green;
+        return CleanColors.attendancePresent;
       case AttendanceStatus.absent:
-        return Colors.red;
+        return CleanColors.attendanceAbsent;
       case AttendanceStatus.late:
-        return Colors.orange;
+        return CleanColors.attendanceLate;
       case AttendanceStatus.leftEarly:
-        return Colors.amber;
+        return CleanColors.attendanceExcused;
       case AttendanceStatus.excused:
-        return Colors.blue;
+        return CleanColors.info;
     }
   }
 
@@ -113,16 +116,17 @@ enum ExcuseStatus {
   }
 
   /// Returns the color associated with this status.
+  /// Uses CleanColors as default theme colors.
   Color get color {
     switch (this) {
       case ExcuseStatus.none:
-        return Colors.grey;
+        return CleanColors.attendanceUnknown;
       case ExcuseStatus.pending:
-        return Colors.orange;
+        return CleanColors.warning;
       case ExcuseStatus.approved:
-        return Colors.green;
+        return CleanColors.success;
       case ExcuseStatus.rejected:
-        return Colors.red;
+        return CleanColors.error;
     }
   }
 }
@@ -296,12 +300,13 @@ class AttendanceStats {
   }
 
   /// Returns a color based on the attendance percentage.
+  /// Uses CleanColors for consistent theming.
   Color get percentageColor {
-    if (attendancePercentage >= 95) return Colors.green;
-    if (attendancePercentage >= 90) return Colors.lightGreen;
-    if (attendancePercentage >= 80) return Colors.orange;
-    if (attendancePercentage >= 70) return Colors.deepOrange;
-    return Colors.red;
+    if (attendancePercentage >= 95) return CleanColors.gradeExcellent;
+    if (attendancePercentage >= 90) return CleanColors.gradeGood;
+    if (attendancePercentage >= 80) return CleanColors.gradeAverage;
+    if (attendancePercentage >= 70) return CleanColors.gradeBelowAverage;
+    return CleanColors.gradeFailing;
   }
 
   @override
@@ -327,18 +332,19 @@ enum DailyAttendanceStatus {
   noData;
 
   /// Returns the color for this status.
+  /// Uses CleanColors for consistent theming.
   Color get color {
     switch (this) {
       case DailyAttendanceStatus.allPresent:
-        return Colors.green;
+        return CleanColors.attendancePresent;
       case DailyAttendanceStatus.partialAbsent:
-        return Colors.orange;
+        return CleanColors.attendanceLate;
       case DailyAttendanceStatus.allAbsent:
-        return Colors.red;
+        return CleanColors.attendanceAbsent;
       case DailyAttendanceStatus.wasLate:
-        return Colors.amber;
+        return CleanColors.attendanceExcused;
       case DailyAttendanceStatus.noData:
-        return Colors.grey.shade300;
+        return CleanColors.attendanceUnknown;
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/theme/theme.dart';
 import '../../../auth/domain/entities/app_user.dart';
 
 /// Provider that fetches students for a specific class.
@@ -72,14 +73,15 @@ class ViewClassStudentsDialog extends ConsumerWidget {
               itemCount: students.length,
               itemBuilder: (context, index) {
                 final student = students[index];
+                final avatarUrl = student.avatarUrl;
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor:
                         theme.colorScheme.primary.withValues(alpha: 0.2),
-                    backgroundImage: student.avatarUrl != null
-                        ? NetworkImage(student.avatarUrl!)
+                    backgroundImage: avatarUrl != null
+                        ? NetworkImage(avatarUrl)
                         : null,
-                    child: student.avatarUrl == null
+                    child: avatarUrl == null
                         ? Text(
                             student.displayName.isNotEmpty
                                 ? student.displayName[0].toUpperCase()

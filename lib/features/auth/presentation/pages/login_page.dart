@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:classio/core/localization/app_localizations.dart';
 import '../../../../core/providers/theme_provider.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../data/repositories/supabase_auth_repository.dart';
 import '../providers/auth_provider.dart';
 
@@ -228,7 +230,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -238,61 +240,61 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     // Logo/Icon
                     _buildLogo(isPlayful, theme),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: AppSpacing.xxl),
 
                     // Welcome Text
                     _buildWelcomeText(isPlayful, theme),
 
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppSpacing.xs),
 
                     // Subtitle
                     _buildSubtitle(isPlayful, theme),
 
-                    const SizedBox(height: 48),
+                    SizedBox(height: AppSpacing.xxxl + AppSpacing.xs),
 
                     // Email Field
                     _buildEmailField(isLoading, isPlayful, theme),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
 
                     // Password Field
                     _buildPasswordField(isLoading, isPlayful, theme),
 
                     // Registration-only fields
                     if (_isRegistrationMode) ...[
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
 
                       // First Name Field
                       _buildFirstNameField(isLoading, isPlayful, theme),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
 
                       // Last Name Field
                       _buildLastNameField(isLoading, isPlayful, theme),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
 
                       // Confirm Password Field
                       _buildConfirmPasswordField(isLoading, isPlayful, theme),
 
-                      const SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.md),
 
                       // Invite Code Field
                       _buildInviteCodeField(isLoading, isPlayful, theme),
                     ],
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: AppSpacing.xl),
 
                     // Login/Register Button
                     _buildSubmitButton(isLoading, isPlayful, theme),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
 
                     // Toggle Mode Link
                     _buildToggleModeButton(isPlayful, theme, isLoading),
 
                     if (!_isRegistrationMode) ...[
-                      const SizedBox(height: 8),
+                      SizedBox(height: AppSpacing.xs),
 
                       // Forgot Password Link (only in login mode)
                       _buildForgotPasswordButton(isPlayful, theme),
@@ -318,7 +320,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ? theme.colorScheme.primary.withValues(alpha: 0.1)
               : theme.colorScheme.primary.withValues(alpha: 0.08),
           shape: isPlayful ? BoxShape.circle : BoxShape.rectangle,
-          borderRadius: isPlayful ? null : BorderRadius.circular(16),
+          borderRadius: isPlayful ? null : AppRadius.largeBorderRadius,
           boxShadow: isPlayful
               ? [
                   BoxShadow(
@@ -605,7 +607,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Container(
       decoration: isPlayful
           ? BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: AppRadius.xlBorderRadius,
               gradient: LinearGradient(
                 colors: [
                   theme.colorScheme.primary,
@@ -615,7 +617,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               boxShadow: [
                 BoxShadow(
                   color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                  blurRadius: 16,
+                  blurRadius: AppSpacing.md,
                   offset: const Offset(0, 8),
                 ),
               ],
@@ -629,7 +631,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 shadowColor: Colors.transparent,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: AppRadius.xlBorderRadius,
                 ),
               )
             : ElevatedButton.styleFrom(
@@ -702,7 +704,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           builder: (context, setDialogState) {
             return AlertDialog(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(isPlayful ? 24 : 12),
+                borderRadius: BorderRadius.circular(isPlayful ? AppRadius.xl : AppRadius.md),
               ),
               title: Text(
                 context.l10n.resetPassword,
@@ -722,7 +724,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
                     TextFormField(
                       controller: forgotPasswordEmailController,
                       enabled: !isSubmitting,

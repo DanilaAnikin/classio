@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/providers/providers.dart';
+import '../../core/theme/theme.dart';
 import '../../shared/widgets/language_selector.dart';
 import '../settings/settings_screen.dart';
 
@@ -13,6 +14,13 @@ import '../settings/settings_screen.dart';
 /// - Current theme and language info display
 /// - Sample cards demonstrating the theme
 /// - Navigation to Settings
+///
+/// Design System:
+/// - Uses AppSpacing for all padding/margins
+/// - Uses AppTypography for text styles
+/// - Uses AppRadius for corners
+/// - Uses AppColors for all colors
+/// - Fully theme-aware (Clean vs Playful)
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -22,37 +30,23 @@ class DashboardScreen extends ConsumerWidget {
     final currentTheme = ref.watch(themeNotifierProvider);
     final currentLocale = ref.watch(localeNotifierProvider);
     final currentLanguage = getLanguageOption(currentLocale.languageCode);
+    final isPlayful = currentTheme == ThemeType.playful;
 
     return Scaffold(
+      backgroundColor: isPlayful ? PlayfulColors.background : CleanColors.background,
       body: CustomScrollView(
         slivers: [
           // App Bar
-          SliverAppBar.large(
-            title: Text(l10n.appName),
-            centerTitle: true,
-            floating: true,
-            pinned: true,
-            actions: [
-              // Language indicator button
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: _LanguageIndicator(
-                  flag: currentLanguage.flag,
-                  onTap: () => _navigateToSettings(context),
-                ),
-              ),
-              // Settings button
-              IconButton(
-                icon: const Icon(Icons.settings_outlined),
-                onPressed: () => _navigateToSettings(context),
-                tooltip: l10n.settings,
-              ),
-              const SizedBox(width: 8),
-            ],
+          _DashboardAppBar(
+            appName: l10n.appName,
+            languageFlag: currentLanguage.flag,
+            settingsTooltip: l10n.settings,
+            isPlayful: isPlayful,
+            onSettingsTap: () => _navigateToSettings(context),
           ),
           // Dashboard Content
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: AppSpacing.getPagePadding(context, isPlayful: isPlayful),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Welcome Card
@@ -61,57 +55,146 @@ class DashboardScreen extends ConsumerWidget {
                   currentTheme: currentTheme,
                   l10n: l10n,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: AppSpacing.getSectionGap(isPlayful: isPlayful)),
 
                 // Quick Stats Section
-                _SectionTitle(title: 'Quick Overview'),
-                const SizedBox(height: 12),
-                _QuickStatsRow(),
-                const SizedBox(height: 24),
+                _SectionHeader(
+                  title: 'Quick Overview',
+                  isPlayful: isPlayful,
+                ),
+                AppSpacing.gapSm,
+                _QuickStatsRow(isPlayful: isPlayful),
+                SizedBox(height: AppSpacing.getSectionGap(isPlayful: isPlayful)),
 
                 // Feature Cards Section
-                _SectionTitle(title: 'Features'),
-                const SizedBox(height: 12),
-                _FeatureCardsGrid(currentTheme: currentTheme),
-                const SizedBox(height: 24),
+                _SectionHeader(
+                  title: 'Features',
+                  isPlayful: isPlayful,
+                ),
+                AppSpacing.gapSm,
+                _FeatureCardsGrid(isPlayful: isPlayful),
+                SizedBox(height: AppSpacing.getSectionGap(isPlayful: isPlayful)),
 
                 // Current Settings Card
-                _SectionTitle(title: 'Your Settings'),
-                const SizedBox(height: 12),
+                _SectionHeader(
+                  title: 'Your Settings',
+                  isPlayful: isPlayful,
+                ),
+                AppSpacing.gapSm,
                 _SettingsPreviewCard(
                   currentTheme: currentTheme,
                   currentLanguage: currentLanguage,
                   l10n: l10n,
                   onSettingsTap: () => _navigateToSettings(context),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: AppSpacing.getSectionGap(isPlayful: isPlayful)),
 
                 // Action Buttons Demo
-                _SectionTitle(title: 'Quick Actions'),
-                const SizedBox(height: 12),
+                _SectionHeader(
+                  title: 'Quick Actions',
+                  isPlayful: isPlayful,
+                ),
+                AppSpacing.gapSm,
                 _QuickActionsCard(
+                  isPlayful: isPlayful,
                   onSettingsTap: () => _navigateToSettings(context),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: AppSpacing.space48),
               ]),
             ),
           ),
         ],
       ),
       // Floating Action Button
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: _DashboardFAB(
+        label: l10n.settings,
+        isPlayful: isPlayful,
         onPressed: () => _navigateToSettings(context),
-        icon: const Icon(Icons.tune_rounded),
-        label: Text(l10n.settings),
       ),
     );
   }
 
   void _navigateToSettings(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => const SettingsScreen(),
+      PageRouteBuilder<void>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const SettingsScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: AppCurves.emphasized,
+            ),
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.05, 0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: AppCurves.decelerate,
+              )),
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: AppDuration.pageTransition,
       ),
+    );
+  }
+}
+
+/// Premium app bar for the dashboard.
+class _DashboardAppBar extends StatelessWidget {
+  final String appName;
+  final String languageFlag;
+  final String settingsTooltip;
+  final bool isPlayful;
+  final VoidCallback onSettingsTap;
+
+  const _DashboardAppBar({
+    required this.appName,
+    required this.languageFlag,
+    required this.settingsTooltip,
+    required this.isPlayful,
+    required this.onSettingsTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar.large(
+      title: Text(
+        appName,
+        style: AppTypography.appBarTitle(isPlayful: isPlayful),
+      ),
+      centerTitle: true,
+      floating: true,
+      pinned: true,
+      backgroundColor: isPlayful ? PlayfulColors.appBar : CleanColors.appBar,
+      surfaceTintColor: Colors.transparent,
+      actions: [
+        // Language indicator button
+        Padding(
+          padding: EdgeInsets.only(right: AppSpacing.xs),
+          child: _LanguageIndicator(
+            flag: languageFlag,
+            isPlayful: isPlayful,
+            onTap: onSettingsTap,
+          ),
+        ),
+        // Settings button
+        IconButton(
+          icon: Icon(
+            Icons.settings_outlined,
+            size: AppIconSize.appBar,
+            color: isPlayful
+                ? PlayfulColors.appBarForeground
+                : CleanColors.appBarForeground,
+          ),
+          onPressed: onSettingsTap,
+          tooltip: settingsTooltip,
+        ),
+        SizedBox(width: AppSpacing.xs),
+      ],
     );
   }
 }
@@ -119,31 +202,38 @@ class DashboardScreen extends ConsumerWidget {
 /// Language indicator button showing the current flag.
 class _LanguageIndicator extends StatelessWidget {
   final String flag;
+  final bool isPlayful;
   final VoidCallback onTap;
 
   const _LanguageIndicator({
     required this.flag,
+    required this.isPlayful,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final primaryColor = isPlayful ? PlayfulColors.primary : CleanColors.primary;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        borderRadius: AppRadius.button(isPlayful: isPlayful),
+        child: AnimatedContainer(
+          duration: AppDuration.fast,
+          curve: AppCurves.standard,
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
+            color: primaryColor.withValues(alpha: AppOpacity.soft),
+            borderRadius: AppRadius.button(isPlayful: isPlayful),
           ),
           child: Text(
             flag,
-            style: const TextStyle(fontSize: 20),
+            style: TextStyle(fontSize: AppIconSize.md),
           ),
         ),
       ),
@@ -151,21 +241,22 @@ class _LanguageIndicator extends StatelessWidget {
   }
 }
 
-/// Section title widget.
-class _SectionTitle extends StatelessWidget {
+/// Section header with consistent styling.
+class _SectionHeader extends StatelessWidget {
   final String title;
+  final bool isPlayful;
 
-  const _SectionTitle({required this.title});
+  const _SectionHeader({
+    required this.title,
+    required this.isPlayful,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Text(
       title,
-      style: theme.textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-        letterSpacing: 0.3,
+      style: AppTypography.sectionTitle(isPlayful: isPlayful).copyWith(
+        fontSize: AppFontSize.titleMedium,
       ),
     );
   }
@@ -185,75 +276,75 @@ class _WelcomeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isPlayful = currentTheme == ThemeType.playful;
+    final primaryColor = isPlayful ? PlayfulColors.primary : CleanColors.primary;
+    final secondaryColor = isPlayful ? PlayfulColors.secondary : CleanColors.secondary;
 
-    return Container(
-      padding: const EdgeInsets.all(24),
+    return AnimatedContainer(
+      duration: AppDuration.medium,
+      curve: AppCurves.emphasized,
+      padding: AppSpacing.getCardPadding(isPlayful: isPlayful),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isPlayful
               ? [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.primary.withValues(alpha: 0.8),
-                  theme.colorScheme.secondary.withValues(alpha: 0.6),
+                  primaryColor,
+                  primaryColor.withValues(alpha: AppOpacity.almostOpaque),
+                  secondaryColor.withValues(alpha: AppOpacity.dominant),
                 ]
               : [
-                  theme.colorScheme.primary,
-                  theme.colorScheme.primary.withValues(alpha: 0.85),
+                  primaryColor,
+                  primaryColor.withValues(alpha: AppOpacity.almostOpaque),
                 ],
         ),
-        borderRadius: BorderRadius.circular(isPlayful ? 24 : 16),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+        boxShadow: AppShadows.cardHover(isPlayful: isPlayful),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Greeting icon
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: AppSpacing.insets12,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: AppOpacity.medium),
+              borderRadius: AppRadius.button(isPlayful: isPlayful),
             ),
             child: Icon(
               isPlayful ? Icons.waving_hand_rounded : Icons.school_rounded,
               color: Colors.white,
-              size: 28,
+              size: AppIconSize.lg,
             ),
           ),
-          const SizedBox(height: 20),
+          AppSpacing.gapLg,
           // Welcome message
           Text(
             welcomeMessage,
-            style: theme.textTheme.headlineSmall?.copyWith(
+            style: AppTypography.pageTitle(isPlayful: isPlayful).copyWith(
               color: Colors.white,
-              fontWeight: FontWeight.bold,
+              fontSize: AppFontSize.headlineSmall,
             ),
           ),
-          const SizedBox(height: 8),
+          AppSpacing.gap4,
           // Subtitle
           Text(
             'Your learning journey starts here',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: Colors.white.withValues(alpha: 0.9),
+            style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+              color: Colors.white.withValues(alpha: AppOpacity.almostOpaque),
             ),
           ),
-          const SizedBox(height: 20),
+          AppSpacing.gapLg,
           // Theme badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.space4,
+            ),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
+              color: Colors.white.withValues(alpha: AppOpacity.medium),
+              borderRadius: AppRadius.fullRadius,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -261,14 +352,13 @@ class _WelcomeCard extends StatelessWidget {
                 Icon(
                   isPlayful ? Icons.palette_outlined : Icons.auto_awesome_outlined,
                   color: Colors.white,
-                  size: 16,
+                  size: AppIconSize.sm,
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: AppSpacing.xs),
                 Text(
                   '${l10n.theme}: ${isPlayful ? l10n.playfulTheme : l10n.cleanTheme}',
-                  style: theme.textTheme.labelMedium?.copyWith(
+                  style: AppTypography.buttonTextSmall(isPlayful: isPlayful).copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -282,6 +372,10 @@ class _WelcomeCard extends StatelessWidget {
 
 /// Quick stats row showing sample metrics.
 class _QuickStatsRow extends StatelessWidget {
+  final bool isPlayful;
+
+  const _QuickStatsRow({required this.isPlayful});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -291,25 +385,28 @@ class _QuickStatsRow extends StatelessWidget {
             icon: Icons.book_outlined,
             value: '12',
             label: 'Courses',
-            color: Colors.blue,
+            color: isPlayful ? PlayfulColors.statBlue : CleanColors.statBlue,
+            isPlayful: isPlayful,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: AppSpacing.cardGap),
         Expanded(
           child: _StatCard(
             icon: Icons.check_circle_outline,
             value: '48',
             label: 'Completed',
-            color: Colors.green,
+            color: isPlayful ? PlayfulColors.statGreen : CleanColors.statGreen,
+            isPlayful: isPlayful,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: AppSpacing.cardGap),
         Expanded(
           child: _StatCard(
             icon: Icons.timer_outlined,
             value: '24h',
             label: 'Study Time',
-            color: Colors.orange,
+            color: isPlayful ? PlayfulColors.statOrange : CleanColors.statOrange,
+            isPlayful: isPlayful,
           ),
         ),
       ],
@@ -323,60 +420,61 @@ class _StatCard extends StatelessWidget {
   final String value;
   final String label;
   final Color color;
+  final bool isPlayful;
 
   const _StatCard({
     required this.icon,
     required this.value,
     required this.label,
     required this.color,
+    required this.isPlayful,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final surfaceColor = isPlayful ? PlayfulColors.surface : CleanColors.surface;
+    final cardBorder = isPlayful ? PlayfulColors.cardBorder : CleanColors.cardBorder;
+    final textColor = isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+    final secondaryTextColor = isPlayful
+        ? PlayfulColors.textSecondary
+        : CleanColors.textSecondary;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return AnimatedContainer(
+      duration: AppDuration.fast,
+      curve: AppCurves.standard,
+      padding: AppSpacing.cardInsetsCompact,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: surfaceColor,
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+        border: Border.all(color: cardBorder, width: 1),
+        boxShadow: AppShadows.card(isPlayful: isPlayful),
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: AppSpacing.insets8,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              color: color.withValues(alpha: AppOpacity.soft),
+              borderRadius: AppRadius.button(isPlayful: isPlayful),
             ),
             child: Icon(
               icon,
               color: color,
-              size: 24,
+              size: AppIconSize.md,
             ),
           ),
-          const SizedBox(height: 12),
+          AppSpacing.gapSm,
           Text(
             value,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+              color: textColor,
             ),
           ),
-          const SizedBox(height: 4),
+          AppSpacing.gap4,
           Text(
             label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+              color: secondaryTextColor,
             ),
             textAlign: TextAlign.center,
           ),
@@ -388,14 +486,12 @@ class _StatCard extends StatelessWidget {
 
 /// Grid of feature cards.
 class _FeatureCardsGrid extends StatelessWidget {
-  final ThemeType currentTheme;
+  final bool isPlayful;
 
-  const _FeatureCardsGrid({required this.currentTheme});
+  const _FeatureCardsGrid({required this.isPlayful});
 
   @override
   Widget build(BuildContext context) {
-    final isPlayful = currentTheme == ThemeType.playful;
-
     return Column(
       children: [
         Row(
@@ -405,21 +501,23 @@ class _FeatureCardsGrid extends StatelessWidget {
                 icon: Icons.quiz_outlined,
                 title: 'Quizzes',
                 subtitle: 'Test your knowledge',
-                color: isPlayful ? const Color(0xFF7C3AED) : const Color(0xFF1E3A5F),
+                color: isPlayful ? PlayfulColors.primary : CleanColors.primary,
+                isPlayful: isPlayful,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppSpacing.cardGap),
             Expanded(
               child: _FeatureCard(
                 icon: Icons.library_books_outlined,
                 title: 'Library',
                 subtitle: 'Browse materials',
-                color: isPlayful ? const Color(0xFFF97316) : const Color(0xFF64748B),
+                color: isPlayful ? PlayfulColors.secondary : CleanColors.secondary,
+                isPlayful: isPlayful,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: AppSpacing.cardGap),
         Row(
           children: [
             Expanded(
@@ -427,16 +525,18 @@ class _FeatureCardsGrid extends StatelessWidget {
                 icon: Icons.people_outline,
                 title: 'Community',
                 subtitle: 'Connect with peers',
-                color: isPlayful ? const Color(0xFF22C55E) : const Color(0xFF16A34A),
+                color: isPlayful ? PlayfulColors.success : CleanColors.success,
+                isPlayful: isPlayful,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppSpacing.cardGap),
             Expanded(
               child: _FeatureCard(
                 icon: Icons.analytics_outlined,
                 title: 'Progress',
                 subtitle: 'Track your growth',
-                color: isPlayful ? const Color(0xFFEC4899) : const Color(0xFF0284C7),
+                color: isPlayful ? PlayfulColors.accentPink : CleanColors.info,
+                isPlayful: isPlayful,
               ),
             ),
           ],
@@ -446,72 +546,101 @@ class _FeatureCardsGrid extends StatelessWidget {
   }
 }
 
-/// Individual feature card.
-class _FeatureCard extends StatelessWidget {
+/// Individual feature card with hover effect.
+class _FeatureCard extends StatefulWidget {
   final IconData icon;
   final String title;
   final String subtitle;
   final Color color;
+  final bool isPlayful;
 
   const _FeatureCard({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.color,
+    required this.isPlayful,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+  State<_FeatureCard> createState() => _FeatureCardState();
+}
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {},
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
+class _FeatureCardState extends State<_FeatureCard> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final surfaceColor = widget.isPlayful
+        ? PlayfulColors.surface
+        : CleanColors.surface;
+    final cardBorder = widget.isPlayful
+        ? PlayfulColors.cardBorder
+        : CleanColors.cardBorder;
+    final cardRadius = AppRadius.card(isPlayful: widget.isPlayful);
+    final textColor = widget.isPlayful
+        ? PlayfulColors.textPrimary
+        : CleanColors.textPrimary;
+    final secondaryTextColor = widget.isPlayful
+        ? PlayfulColors.textSecondary
+        : CleanColors.textSecondary;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () {
+          // Feature tap handler
+        },
+        child: AnimatedContainer(
+          duration: AppDuration.fast,
+          curve: AppCurves.standard,
+          padding: AppSpacing.getCardPadding(isPlayful: widget.isPlayful),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
+            color: surfaceColor,
+            borderRadius: cardRadius,
             border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.1),
+              color: _isHovered
+                  ? widget.color.withValues(alpha: AppOpacity.semi)
+                  : cardBorder,
+              width: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            boxShadow: _isHovered
+                ? AppShadows.cardHover(isPlayful: widget.isPlayful)
+                : AppShadows.card(isPlayful: widget.isPlayful),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
+              AnimatedContainer(
+                duration: AppDuration.fast,
+                curve: AppCurves.standard,
+                padding: AppSpacing.insets12,
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: widget.color.withValues(
+                    alpha: _isHovered ? AppOpacity.medium : AppOpacity.soft,
+                  ),
+                  borderRadius: AppRadius.button(isPlayful: widget.isPlayful),
                 ),
                 child: Icon(
-                  icon,
-                  color: color,
-                  size: 24,
+                  widget.icon,
+                  color: widget.color,
+                  size: AppIconSize.md,
                 ),
               ),
-              const SizedBox(height: 12),
+              AppSpacing.gapSm,
               Text(
-                title,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                widget.title,
+                style: AppTypography.cardTitle(isPlayful: widget.isPlayful).copyWith(
+                  color: textColor,
+                  fontSize: AppFontSize.titleMedium,
                 ),
               ),
-              const SizedBox(height: 4),
+              AppSpacing.gap4,
               Text(
-                subtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                widget.subtitle,
+                style: AppTypography.caption(isPlayful: widget.isPlayful).copyWith(
+                  color: secondaryTextColor,
                 ),
               ),
             ],
@@ -538,51 +667,53 @@ class _SettingsPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isPlayful = currentTheme == ThemeType.playful;
+    final surfaceColor = isPlayful ? PlayfulColors.surface : CleanColors.surface;
+    final cardBorder = isPlayful ? PlayfulColors.cardBorder : CleanColors.cardBorder;
+    final cardRadius = AppRadius.card(isPlayful: isPlayful);
+    final textColor = isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary;
+    final secondaryTextColor = isPlayful
+        ? PlayfulColors.textSecondary
+        : CleanColors.textSecondary;
+    final primaryColor = isPlayful ? PlayfulColors.primary : CleanColors.primary;
+    final secondaryColor = isPlayful ? PlayfulColors.secondary : CleanColors.secondary;
 
     return Material(
       color: Colors.transparent,
+      borderRadius: cardRadius,
       child: InkWell(
         onTap: onSettingsTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
+        borderRadius: cardRadius,
+        child: AnimatedContainer(
+          duration: AppDuration.fast,
+          curve: AppCurves.standard,
+          padding: AppSpacing.getCardPadding(isPlayful: isPlayful),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.1),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.shadowColor.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: surfaceColor,
+            borderRadius: cardRadius,
+            border: Border.all(color: cardBorder, width: 1),
+            boxShadow: AppShadows.card(isPlayful: isPlayful),
           ),
           child: Row(
             children: [
               // Theme indicator
               Container(
-                width: 56,
-                height: 56,
+                width: AppSpacing.space48,
+                height: AppSpacing.space48,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: isPlayful
-                        ? [const Color(0xFF7C3AED), const Color(0xFFF97316)]
-                        : [const Color(0xFF1E3A5F), const Color(0xFF64748B)],
+                    colors: [primaryColor, secondaryColor],
                   ),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: AppRadius.button(isPlayful: isPlayful),
+                  boxShadow: AppShadows.button(isPlayful: isPlayful),
                 ),
                 child: Icon(
                   isPlayful ? Icons.palette_rounded : Icons.auto_awesome_rounded,
                   color: Colors.white,
-                  size: 28,
+                  size: AppIconSize.md,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: AppSpacing.md),
               // Settings info
               Expanded(
                 child: Column(
@@ -592,24 +723,25 @@ class _SettingsPreviewCard extends StatelessWidget {
                       children: [
                         Text(
                           currentLanguage.flag,
-                          style: const TextStyle(fontSize: 18),
+                          style: TextStyle(fontSize: AppIconSize.md),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(
                             currentLanguage.nativeName,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
+                            style: AppTypography.cardTitle(isPlayful: isPlayful).copyWith(
+                              color: textColor,
+                              fontSize: AppFontSize.titleMedium,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    AppSpacing.gap4,
                     Text(
                       '${l10n.theme}: ${isPlayful ? l10n.playfulTheme : l10n.cleanTheme}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+                        color: secondaryTextColor,
                       ),
                     ),
                   ],
@@ -618,7 +750,8 @@ class _SettingsPreviewCard extends StatelessWidget {
               // Arrow
               Icon(
                 Icons.chevron_right_rounded,
-                color: theme.colorScheme.onSurfaceVariant,
+                color: secondaryTextColor,
+                size: AppIconSize.md,
               ),
             ],
           ),
@@ -630,67 +763,128 @@ class _SettingsPreviewCard extends StatelessWidget {
 
 /// Quick actions card with buttons.
 class _QuickActionsCard extends StatelessWidget {
+  final bool isPlayful;
   final VoidCallback onSettingsTap;
 
   const _QuickActionsCard({
+    required this.isPlayful,
     required this.onSettingsTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final surfaceColor = isPlayful ? PlayfulColors.surface : CleanColors.surface;
+    final cardBorder = isPlayful ? PlayfulColors.cardBorder : CleanColors.cardBorder;
+    final cardRadius = AppRadius.card(isPlayful: isPlayful);
 
-    return Container(
-      padding: const EdgeInsets.all(20),
+    return AnimatedContainer(
+      duration: AppDuration.fast,
+      curve: AppCurves.standard,
+      padding: AppSpacing.getCardPadding(isPlayful: isPlayful),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: surfaceColor,
+        borderRadius: cardRadius,
+        border: Border.all(color: cardBorder, width: 1),
+        boxShadow: AppShadows.card(isPlayful: isPlayful),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Start Learning'),
+          // Primary action button
+          SizedBox(
+            height: AppSpacing.buttonHeight,
+            child: ElevatedButton.icon(
+              onPressed: () {},
+              icon: Icon(Icons.play_arrow_rounded, size: AppIconSize.button),
+              label: Text(
+                'Start Learning',
+                style: AppTypography.buttonTextMedium(isPlayful: isPlayful),
+              ),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppRadius.button(isPlayful: isPlayful),
                 ),
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: AppSpacing.cardGap),
           Row(
             children: [
+              // Secondary action button
               Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onSettingsTap,
-                  icon: const Icon(Icons.settings_outlined),
-                  label: const Text('Customize'),
+                child: SizedBox(
+                  height: AppSpacing.buttonHeight,
+                  child: OutlinedButton.icon(
+                    onPressed: onSettingsTap,
+                    icon: Icon(Icons.settings_outlined, size: AppIconSize.button),
+                    label: Text(
+                      'Customize',
+                      style: AppTypography.buttonTextMedium(isPlayful: isPlayful),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppRadius.button(isPlayful: isPlayful),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: AppSpacing.cardGap),
+              // Tertiary action button
               Expanded(
-                child: TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.help_outline_rounded),
-                  label: const Text('Help'),
+                child: SizedBox(
+                  height: AppSpacing.buttonHeight,
+                  child: TextButton.icon(
+                    onPressed: () {},
+                    icon: Icon(Icons.help_outline_rounded, size: AppIconSize.button),
+                    label: Text(
+                      'Help',
+                      style: AppTypography.buttonTextMedium(isPlayful: isPlayful),
+                    ),
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppRadius.button(isPlayful: isPlayful),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Premium floating action button for the dashboard.
+class _DashboardFAB extends StatelessWidget {
+  final String label;
+  final bool isPlayful;
+  final VoidCallback onPressed;
+
+  const _DashboardFAB({
+    required this.label,
+    required this.isPlayful,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton.extended(
+      onPressed: onPressed,
+      icon: Icon(
+        Icons.tune_rounded,
+        size: AppIconSize.button,
+      ),
+      label: Text(
+        label,
+        style: AppTypography.buttonTextMedium(isPlayful: isPlayful).copyWith(
+          color: Colors.white,
+        ),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.button(isPlayful: isPlayful),
       ),
     );
   }

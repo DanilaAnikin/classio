@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import 'package:classio/core/theme/app_radius.dart';
+import 'package:classio/core/theme/spacing.dart';
 import '../../../../core/localization/localization.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../dashboard/domain/entities/assignment.dart';
@@ -71,7 +73,7 @@ class _SubjectDetailPageState extends ConsumerState<SubjectDetailPage>
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -80,7 +82,7 @@ class _SubjectDetailPageState extends ConsumerState<SubjectDetailPage>
               size: isPlayful ? 72 : 64,
               color: theme.colorScheme.error.withValues(alpha: 0.6),
             ),
-            SizedBox(height: isPlayful ? 24 : 20),
+            SizedBox(height: isPlayful ? AppSpacing.xl : AppSpacing.lg),
             Text(
               l10n.subjectFailedToLoad,
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -89,7 +91,7 @@ class _SubjectDetailPageState extends ConsumerState<SubjectDetailPage>
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               error,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -97,7 +99,7 @@ class _SubjectDetailPageState extends ConsumerState<SubjectDetailPage>
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             ElevatedButton.icon(
               onPressed: () {
                 ref
@@ -141,7 +143,7 @@ class _SubjectDetailPageState extends ConsumerState<SubjectDetailPage>
                       letterSpacing: isPlayful ? 0.3 : -0.3,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppSpacing.xxs),
                   Text(
                     data.teacherName,
                     style: TextStyle(
@@ -152,7 +154,7 @@ class _SubjectDetailPageState extends ConsumerState<SubjectDetailPage>
                   ),
                 ],
               ),
-              titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+              titlePadding: EdgeInsets.only(left: AppSpacing.md, bottom: AppSpacing.md),
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -228,11 +230,11 @@ class _StreamTab extends ConsumerWidget {
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       itemCount: posts.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: EdgeInsets.only(bottom: isPlayful ? 16 : 12),
+          padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.md : AppSpacing.sm),
           child: _PostCard(post: posts[index]),
         );
       },
@@ -248,7 +250,7 @@ class _StreamTab extends ConsumerWidget {
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -265,7 +267,7 @@ class _StreamTab extends ConsumerWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            SizedBox(height: isPlayful ? 28 : 24),
+            SizedBox(height: isPlayful ? AppSpacing.xxl - AppSpacing.xxs : AppSpacing.xl),
             Text(
               title,
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -275,7 +277,7 @@ class _StreamTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               subtitle,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -322,7 +324,7 @@ class _PostCard extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         color: theme.colorScheme.surface,
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.15),
@@ -339,7 +341,7 @@ class _PostCard extends ConsumerWidget {
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 16 : 14),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm + 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -361,7 +363,7 @@ class _PostCard extends ConsumerWidget {
                         )
                       : _buildAvatarFallback(theme, isPlayful),
                 ),
-                SizedBox(width: isPlayful ? 12 : 10),
+                SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.sm - 2),
 
                 // Author name and date
                 Expanded(
@@ -376,7 +378,7 @@ class _PostCard extends ConsumerWidget {
                           color: theme.colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: AppSpacing.xxs / 2),
                       Text(
                         _formatDate(post.date, context),
                         style: TextStyle(
@@ -391,14 +393,14 @@ class _PostCard extends ConsumerWidget {
                 // Type badge
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: isPlayful ? 12 : 10,
+                    horizontal: isPlayful ? AppSpacing.sm : AppSpacing.sm - 2,
                     vertical: isPlayful ? 6 : 5,
                   ),
                   decoration: BoxDecoration(
                     color: post.type == CoursePostType.assignment
                         ? theme.colorScheme.tertiaryContainer
                         : theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                    borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -412,7 +414,7 @@ class _PostCard extends ConsumerWidget {
                             ? theme.colorScheme.onTertiaryContainer
                             : theme.colorScheme.onPrimaryContainer,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: AppSpacing.xxs),
                       Text(
                         post.type.displayName,
                         style: TextStyle(
@@ -429,7 +431,7 @@ class _PostCard extends ConsumerWidget {
               ],
             ),
 
-            SizedBox(height: isPlayful ? 16 : 12),
+            SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
 
             // Content
             Text(
@@ -479,11 +481,11 @@ class _AssignmentsTab extends ConsumerWidget {
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       itemCount: assignments.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: EdgeInsets.only(bottom: isPlayful ? 12 : 10),
+          padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.sm : AppSpacing.sm - 2),
           child: _AssignmentCard(assignment: assignments[index]),
         );
       },
@@ -499,7 +501,7 @@ class _AssignmentsTab extends ConsumerWidget {
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -516,7 +518,7 @@ class _AssignmentsTab extends ConsumerWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            SizedBox(height: isPlayful ? 28 : 24),
+            SizedBox(height: isPlayful ? AppSpacing.xxl - AppSpacing.xxs : AppSpacing.xl),
             Text(
               title,
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -526,7 +528,7 @@ class _AssignmentsTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               subtitle,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -572,7 +574,7 @@ class _AssignmentCard extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         gradient: isPlayful && !isCompleted
             ? LinearGradient(
                 begin: Alignment.centerLeft,
@@ -607,7 +609,7 @@ class _AssignmentCard extends ConsumerWidget {
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(isPlayful ? 16 : 14),
+        padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm + 2),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -629,7 +631,7 @@ class _AssignmentCard extends ConsumerWidget {
                           decoration: isCompleted ? TextDecoration.lineThrough : null,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: AppSpacing.xxs + 2),
                       Row(
                         children: [
                           Icon(
@@ -639,7 +641,7 @@ class _AssignmentCard extends ConsumerWidget {
                                 ? theme.colorScheme.error
                                 : theme.colorScheme.onSurfaceVariant,
                           ),
-                          const SizedBox(width: 6),
+                          SizedBox(width: AppSpacing.xxs + 2),
                           Text(
                             _formatDueDate(assignment.dueDate, context),
                             style: TextStyle(
@@ -673,7 +675,7 @@ class _AssignmentCard extends ConsumerWidget {
             ),
 
             if (assignment.description != null && assignment.description!.isNotEmpty) ...[
-              SizedBox(height: isPlayful ? 12 : 10),
+              SizedBox(height: isPlayful ? AppSpacing.sm : AppSpacing.sm - 2),
               Text(
                 assignment.description!,
                 style: TextStyle(
@@ -687,7 +689,7 @@ class _AssignmentCard extends ConsumerWidget {
             ],
 
             if (!isCompleted) ...[
-              SizedBox(height: isPlayful ? 16 : 12),
+              SizedBox(height: isPlayful ? AppSpacing.md : AppSpacing.sm),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -697,7 +699,7 @@ class _AssignmentCard extends ConsumerWidget {
                         content: Text(context.l10n.subjectSubmitted),
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         backgroundColor: theme.colorScheme.primary,
                       ),
@@ -707,10 +709,10 @@ class _AssignmentCard extends ConsumerWidget {
                   label: Text(context.l10n.subjectSubmit),
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(
-                      vertical: isPlayful ? 14 : 12,
+                      vertical: isPlayful ? AppSpacing.sm + 2 : AppSpacing.sm,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                      borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
                     ),
                   ),
                 ),
@@ -747,11 +749,11 @@ class _MaterialsTab extends ConsumerWidget {
     }
 
     return ListView.builder(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       itemCount: materials.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: EdgeInsets.only(bottom: isPlayful ? 12 : 10),
+          padding: EdgeInsets.only(bottom: isPlayful ? AppSpacing.sm : AppSpacing.sm - 2),
           child: _MaterialCard(material: materials[index]),
         );
       },
@@ -767,7 +769,7 @@ class _MaterialsTab extends ConsumerWidget {
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -784,7 +786,7 @@ class _MaterialsTab extends ConsumerWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            SizedBox(height: isPlayful ? 28 : 24),
+            SizedBox(height: isPlayful ? AppSpacing.xxl - AppSpacing.xxs : AppSpacing.xl),
             Text(
               title,
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -794,7 +796,7 @@ class _MaterialsTab extends ConsumerWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: AppSpacing.sm),
             Text(
               subtitle,
               style: theme.textTheme.bodyLarge?.copyWith(
@@ -850,7 +852,7 @@ class _MaterialCard extends ConsumerWidget {
           content: Text(context.l10n.subjectOpening(url)),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
         ),
       );
@@ -865,10 +867,10 @@ class _MaterialCard extends ConsumerWidget {
 
     return InkWell(
       onTap: () => _openUrl(material.url, context),
-      borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+      borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+          borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
           color: theme.colorScheme.surface,
           border: Border.all(
             color: theme.colorScheme.outline.withValues(alpha: 0.15),
@@ -885,7 +887,7 @@ class _MaterialCard extends ConsumerWidget {
           ],
         ),
         child: Padding(
-          padding: EdgeInsets.all(isPlayful ? 16 : 14),
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm + 2),
           child: Row(
             children: [
               // Icon
@@ -894,7 +896,7 @@ class _MaterialCard extends ConsumerWidget {
                 height: isPlayful ? 52 : 48,
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(isPlayful ? 14 : 12),
+                  borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md + 2 : AppRadius.md),
                 ),
                 child: Icon(
                   _getIconForType(material.type),
@@ -902,7 +904,7 @@ class _MaterialCard extends ConsumerWidget {
                   color: iconColor,
                 ),
               ),
-              SizedBox(width: isPlayful ? 16 : 12),
+              SizedBox(width: isPlayful ? AppSpacing.md : AppSpacing.sm),
 
               // Content
               Expanded(
@@ -919,17 +921,17 @@ class _MaterialCard extends ConsumerWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: AppSpacing.xxs + 2),
                     Row(
                       children: [
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: isPlayful ? 8 : 6,
-                            vertical: isPlayful ? 4 : 3,
+                            horizontal: isPlayful ? AppSpacing.xs : AppSpacing.xxs + 2,
+                            vertical: isPlayful ? AppSpacing.xxs : 3,
                           ),
                           decoration: BoxDecoration(
                             color: iconColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(isPlayful ? 8 : 6),
+                            borderRadius: BorderRadius.circular(isPlayful ? AppRadius.sm : AppRadius.xxs + 2),
                           ),
                           child: Text(
                             material.type.displayName,
@@ -940,13 +942,13 @@ class _MaterialCard extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        SizedBox(width: isPlayful ? 12 : 10),
+                        SizedBox(width: isPlayful ? AppSpacing.sm : AppSpacing.sm - 2),
                         Icon(
                           Icons.calendar_today_rounded,
                           size: isPlayful ? 14 : 12,
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: AppSpacing.xxs),
                         Text(
                           _formatDate(material.dateAdded),
                           style: TextStyle(

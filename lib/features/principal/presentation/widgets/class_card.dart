@@ -1,11 +1,32 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../shared/widgets/app_card.dart';
 import '../../domain/entities/class_with_details.dart';
 
-/// A card widget displaying class information.
+// =============================================================================
+// CLASS CARD - Principal Dashboard Class Display
+// =============================================================================
+// A premium card component for displaying class information with proper
+// hierarchy, theme-aware styling, and interactive actions.
+//
+// Features:
+// - Uses AppCard.interactive for consistent card styling
+// - AppTypography for all text styles
+// - AppSpacing for all margins/padding
+// - AppRadius for border radius
+// - AppShadows for elevation
+// - Theme-aware colors (Clean vs Playful)
+// =============================================================================
+
+/// A card widget displaying class information with premium styling.
 ///
 /// Shows the class name, grade level, head teacher, student count,
-/// and provides action buttons.
+/// and provides action buttons. Uses design system tokens for
+/// consistent styling across themes.
 class ClassCard extends StatelessWidget {
   /// Creates a [ClassCard].
   const ClassCard({
@@ -15,7 +36,6 @@ class ClassCard extends StatelessWidget {
     this.onAssignTeacher,
     this.onViewStudents,
     this.onDelete,
-    this.isPlayful = false,
   });
 
   /// The class details to display.
@@ -33,262 +53,328 @@ class ClassCard extends StatelessWidget {
   /// Callback when delete is triggered.
   final VoidCallback? onDelete;
 
-  /// Whether to use playful styling.
+  /// Detects if the current theme is playful.
+  bool _isPlayful(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    return primaryColor.toARGB32() == PlayfulColors.primary.toARGB32() ||
+        (primaryColor.r * 255 > 100 && primaryColor.b * 255 > 200);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPlayful = _isPlayful(context);
+
+    return AppCard.interactive(
+      onTap: onViewStudents,
+      semanticLabel: 'Class ${classDetails.name}',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row with icon, info, and actions
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Class icon container
+              _ClassIconBadge(isPlayful: isPlayful),
+              SizedBox(width: AppSpacing.md),
+              // Class info
+              Expanded(
+                child: _ClassInfo(
+                  classDetails: classDetails,
+                  isPlayful: isPlayful,
+                ),
+              ),
+              // Actions menu
+              _ActionsMenu(
+                isPlayful: isPlayful,
+                onEdit: onEdit,
+                onAssignTeacher: onAssignTeacher,
+                onViewStudents: onViewStudents,
+                onDelete: onDelete,
+              ),
+            ],
+          ),
+          // Divider
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Divider(
+              height: 1,
+              color: isPlayful ? PlayfulColors.divider : CleanColors.divider,
+            ),
+          ),
+          // Bottom row with head teacher and student count
+          Row(
+            children: [
+              // Head teacher info
+              Expanded(
+                child: _InfoItem(
+                  icon: Icons.school_outlined,
+                  label: 'Head Teacher',
+                  value: classDetails.headTeacher?.fullName ?? 'Not assigned',
+                  isPlaceholder: classDetails.headTeacher == null,
+                  isPlayful: isPlayful,
+                ),
+              ),
+              // Vertical divider
+              Container(
+                height: AppSpacing.xxxl,
+                width: 1,
+                color: isPlayful ? PlayfulColors.divider : CleanColors.divider,
+              ),
+              // Student count
+              Expanded(
+                child: _InfoItem(
+                  icon: Icons.people_outline,
+                  label: 'Students',
+                  value: classDetails.studentCount.toString(),
+                  isPlayful: isPlayful,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// SUBCOMPONENTS
+// =============================================================================
+
+/// Icon badge for the class card header.
+class _ClassIconBadge extends StatelessWidget {
+  const _ClassIconBadge({required this.isPlayful});
+
   final bool isPlayful;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final primaryColor =
+        isPlayful ? PlayfulColors.primary : CleanColors.primary;
+    final backgroundColor =
+        isPlayful ? PlayfulColors.primarySubtle : CleanColors.primarySubtle;
 
     return Container(
+      width: AppSpacing.xxxxl,
+      height: AppSpacing.xxxxl,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        color: theme.colorScheme.surface,
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.15),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isPlayful
-                ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                : Colors.black.withValues(alpha: 0.03),
-            blurRadius: isPlayful ? 10 : 4,
-            offset: Offset(0, isPlayful ? 3 : 2),
-          ),
-        ],
+        color: backgroundColor,
+        borderRadius: AppRadius.button(isPlayful: isPlayful),
       ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-        child: InkWell(
-          onTap: onViewStudents,
-          borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
-          child: Padding(
-            padding: EdgeInsets.all(isPlayful ? 18 : 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Class icon
-                    Container(
-                      padding: EdgeInsets.all(isPlayful ? 14 : 12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                        borderRadius:
-                            BorderRadius.circular(isPlayful ? 14 : 12),
-                      ),
-                      child: Icon(
-                        Icons.class_outlined,
-                        color: theme.colorScheme.primary,
-                        size: isPlayful ? 30 : 28,
-                      ),
-                    ),
-                    SizedBox(width: isPlayful ? 18 : 16),
-                    // Class info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            classDetails.name,
-                            style: TextStyle(
-                              fontSize: isPlayful ? 19 : 18,
-                              fontWeight: isPlayful
-                                  ? FontWeight.w700
-                                  : FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          if (classDetails.gradeLevel != null)
-                            Text(
-                              'Grade ${classDetails.gradeLevel}',
-                              style: TextStyle(
-                                fontSize: isPlayful ? 15 : 14,
-                                color: theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.6),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          if (classDetails.academicYear != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              classDetails.academicYear!,
-                              style: TextStyle(
-                                fontSize: isPlayful ? 13 : 12,
-                                color: theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    // Actions
-                    PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert,
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(isPlayful ? 12 : 8),
-                      ),
-                      itemBuilder: (context) => [
-                        PopupMenuItem<String>(
-                          value: 'edit',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit_outlined,
-                                  size: 20, color: theme.colorScheme.onSurface),
-                              const SizedBox(width: 12),
-                              const Text('Edit Class'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'assign',
-                          child: Row(
-                            children: [
-                              Icon(Icons.person_add_outlined,
-                                  size: 20, color: theme.colorScheme.onSurface),
-                              const SizedBox(width: 12),
-                              const Text('Assign Head Teacher'),
-                            ],
-                          ),
-                        ),
-                        PopupMenuItem<String>(
-                          value: 'students',
-                          child: Row(
-                            children: [
-                              Icon(Icons.people_outline,
-                                  size: 20, color: theme.colorScheme.onSurface),
-                              const SizedBox(width: 12),
-                              const Text('View Students'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuDivider(),
-                        PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline,
-                                  size: 20, color: theme.colorScheme.error),
-                              const SizedBox(width: 12),
-                              Text('Delete Class',
-                                  style: TextStyle(
-                                      color: theme.colorScheme.error)),
-                            ],
-                          ),
-                        ),
-                      ],
-                      onSelected: (value) {
-                        switch (value) {
-                          case 'edit':
-                            onEdit?.call();
-                            break;
-                          case 'assign':
-                            onAssignTeacher?.call();
-                            break;
-                          case 'students':
-                            onViewStudents?.call();
-                            break;
-                          case 'delete':
-                            onDelete?.call();
-                            break;
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                Divider(
-                    height: isPlayful ? 28 : 24,
-                    color: theme.colorScheme.outline.withValues(alpha: 0.15)),
-                // Bottom row with head teacher and student count
-                Row(
-                  children: [
-                    // Head teacher
-                    Expanded(
-                      child: _buildInfoItem(
-                        theme: theme,
-                        icon: Icons.school_outlined,
-                        label: 'Head Teacher',
-                        value:
-                            classDetails.headTeacher?.fullName ?? 'Not assigned',
-                        isPlaceholder: classDetails.headTeacher == null,
-                      ),
-                    ),
-                    Container(
-                      height: 40,
-                      width: 1,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.15),
-                    ),
-                    // Student count
-                    Expanded(
-                      child: _buildInfoItem(
-                        theme: theme,
-                        icon: Icons.people_outline,
-                        label: 'Students',
-                        value: classDetails.studentCount.toString(),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+      child: Icon(
+        Icons.class_outlined,
+        color: primaryColor,
+        size: AppIconSize.lg,
       ),
     );
   }
+}
 
-  Widget _buildInfoItem({
-    required ThemeData theme,
+/// Class information section showing name, grade, and academic year.
+class _ClassInfo extends StatelessWidget {
+  const _ClassInfo({
+    required this.classDetails,
+    required this.isPlayful,
+  });
+
+  final ClassWithDetails classDetails;
+  final bool isPlayful;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Class name
+        Text(
+          classDetails.name,
+          style: AppTypography.cardTitle(isPlayful: isPlayful),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: AppSpacing.xxs),
+        // Grade level
+        if (classDetails.gradeLevel != null)
+          Text(
+            'Grade ${classDetails.gradeLevel}',
+            style: AppTypography.secondaryText(isPlayful: isPlayful),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        // Academic year
+        if (classDetails.academicYear case final academicYear?) ...[
+          SizedBox(height: AppSpacing.space2),
+          Text(
+            academicYear,
+            style: AppTypography.tertiaryText(isPlayful: isPlayful),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// Popup menu with card actions.
+class _ActionsMenu extends StatelessWidget {
+  const _ActionsMenu({
+    required this.isPlayful,
+    this.onEdit,
+    this.onAssignTeacher,
+    this.onViewStudents,
+    this.onDelete,
+  });
+
+  final bool isPlayful;
+  final VoidCallback? onEdit;
+  final VoidCallback? onAssignTeacher;
+  final VoidCallback? onViewStudents;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor =
+        isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary;
+
+    return PopupMenuButton<String>(
+      icon: Icon(
+        Icons.more_vert,
+        color: iconColor,
+        size: AppIconSize.md,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadius.card(isPlayful: isPlayful),
+      ),
+      elevation: isPlayful ? AppElevation.md : AppElevation.sm,
+      itemBuilder: (context) => [
+        _buildMenuItem(
+          context: context,
+          value: 'edit',
+          icon: Icons.edit_outlined,
+          label: 'Edit Class',
+        ),
+        _buildMenuItem(
+          context: context,
+          value: 'assign',
+          icon: Icons.person_add_outlined,
+          label: 'Assign Head Teacher',
+        ),
+        _buildMenuItem(
+          context: context,
+          value: 'students',
+          icon: Icons.people_outline,
+          label: 'View Students',
+        ),
+        const PopupMenuDivider(),
+        _buildMenuItem(
+          context: context,
+          value: 'delete',
+          icon: Icons.delete_outline,
+          label: 'Delete Class',
+          isDestructive: true,
+        ),
+      ],
+      onSelected: (value) {
+        switch (value) {
+          case 'edit':
+            onEdit?.call();
+          case 'assign':
+            onAssignTeacher?.call();
+          case 'students':
+            onViewStudents?.call();
+          case 'delete':
+            onDelete?.call();
+        }
+      },
+    );
+  }
+
+  PopupMenuItem<String> _buildMenuItem({
+    required BuildContext context,
+    required String value,
     required IconData icon,
     required String label,
-    required String value,
-    bool isPlaceholder = false,
+    bool isDestructive = false,
   }) {
+    final textColor = isDestructive
+        ? (isPlayful ? PlayfulColors.error : CleanColors.error)
+        : (isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary);
+
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: AppIconSize.sm, color: textColor),
+          SizedBox(width: AppSpacing.sm),
+          Text(
+            label,
+            style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+              color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Info item showing icon, value, and label for bottom stats.
+class _InfoItem extends StatelessWidget {
+  const _InfoItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isPlayful,
+    this.isPlaceholder = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isPlayful;
+  final bool isPlaceholder;
+
+  @override
+  Widget build(BuildContext context) {
+    final iconColor = isPlaceholder
+        ? (isPlayful ? PlayfulColors.textMuted : CleanColors.textMuted)
+        : (isPlayful ? PlayfulColors.textSecondary : CleanColors.textSecondary);
+
+    final valueColor = isPlaceholder
+        ? (isPlayful ? PlayfulColors.textDisabled : CleanColors.textDisabled)
+        : (isPlayful ? PlayfulColors.textPrimary : CleanColors.textPrimary);
+
+    final labelColor =
+        isPlayful ? PlayfulColors.textTertiary : CleanColors.textTertiary;
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isPlayful ? 10 : 8),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       child: Column(
         children: [
           Icon(
             icon,
-            size: isPlayful ? 22 : 20,
-            color: isPlaceholder
-                ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
-                : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            size: AppIconSize.sm,
+            color: iconColor,
           ),
-          SizedBox(height: isPlayful ? 6 : 4),
+          SizedBox(height: AppSpacing.xxs),
           Text(
             value,
-            style: TextStyle(
-              fontSize: isPlayful ? 15 : 14,
-              fontWeight: isPlayful ? FontWeight.w600 : FontWeight.w500,
-              color: isPlaceholder
-                  ? theme.colorScheme.onSurface.withValues(alpha: 0.4)
-                  : theme.colorScheme.onSurface,
+            style: AppTypography.secondaryText(isPlayful: isPlayful).copyWith(
+              fontWeight: FontWeight.w500,
+              color: valueColor,
               fontStyle: isPlaceholder ? FontStyle.italic : FontStyle.normal,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
+          SizedBox(height: AppSpacing.space2),
           Text(
             label,
-            style: TextStyle(
-              fontSize: isPlayful ? 13 : 12,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            style: AppTypography.caption(isPlayful: isPlayful).copyWith(
+              color: labelColor,
             ),
           ),
         ],

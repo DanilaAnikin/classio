@@ -21,20 +21,10 @@ export 'constants/storage_keys.dart';
 // Theme
 // ============================================================================
 
-// Note: ThemeType enum is exported from providers/theme_provider.dart
-// to avoid duplicate definition conflicts. Do not export theme_type.dart here.
-
-/// Color definitions for both themes
-export 'theme/app_colors.dart';
-
-/// Text styles for both themes
-export 'theme/app_text_styles.dart';
-
-/// Clean theme - minimalist, professional design
-export 'theme/clean_theme.dart';
-
-/// Playful theme - colorful, engaging design
-export 'theme/playful_theme.dart';
+/// All theme-related exports (colors, typography, shadows, radius, spacing, themes)
+/// Note: ThemeType enum is exported from providers/theme_provider.dart
+/// to avoid duplicate definition conflicts.
+export 'theme/theme.dart';
 
 // ============================================================================
 // Providers
@@ -63,3 +53,10 @@ export 'localization/app_localizations.dart';
 
 /// Subject color utilities
 export 'utils/subject_colors.dart';
+
+// ============================================================================
+// Exceptions
+// ============================================================================
+
+/// Application exception classes
+export 'exceptions/exceptions.dart';

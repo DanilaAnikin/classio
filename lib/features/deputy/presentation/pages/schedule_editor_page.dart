@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:classio/core/providers/theme_provider.dart';
+import 'package:classio/core/theme/spacing.dart';
+import 'package:classio/core/theme/app_radius.dart';
 import 'package:classio/features/auth/presentation/providers/auth_provider.dart';
 import 'package:classio/shared/widgets/responsive_center.dart';
 import '../../../admin_panel/domain/entities/class_info.dart';
@@ -139,7 +141,7 @@ class _ScheduleEditorPageState extends ConsumerState<ScheduleEditorPage> {
               size: 64,
               color: theme.colorScheme.primary.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.md),
             Text(
               'No School Assigned',
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -147,7 +149,7 @@ class _ScheduleEditorPageState extends ConsumerState<ScheduleEditorPage> {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               'You are not assigned to any school.',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -168,12 +170,12 @@ class _ScheduleEditorPageState extends ConsumerState<ScheduleEditorPage> {
   ) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(isPlayful ? 24 : 20),
+              padding: EdgeInsets.all(isPlayful ? AppSpacing.xl : AppSpacing.lg),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: theme.colorScheme.primary.withValues(alpha: 0.1),
@@ -184,7 +186,7 @@ class _ScheduleEditorPageState extends ConsumerState<ScheduleEditorPage> {
                 color: theme.colorScheme.primary.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             Text(
               'Select a Class',
               style: TextStyle(
@@ -193,7 +195,7 @@ class _ScheduleEditorPageState extends ConsumerState<ScheduleEditorPage> {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.xs),
             Text(
               'Choose a class from the dropdown above to view and edit its schedule.',
               style: TextStyle(
@@ -228,7 +230,7 @@ class _ClassSelector extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
@@ -247,7 +249,7 @@ class _ClassSelector extends StatelessWidget {
               size: isPlayful ? 24 : 20,
               color: theme.colorScheme.primary,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: AppSpacing.sm),
             Text(
               'Class:',
               style: TextStyle(
@@ -256,17 +258,17 @@ class _ClassSelector extends StatelessWidget {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: AppSpacing.md),
             Expanded(
               child: classesAsync.when(
                 data: (classes) => DropdownButtonFormField<String>(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                      borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
                     ),
                     isDense: true,
                   ),
@@ -287,7 +289,7 @@ class _ClassSelector extends StatelessWidget {
                 loading: () => Container(
                   height: 48,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                    borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
                     border: Border.all(
                       color: theme.colorScheme.outline.withValues(alpha: 0.3),
                     ),
@@ -302,9 +304,9 @@ class _ClassSelector extends StatelessWidget {
                 ),
                 error: (error, stack) => Container(
                   height: 48,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+                    borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
                     border: Border.all(
                       color: theme.colorScheme.error.withValues(alpha: 0.5),
                     ),
@@ -352,21 +354,21 @@ class _ScheduleContent extends ConsumerWidget {
       children: [
         // Week selector - always visible when a class is selected
         Padding(
-          padding: EdgeInsets.all(isPlayful ? 12 : 8),
+          padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs),
           child: const WeekSelector(),
         ),
 
         // Info banner for stable view
         if (isViewingStable)
           Container(
-            margin: EdgeInsets.symmetric(horizontal: isPlayful ? 12 : 8),
+            margin: EdgeInsets.symmetric(horizontal: isPlayful ? AppSpacing.sm : AppSpacing.xs),
             padding: EdgeInsets.symmetric(
-              horizontal: isPlayful ? 16 : 12,
-              vertical: isPlayful ? 10 : 8,
+              horizontal: isPlayful ? AppSpacing.md : AppSpacing.sm,
+              vertical: isPlayful ? 10 : AppSpacing.xs,
             ),
             decoration: BoxDecoration(
               color: theme.colorScheme.secondary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(isPlayful ? 12 : 8),
+              borderRadius: BorderRadius.circular(isPlayful ? AppRadius.md : AppRadius.sm),
               border: Border.all(
                 color: theme.colorScheme.secondary.withValues(alpha: 0.3),
               ),
@@ -378,7 +380,7 @@ class _ScheduleContent extends ConsumerWidget {
                   size: isPlayful ? 20 : 18,
                   color: theme.colorScheme.secondary,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(
                     'Editing stable timetable - changes apply to all weeks unless overridden',
@@ -402,12 +404,12 @@ class _ScheduleContent extends ConsumerWidget {
               };
 
               for (final lesson in lessons) {
-                lessonsByDay[lesson.dayOfWeek]!.add(lesson);
+                lessonsByDay[lesson.dayOfWeek]?.add(lesson);
               }
 
               // Sort each day by start time
               for (final day in lessonsByDay.keys) {
-                lessonsByDay[day]!.sort((a, b) {
+                lessonsByDay[day]?.sort((a, b) {
                   final aMinutes = a.startTime.hour * 60 + a.startTime.minute;
                   final bMinutes = b.startTime.hour * 60 + b.startTime.minute;
                   return aMinutes.compareTo(bMinutes);
@@ -465,7 +467,7 @@ class _ScheduleContent extends ConsumerWidget {
             ),
             error: (error, stack) => Center(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(AppSpacing.xl),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -474,7 +476,7 @@ class _ScheduleContent extends ConsumerWidget {
                       size: 64,
                       color: theme.colorScheme.error.withValues(alpha: 0.6),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: AppSpacing.md),
                     Text(
                       'Failed to load schedule',
                       style: TextStyle(
@@ -483,7 +485,7 @@ class _ScheduleContent extends ConsumerWidget {
                         color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: AppSpacing.xs),
                     Text(
                       error.toString(),
                       style: TextStyle(
@@ -492,7 +494,7 @@ class _ScheduleContent extends ConsumerWidget {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: AppSpacing.xl),
                     ElevatedButton.icon(
                       onPressed: () {
                         ref.invalidate(classScheduleProvider(classId));
@@ -621,8 +623,8 @@ class _ScheduleStatsBar extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 16 : 12,
-        vertical: isPlayful ? 10 : 8,
+        horizontal: isPlayful ? AppSpacing.md : AppSpacing.sm,
+        vertical: isPlayful ? 10 : AppSpacing.xs,
       ),
       decoration: BoxDecoration(
         color: isPlayful
@@ -644,7 +646,7 @@ class _ScheduleStatsBar extends StatelessWidget {
                 ? theme.colorScheme.secondary
                 : theme.colorScheme.primary,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: AppSpacing.xs),
           Text(
             '$totalLessons ${totalLessons == 1 ? "lesson" : "lessons"} ${isViewingStable ? "(stable)" : "scheduled"}',
             style: TextStyle(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../auth/domain/entities/app_user.dart';
 import '../../../dashboard/domain/entities/lesson.dart';
@@ -78,7 +80,7 @@ class _DatePickerHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 16 : 12),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.md : AppSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
@@ -94,7 +96,7 @@ class _DatePickerHeader extends StatelessWidget {
             color: theme.colorScheme.primary,
             size: isPlayful ? 24 : 22,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               DateFormat('EEEE, MMMM d, y').format(selectedDate),
@@ -161,8 +163,8 @@ class _LessonSelector extends ConsumerWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isPlayful ? 16 : 12,
-        vertical: isPlayful ? 12 : 10,
+        horizontal: isPlayful ? AppSpacing.md : AppSpacing.sm,
+        vertical: isPlayful ? AppSpacing.sm : AppSpacing.xs + 2,
       ),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLow,
@@ -188,7 +190,7 @@ class _LessonSelector extends ConsumerWidget {
                     '${DateFormat('HH:mm').format(lesson.startTime)} - ${DateFormat('HH:mm').format(lesson.endTime)}';
 
                 return Padding(
-                  padding: const EdgeInsets.only(right: 8),
+                  padding: const EdgeInsets.only(right: AppSpacing.xs),
                   child: ChoiceChip(
                     label: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -265,7 +267,7 @@ class _EmptyAttendance extends StatelessWidget {
             size: isPlayful ? 72 : 64,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: AppSpacing.md),
           Text(
             'Select a lesson to mark attendance',
             style: TextStyle(
@@ -274,7 +276,7 @@ class _EmptyAttendance extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: AppSpacing.xs),
           Text(
             'Choose a lesson from the list above',
             style: TextStyle(
@@ -352,7 +354,7 @@ class _AttendanceListState extends ConsumerState<_AttendanceList> {
                 // Student List
                 Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.all(widget.isPlayful ? 16 : 12),
+                    padding: EdgeInsets.all(widget.isPlayful ? AppSpacing.md : AppSpacing.sm),
                     itemCount: students.length,
                     itemBuilder: (context, index) {
                       final student = students[index];
@@ -446,7 +448,7 @@ class _AttendanceActionsBar extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.all(isPlayful ? 12 : 10),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.sm : AppSpacing.xs + 2),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         border: Border(
@@ -455,7 +457,11 @@ class _AttendanceActionsBar extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
+      child: Wrap(
+        spacing: AppSpacing.xs,
+        runSpacing: AppSpacing.xs,
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
             '${students.length} students',
@@ -464,26 +470,30 @@ class _AttendanceActionsBar extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          const Spacer(),
-          OutlinedButton.icon(
-            onPressed: onMarkAllPresent,
-            icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-            label: const Text('Mark All Present'),
-          ),
-          const SizedBox(width: 8),
-          FilledButton.icon(
-            onPressed: isSaving ? null : onSave,
-            icon: isSaving
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.save_rounded, size: 18),
-            label: const Text('Save Attendance'),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              OutlinedButton.icon(
+                onPressed: onMarkAllPresent,
+                icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+                label: const Text('Mark All Present'),
+              ),
+              FilledButton.icon(
+                onPressed: isSaving ? null : onSave,
+                icon: isSaving
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.save_rounded, size: 18),
+                label: const Text('Save Attendance'),
+              ),
+            ],
           ),
         ],
       ),
@@ -513,11 +523,11 @@ class _StudentAttendanceRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: EdgeInsets.all(isPlayful ? 14 : 12),
+      margin: EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: EdgeInsets.all(isPlayful ? AppSpacing.sm + 2 : AppSpacing.sm),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(isPlayful ? 16 : 12),
+        borderRadius: BorderRadius.circular(isPlayful ? AppRadius.lg : AppRadius.md),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.15),
         ),
@@ -551,7 +561,7 @@ class _StudentAttendanceRow extends StatelessWidget {
                   )
                 : null,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: AppSpacing.sm),
 
           // Name and excuse indicator
           Expanded(
@@ -567,7 +577,7 @@ class _StudentAttendanceRow extends StatelessWidget {
                   ),
                 ),
                 if (hasExcuse) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: AppSpacing.xxs),
                   Row(
                     children: [
                       Icon(
@@ -583,7 +593,7 @@ class _StudentAttendanceRow extends StatelessWidget {
                                 ? Colors.red
                                 : Colors.orange,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: AppSpacing.xxs),
                       Text(
                         'Has excuse note',
                         style: TextStyle(

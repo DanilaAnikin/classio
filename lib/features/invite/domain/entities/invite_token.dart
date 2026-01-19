@@ -30,7 +30,7 @@ class InviteToken {
   final String? schoolId;
 
   /// User ID of the person who created this token.
-  /// Can be null for bootstrap tokens (e.g., GENESIS-KEY) that are not created by a user.
+  /// Can be null for bootstrap tokens that are not created by a user.
   final String? createdByUserId;
 
   /// Optional class ID for student assignments (required when teacher invites student).
@@ -55,12 +55,16 @@ class InviteToken {
   bool get isActive => timesUsed < usageLimit;
 
   /// Whether this token is still valid (not fully used and not expired).
-  bool get isValid =>
-      isActive && (expiresAt == null || expiresAt!.isAfter(DateTime.now()));
+  bool get isValid {
+    final expiry = expiresAt;
+    return isActive && (expiry == null || expiry.isAfter(DateTime.now()));
+  }
 
   /// Whether this token has expired.
-  bool get isExpired =>
-      expiresAt != null && DateTime.now().isAfter(expiresAt!);
+  bool get isExpired {
+    final expiry = expiresAt;
+    return expiry != null && DateTime.now().isAfter(expiry);
+  }
 
   /// Creates an [InviteToken] from a JSON map.
   ///
@@ -77,7 +81,7 @@ class InviteToken {
 
     // schoolId and createdByUserId are optional
     // - schoolId is null for SuperAdmin tokens
-    // - createdByUserId is null for bootstrap tokens (e.g., GENESIS-KEY)
+    // - createdByUserId is null for bootstrap tokens
     if (token == null ||
         role == null ||
         timesUsed == null ||

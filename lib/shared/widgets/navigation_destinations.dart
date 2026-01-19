@@ -310,7 +310,7 @@ class NavigationDestinationsBuilder {
     return NavigationDestination(
       icon: UnreadBadgeOverlay(
         count: unreadCount,
-        badgeSize: 16,
+        badgeSize: BadgeSize.small,
         offset: const Offset(-2, -2),
         child: Icon(
           isPlayful ? Icons.chat_rounded : Icons.chat_outlined,
@@ -319,7 +319,7 @@ class NavigationDestinationsBuilder {
       ),
       selectedIcon: UnreadBadgeOverlay(
         count: unreadCount,
-        badgeSize: 16,
+        badgeSize: BadgeSize.small,
         offset: const Offset(-2, -2),
         child: Icon(
           Icons.chat_rounded,

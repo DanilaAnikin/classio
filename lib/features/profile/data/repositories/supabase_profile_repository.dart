@@ -1,14 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:classio/core/exceptions/app_exception.dart';
 import 'package:classio/features/auth/domain/entities/app_user.dart';
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 
 /// Exception thrown when profile operations fail.
-class ProfileException implements Exception {
-  const ProfileException(this.message);
-
-  final String message;
+class ProfileException extends RepositoryException {
+  const ProfileException(super.message, {super.code, super.originalError});
 
   @override
   String toString() => 'ProfileException: $message';

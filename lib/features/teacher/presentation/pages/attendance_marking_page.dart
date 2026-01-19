@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:classio/core/theme/app_colors.dart';
 import '../../../../core/providers/theme_provider.dart';
 import '../../../../shared/widgets/responsive_center.dart';
 
@@ -142,25 +143,25 @@ class AttendanceMarkingPage extends ConsumerWidget {
                       children: [
                         _AttendanceChip(
                           label: 'Present',
-                          color: Colors.green,
+                          color: isPlayful ? PlayfulColors.attendancePresent : CleanColors.attendancePresent,
                           isPlayful: isPlayful,
                         ),
                         SizedBox(width: isPlayful ? 8 : 6),
                         _AttendanceChip(
                           label: 'Absent',
-                          color: Colors.red,
+                          color: isPlayful ? PlayfulColors.attendanceAbsent : CleanColors.attendanceAbsent,
                           isPlayful: isPlayful,
                         ),
                         SizedBox(width: isPlayful ? 8 : 6),
                         _AttendanceChip(
                           label: 'Late',
-                          color: Colors.orange,
+                          color: isPlayful ? PlayfulColors.attendanceLate : CleanColors.attendanceLate,
                           isPlayful: isPlayful,
                         ),
                         SizedBox(width: isPlayful ? 8 : 6),
                         _AttendanceChip(
                           label: 'Excused',
-                          color: Colors.blue,
+                          color: isPlayful ? PlayfulColors.attendanceExcused : CleanColors.attendanceExcused,
                           isPlayful: isPlayful,
                         ),
                       ],
