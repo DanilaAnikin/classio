@@ -872,7 +872,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(context.l10n.failedToSendResetLink),
             backgroundColor: theme.colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),

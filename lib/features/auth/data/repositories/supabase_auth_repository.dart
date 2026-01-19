@@ -95,7 +95,7 @@ class SupabaseAuthRepository implements AuthRepository {
           .maybeSingle();
 
       if (response == null) {
-        throw Exception('Profile not found for user: $userId');
+        throw Exception('Profile not found');
       }
 
       final user = AppUser.fromJson(response);
@@ -140,7 +140,7 @@ class SupabaseAuthRepository implements AuthRepository {
           .maybeSingle();
 
       if (response == null) {
-        throw Exception('Profile not found for user: ${authUser.id}');
+        throw Exception('Profile not found');
       }
 
       return AppUser.fromJson(response);
@@ -197,7 +197,7 @@ class SupabaseAuthRepository implements AuthRepository {
             .maybeSingle();
 
         if (profileResponse == null) {
-          throw Exception('Profile not found for user: ${user.id}');
+          throw Exception('Profile not found');
         }
 
         return AppUser.fromJson(profileResponse);

@@ -34,3 +34,6 @@ export 'clean_theme.dart';
 
 /// Playful theme - colorful, engaging design
 export 'playful_theme.dart';
+
+/// Theme detection utilities for consistent theme checking
+export 'theme_detector.dart';

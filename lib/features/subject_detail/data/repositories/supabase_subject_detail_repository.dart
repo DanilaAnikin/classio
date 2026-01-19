@@ -153,23 +153,31 @@ class SupabaseSubjectDetailRepository implements SubjectDetailRepository {
           .eq('subject_id', subjectId)
           .order('due_date', ascending: true);
 
+      final assignmentsList = assignmentsResponse as List<dynamic>;
+
+      // Collect all assignment IDs for batch completion check
+      final assignmentIds = assignmentsList
+          .map((data) => (data as Map<String, dynamic>)['id'] as String)
+          .toList();
+
+      // Batch query to get all completed assignment IDs in a single request
+      final completedAssignmentIds = await _getCompletedAssignmentIds(assignmentIds);
+
       final assignments = <Assignment>[];
 
-      for (final assignmentData in assignmentsResponse as List<dynamic>) {
+      for (final assignmentData in assignmentsList) {
         final data = assignmentData as Map<String, dynamic>;
-
-        // Check if current user has submitted this assignment
-        final isCompleted = await _checkAssignmentCompletion(data['id'] as String);
+        final assignmentId = data['id'] as String;
 
         assignments.add(Assignment(
-          id: data['id'] as String,
+          id: assignmentId,
           subject: subject,
           title: data['title'] as String? ?? 'Untitled Assignment',
           description: data['description'] as String?,
           dueDate: data['due_date'] != null
               ? DateTime.parse(data['due_date'] as String)
               : DateTime.now().add(const Duration(days: 7)),
-          isCompleted: isCompleted,
+          isCompleted: completedAssignmentIds.contains(assignmentId),
         ));
       }
 
@@ -349,6 +357,29 @@ class SupabaseSubjectDetailRepository implements SubjectDetailRepository {
       return (response as List<dynamic>).isNotEmpty;
     } catch (e) {
       return false;
+    }
+  }
+
+  /// Batch checks which assignments the current user has completed.
+  ///
+  /// Returns a [Set] of assignment IDs that have been submitted by the current user.
+  /// This is more efficient than checking each assignment individually (N+1 problem).
+  Future<Set<String>> _getCompletedAssignmentIds(List<String> assignmentIds) async {
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null || assignmentIds.isEmpty) return <String>{};
+
+      final submissionsResponse = await _supabase
+          .from('assignment_submissions')
+          .select('assignment_id')
+          .eq('student_id', user.id)
+          .inFilter('assignment_id', assignmentIds);
+
+      return (submissionsResponse as List<dynamic>)
+          .map((data) => (data as Map<String, dynamic>)['assignment_id'] as String)
+          .toSet();
+    } catch (e) {
+      return <String>{};
     }
   }
 
